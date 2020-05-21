@@ -1,0 +1,4 @@
+CREATE SCHEMA advertisement AUTHORIZATION postgres;
+CREATE SCHEMA messages AUTHORIZATION postgres;
+CREATE SCHEMA orders AUTHORIZATION postgres;
+CREATE SCHEMA users AUTHORIZATION postgres;

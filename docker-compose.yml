@@ -1,0 +1,138 @@
+version: "3.8"
+services:
+
+  eureka:
+    build: ./eureka
+    image: eureka
+    container_name: eureka
+    restart: on-failure
+    tty: true
+    networks:
+      - microservices
+    ports:
+      - 8761:8761
+
+  zuul:
+    build: ./zuul
+    image: zuul
+    container_name: zuul
+    restart: on-failure
+    tty: true
+    networks:
+      - microservices
+    ports:
+      - 8082:8082
+    environment:
+      - REGISTRY_HOST=eureka
+    tty: true
+    depends_on:
+      - eureka
+
+  postgres:
+    build: ./postgres
+    container_name: postgres
+    restart: always
+    networks:
+      - microservices
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: postgres
+      POSTGRES_DB: microservices
+    #volumes:
+     # - mysql-data:/var/lib/mysql
+
+  advertisement:
+    build: ./advertisement-service
+    image: advertisement
+    container_name: advertisement
+    restart: on-failure
+    networks:
+      - microservices
+    ports:
+      - 8083:8083
+    environment:
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: admin
+      DATABASE_DOMAIN: postgres
+      DATABASE_PORT: 5432
+      DATABASE_DB: microservices
+      DATABASE_SCHEMA: advertisement
+      REGISTRY_HOST: eureka
+    tty: true
+    depends_on: 
+      - postgres
+      - eureka
+
+  messages:
+    build: ./message-service
+    image: messages
+    container_name: messages
+    restart: on-failure
+    networks:
+      - microservices
+    ports:
+      - 8085:8085
+    environment:
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: admin
+      DATABASE_DOMAIN: postgres
+      DATABASE_PORT: 5432
+      DATABASE_DB: microservices
+      DATABASE_SCHEMA: messages
+      REGISTRY_HOST: eureka
+    tty: true
+    depends_on: 
+      - postgres
+      - eureka
+
+  auth:
+    build: ./auth-service
+    image: auth
+    container_name: auth
+    restart: on-failure
+    networks:
+      - microservices
+    ports:
+      - 8084:8084
+    environment:
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: admin
+      DATABASE_DOMAIN: postgres
+      DATABASE_PORT: 5432
+      DATABASE_DB: microservices
+      DATABASE_SCHEMA: users
+      REGISTRY_HOST: eureka
+    tty: true
+    depends_on: 
+      - postgres
+      - eureka
+
+  orders:
+    build: ./orders-service
+    image: orders
+    container_name: orders
+    restart: on-failure
+    networks:
+      - microservices
+    ports:
+      - 8086:8086
+    environment:
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: admin
+      DATABASE_DOMAIN: postgres
+      DATABASE_PORT: 5432
+      DATABASE_DB: microservices
+      DATABASE_SCHEMA: orders
+      REGISTRY_HOST: eureka
+    tty: true
+    depends_on: 
+      - postgres
+      - eureka
+
+
+networks:
+  microservices:
+    name: microservices
+    driver: bridge
