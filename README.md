@@ -4,11 +4,12 @@
   - pozicionirati se u root folder
   - u docker-u pokrenuti komandu "docker-compose up --build"
   - na adresi localhost:8761 se mogu vidjeti svi aktivni servisi
+  - u browser-u kucati adresu localhost:8082/index.html
   
 ## Pokretanje agentske aplikacije
   - pozicionirati se u folder "agentska aplikacija"
   - u docker-u pokrenuti komandu "docker-compose up --build"
-  - u browser-u kucati adresu localhost:8099/oglasi
+  - u browser-u kucati adresu localhost:8099/index.html
   
 ## Putanje do pojedinacnih repozitorijuma:
 
@@ -21,3 +22,4 @@
 ### message-service: https://github.com/djoda/xml-poruke-service
 ### orders-service: https://github.com/ivana-k/orders-microservice
 ### zuul: https://github.com/m1l1c4/xws-gateway
+### frontend glavne aplikacije: https://github.com/ivana-k/rent-a-car
