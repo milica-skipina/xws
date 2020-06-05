@@ -44,6 +44,8 @@ public class OrdersConfiguration extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().and()
 
                 .authorizeRequests()
+                .antMatchers( "/**")
+                .permitAll()
                 .anyRequest().authenticated();
 
         //http.addFilterAfter(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);

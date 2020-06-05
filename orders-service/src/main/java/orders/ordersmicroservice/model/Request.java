@@ -6,10 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Getter
@@ -25,25 +22,40 @@ public class Request {
             @JoinColumn(name = "request_id") }, inverseJoinColumns = { @JoinColumn(name = "adv_id") })
     private Set<Advertisement> ads = new HashSet<Advertisement>();
 */
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "REQUEST_AND_CAR", joinColumns = {
+            @JoinColumn(name = "request_id") }, inverseJoinColumns = { @JoinColumn(name = "car_id") })
+    private Set<Car> cars = new HashSet<Car>();
+
     @Column(name = "state", nullable = false)
     private String state;
 
     // predjeni kilometri
     @Column(name = "mileage", nullable = false)
-    private String mileage;
+    private double mileage;
 
     // ko salje
-    @Column(name = "customer_id", nullable = false)
-    private Long customerId;
+    @Column(name = "customer_username", nullable = false)
+    private String customerUsername;            // ovo iz jwta
+
+    // ko odobrava
+    @Column(name = "agent_username", nullable = false)
+    private String agentUsername;         // ovo iz dobavljenog oglasa
+
+    // ko salje
+    @Column(name = "customer_name", nullable = true)
+    private String customerName;            // ovo iz jwta
+
+    // ko odobrava
+    @Column(name = "agent_name", nullable = true)
+    private String agentNamee;
 
     @Column(name = "startDate", nullable = false)
-    private LocalDate startDate;
+    private Date startDate;
 
     @Column(name = "endDate", nullable = false)
-    private LocalDate endDate;
-
-    @Column(name = "bundle", nullable = false)
-    private boolean bundle;     // ako je vise kola, da li se svi moraju odobriti
+    private Date endDate;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
@@ -51,14 +63,71 @@ public class Request {
     public Request() {
     }
 
-    public Request(String state, String mileage, Long customerId, LocalDate startDate, LocalDate endDate) {
+    public Request(String state, double mileage, Date startDate, Date endDate, String customerUsername,
+                   String agentUsername) {
         this.state = state;
         this.mileage = mileage;
-        this.customerId = customerId;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.customerUsername = customerUsername;
+        this.agentUsername = agentUsername;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Set<Car> getCars() {
+        return cars;
+    }
+
+    public void setCars(Set<Car> cars) {
+        this.cars = cars;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public double getMileage() {
+        return mileage;
+    }
+
+    public void setMileage(double mileage) {
+        this.mileage = mileage;
     }
 
 
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public OrderStatus getOrderStatus() {
+        return orderStatus;
+    }
+
+    public void setOrderStatus(OrderStatus orderStatus) {
+        this.orderStatus = orderStatus;
+    }
 }
 

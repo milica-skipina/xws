@@ -55,6 +55,12 @@ public class Car {
     @Column(name = "state", nullable = false)
     private String state;
 
+    @Column(name = "entrepUsername", nullable = false)
+    private String entrepreneurUsername;
+
+    /*@Column(name = "entrepName", nullable = false)
+    private String entrepreneurName;
+*/
     // ???
     @Column(name = "following", nullable = false)
     private boolean following;
@@ -70,7 +76,10 @@ public class Car {
     public Car() {
     }
 
-    public Car(Long id, Codebook make, Codebook model, Codebook fuel, Codebook gearbox, Codebook carClass, Boolean insurance, Double mileage, Double mileageLimit, Integer kidsSeats, Double raiting, String state, boolean following, Set<Advertisement> carAdvertisement, Set<Image> images) {
+    public Car(Long id, Codebook make, Codebook model, Codebook fuel, Codebook gearbox,
+               Codebook carClass, Boolean insurance, Double mileage, Double mileageLimit,
+               Integer kidsSeats, Double raiting, String state, boolean following,
+               Set<Advertisement> carAdvertisement, Set<Image> images, String id1) {
         this.id = id;
         this.make = make;
         this.model = model;
@@ -86,6 +95,7 @@ public class Car {
         this.following = following;
         this.carAdvertisement = carAdvertisement;
         this.images = images;
+        this.entrepreneurUsername = id1;
     }
 
     public Long getId() {
@@ -207,4 +217,20 @@ public class Car {
     public void setImages(Set<Image> images) {
         this.images = images;
     }
+
+    public String getEntrepreneurUsername() {
+        return entrepreneurUsername;
+    }
+
+    public void setEntrepreneurUsername(String entrepreneurUsername) {
+        this.entrepreneurUsername = entrepreneurUsername;
+    }
+
+    /*public String getEntrepreneurName() {
+        return entrepreneurName;
+    }
+
+    public void setEntrepreneurName(String entrepreneurName) {
+        this.entrepreneurName = entrepreneurName;
+    }*/
 }

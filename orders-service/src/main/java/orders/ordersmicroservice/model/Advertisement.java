@@ -57,6 +57,60 @@ public class Advertisement {
         this.pricelist = pricelist;
     }
 
+    public Long getId() {
+        return id;
+    }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Car getCarAd() {
+        return carAd;
+    }
+
+    public void setCarAd(Car carAd) {
+        this.carAd = carAd;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public Pricelist getPricelist() {
+        return pricelist;
+    }
+
+    public void setPricelist(Pricelist pricelist) {
+        this.pricelist = pricelist;
+    }
+
+    public Long getEntrepreneurId() {
+        return entrepreneurId;
+    }
+
+    public void setEntrepreneurId(Long entrepreneurId) {
+        this.entrepreneurId = entrepreneurId;
+    }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Long customerId) {
+        this.customerId = customerId;
+    }
 }
 

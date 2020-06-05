@@ -1,6 +1,10 @@
 package com.example.adservice.controller;
 
+import com.example.adservice.datavalidation.RegularExpressions;
 import com.example.adservice.dto.CarDTO;
+import com.example.adservice.model.Car;
+import com.example.adservice.service.CarService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,26 +16,30 @@ import java.util.List;
 @RequestMapping(value = "/car")
 public class CarController {
 
+    @Autowired
+    private CarService carService;
 
     @GetMapping
     public ResponseEntity<List<CarDTO>> getAllCars() {
-
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        List<CarDTO>retValue = carService.getAllCars();
+        if(retValue.size()!=0){
+            return new ResponseEntity<>(retValue, HttpStatus.OK);
+        }
+        else{
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<CarDTO> getOneCar() {
-
-        return new ResponseEntity<>(HttpStatus.OK);
+    @GetMapping(value = "/{id}", produces = "application/json")
+    public ResponseEntity<CarDTO> getOneCar(@PathVariable Long id) {
+        RegularExpressions regularExpressions = new RegularExpressions();
+        if(regularExpressions.idIdValid(id)) {
+            CarDTO c = carService.getOne(id);
+            return new ResponseEntity<>(c, HttpStatus.OK);
+        }
+        else{
+            return  new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+        }
     }
 
-    @RequestMapping(method = RequestMethod.PUT ,value = "/{id}",  produces = "application/json", consumes = "application/json")
-    public ResponseEntity<HttpStatus>editCar(@RequestBody CarDTO car, @PathVariable Long id){
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @RequestMapping(method = RequestMethod.DELETE ,value = "/{id}")
-    public ResponseEntity<HttpStatus>deleteCar(@Valid @PathVariable Long id){
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
 }

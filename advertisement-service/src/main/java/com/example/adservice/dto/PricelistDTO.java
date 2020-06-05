@@ -10,22 +10,32 @@ public class PricelistDTO {
     private Double discount20;
     private Double discount30;
     private Double exceedMileage;
+    private boolean deleted;
 
     public PricelistDTO(){
 
     }
 
-    public PricelistDTO(Long id, Double priceDay, Double collisionDW, Double discount20, Double discount30, Double exceedMileage){
+    public PricelistDTO(Long id, Double priceDay, Double collisionDW, Double discount20, Double discount30, Double exceedMileage, boolean deleted){
         this.id = id;
         this.priceDay = priceDay;
         this.collisionDW = collisionDW;
         this.discount20 = discount20;
         this.discount30 = discount30;
         this.exceedMileage = exceedMileage;
+        this.deleted = deleted;
     }
 
     public PricelistDTO(Pricelist p){
-        this(p.getId(), p.getPriceDay(), p.getCollisionDW(), p.getDiscount20(), p.getDiscount20(), p.getExceedMileage());
+        this(p.getId(), p.getPriceDay(), p.getCollisionDW(), p.getDiscount20(), p.getDiscount30(), p.getExceedMileage(),p.isDeleted());
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     public Long getId() {

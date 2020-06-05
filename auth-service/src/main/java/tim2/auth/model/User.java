@@ -2,13 +2,16 @@ package tim2.auth.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import org.joda.time.DateTime;
+import org.owasp.encoder.Encode;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "table_user")
@@ -27,11 +30,11 @@ public class User implements UserDetails {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "active", nullable = true)
+    @Column(name = "activated", nullable = true)
     private boolean activated;
 
-    @Column(name = "firstLogin", nullable = true) // default: false
-    private boolean firstLogin;
+    /*@Column(name = "firstLogin", nullable = true) // default: false
+    private boolean firstLogin;*/
 
     @Column(name = "enabled", nullable = true)
     private boolean enabled; // authorization for accessing methods
@@ -41,7 +44,7 @@ public class User implements UserDetails {
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id"))
-    private List<Authority> authorities;    // role korisnika
+    private Set<Role> authorities;    // role korisnika
 
     @JsonBackReference(value = "agent_movement")
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -55,7 +58,7 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Admin admin;
 
-    public void setAuthorities(List<Authority> authorities) {
+    public void setAuthorities(Set<Role> authorities) {
         this.authorities = authorities;
     }
 
@@ -77,16 +80,10 @@ public class User implements UserDetails {
         this.lastPasswordResetDate = lastPasswordResetDate;
     }
 
-    public boolean getFirstLogin() {
-        return firstLogin;
-    }
+
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    public void setFirstLogin(boolean firstLogin) {
-        this.firstLogin = firstLogin;
     }
 
 
@@ -127,10 +124,12 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-		/*Authority auth = new Authority();
-		auth.setName("ROLE_" + type);
-		this.authorities.add(auth);*/
-        return this.authorities;
+        List<GrantedAuthority> permissions = new ArrayList<GrantedAuthority>(20);
+        for (Role role : this.authorities) {
+            permissions.addAll(role.getPrivileges());
+        }
+        permissions.addAll(this.authorities);
+        return permissions;
     }
 
     @Override
@@ -163,5 +162,52 @@ public class User implements UserDetails {
         return this.username;
     }
 
+    public User escapeParameters(User u) {
+        u.setUsername(Encode.forHtml(u.getUsername()));
+        u.setEmail(Encode.forHtml(u.getEmail()));
+        return u;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setAgent(Agent agent) {
+        this.agent = agent;
+    }
+
+    public void setEnduser(EndUser enduser) {
+        this.enduser = enduser;
+    }
+
+    public void setAdmin(Admin admin) {
+        this.admin = admin;
+    }
+
+    public Collection<? extends GrantedAuthority> getRoles() {
+        return this.authorities;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.authorities = roles;
+    }
+
+    public boolean isActivated() {
+        return activated;
+    }
+
+
+
+    public Agent getAgent() {
+        return agent;
+    }
+
+    public EndUser getEnduser() {
+        return enduser;
+    }
+
+    public Admin getAdmin() {
+        return admin;
+    }
 }
 

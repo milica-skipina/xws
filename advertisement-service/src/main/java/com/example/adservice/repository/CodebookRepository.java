@@ -15,4 +15,10 @@ public interface CodebookRepository extends JpaRepository<Codebook, Long> {
 
     boolean deleteCodebookById(Long id);
 
+    Codebook findOneByNameAndCodeTypeAndDeleted(String name, String codeType, Boolean deleted);
+
+    List<Codebook> findAllByDeleted(Boolean deleted);
+
+
+
 }

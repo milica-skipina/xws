@@ -4,30 +4,49 @@ import com.example.adservice.model.Advertisement;
 import com.example.adservice.model.Pricelist;
 
 import java.time.LocalDate;
+import java.util.Date;
 
 public class AdvertisementDTO {
     private Long id;
     private CarDTO carAd;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private Date startDate;
+    private Date endDate;
     private Pricelist pricelist;
+    private String city;
+    private boolean deleted;
+    private boolean request;
+    private String name;
+    private String username;
 
 
     public AdvertisementDTO() {
     }
 
     public AdvertisementDTO(Advertisement a){
-        this(a.getId(),new CarDTO(a.getCarAd()),a.getStartDate(),a.getEndDate(),  a.getPricelist());
+        this(a.getId(),new CarDTO(a.getCarAd()),a.getStartDate(),a.getEndDate(),  a.getPricelist(), a.getCity(), a.isDeleted(), a.isRequest(), a.getEntrepreneurName(), a.getEntrepreneurUsername());
         if(a.getCarAd()!=null){
             this.carAd = new CarDTO(a.getCarAd());
         }
     }
-    public AdvertisementDTO(Long id, CarDTO carAd, LocalDate startDate, LocalDate endDate, Pricelist pricelist) {
+    public AdvertisementDTO(Long id, CarDTO carAd, Date startDate, Date endDate, Pricelist pricelist, String city, boolean deleted, boolean request, String name, String username) {
         this.id = id;
         this.carAd = carAd;
         this.startDate = startDate;
         this.endDate = endDate;
         this.pricelist = pricelist;
+        this.city = city;
+        this.deleted = deleted;
+        this.request = request;
+        this.name = name;
+        this.username = username;
+    }
+
+    public boolean isRequest() {
+        return request;
+    }
+
+    public void setRequest(boolean request) {
+        this.request = request;
     }
 
     public Long getId() {
@@ -46,22 +65,21 @@ public class AdvertisementDTO {
         this.carAd = carAd;
     }
 
-    public LocalDate getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(LocalDate startDate) {
+    public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
 
-    public LocalDate getEndDate() {
+    public Date getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(LocalDate endDate) {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
-
 
     public Pricelist getPricelist() {
         return pricelist;
@@ -69,5 +87,37 @@ public class AdvertisementDTO {
 
     public void setPricelist(Pricelist pricelist) {
         this.pricelist = pricelist;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

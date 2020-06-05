@@ -1,6 +1,7 @@
 package com.example.adservice.dto;
 
 import com.example.adservice.model.Car;
+import com.example.adservice.model.Codebook;
 import com.example.adservice.model.Image;
 
 import java.util.HashSet;
@@ -25,17 +26,22 @@ public class CarDTO {
     private String state;
     private boolean following;
     private Set<Image> images = new HashSet<Image>();
+    private String entrepreneurId;      // ovo je username, ali nisam zbog fronta menjala
+    private Double price;
 
     public CarDTO() {
     }
 
     public CarDTO(Car c) {
-
+        this(c.getId(), c.getMake().getName(), c.getModel().getName(), c.getFuel().getName(), c.getGearbox().getName(),
+                c.getCarClass().getName(), c.getInsurance(),  c.getMileage(),
+                c.getMileageLimit(), c.getKidsSeats(), c.getRaiting(), c.getState(), c.isFollowing(), c.getImages(),
+                c.getEntrepreneurUsername(), 0.0);
     }
 
     public CarDTO(Long id, String make, String model, String fuel, String gearbox, String carClass, Boolean insurance,
-                  Double price, Double mileage, Double mileageLimit, Integer kidsSeats,
-                  Double raiting, String state, boolean following, Set<Image> images) {
+                   Double mileage, Double mileageLimit, Integer kidsSeats,
+                  Double raiting, String state, boolean following, Set<Image> images, String entrepreneurId, Double price) {
         this.id = id;
         this.make = make;
         this.model = model;
@@ -50,6 +56,8 @@ public class CarDTO {
         this.state = state;
         this.following = following;
         this.images = images;
+        this.entrepreneurId = entrepreneurId;
+        this.price = price;
     }
 
     public String getMake() {
@@ -78,6 +86,14 @@ public class CarDTO {
 
     public String getGearbox() {
         return gearbox;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
     }
 
     public void setGearbox(String gearbox) {
@@ -164,4 +180,11 @@ public class CarDTO {
         this.images = images;
     }
 
+    public String getEntrepreneurId() {
+        return entrepreneurId;
+    }
+
+    public void setEntrepreneurId(String entrepreneurId) {
+        this.entrepreneurId = entrepreneurId;
+    }
 }

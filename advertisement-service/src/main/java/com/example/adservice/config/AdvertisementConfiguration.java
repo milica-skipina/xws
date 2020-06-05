@@ -40,7 +40,7 @@ public class AdvertisementConfiguration extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().and()
 
                 .authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/search", "/advertisement/*", "/codebook")
+                .antMatchers( "/**")
                 .permitAll()
                 .anyRequest().authenticated();
 

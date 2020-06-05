@@ -7,6 +7,10 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import org.springframework.mail.javamail.MimeMessageHelper;
+
 @Service
 public class EmailService {
 
@@ -28,5 +32,14 @@ public class EmailService {
         System.out.println("Email sent.");
     }
 
-
+    @Async
+    public void sendHtmlMail(String to,String subject,String htmlText) throws MessagingException {
+        MimeMessage mess = javaMailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mess, "utf-8");
+        helper.setText(htmlText,true);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setFrom("isaprojektovanje@gmail.com");
+        javaMailSender.send(mess);
+    }
 }

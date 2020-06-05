@@ -1,18 +1,16 @@
 package tim2.auth.authentication;
 
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import tim2.auth.security.TokenUtils;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import java.io.IOException;
 
-public class AuthenticationTokenFilter extends OncePerRequestFilter {
+public class AuthenticationTokenFilter extends UsernamePasswordAuthenticationFilter {
 
     private TokenUtils tokenUtils;
 
@@ -27,13 +25,13 @@ public class AuthenticationTokenFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
-    @Override
+    /*
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
+
         String username;
         String authToken = tokenUtils.getToken(request);
-
         if (authToken != null) {
             // uzmi username iz tokena
             username = tokenUtils.getUsernameFromToken(authToken);
@@ -53,6 +51,12 @@ public class AuthenticationTokenFilter extends OncePerRequestFilter {
         }
 
         // prosledi request dalje u sledeci filter
+        chain.doFilter(request, response);
+    }*/
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+
         chain.doFilter(request, response);
     }
 

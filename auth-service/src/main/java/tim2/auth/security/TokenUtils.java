@@ -6,17 +6,18 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import tim2.auth.model.User;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
 import java.util.Date;
 
 @Component
 public class TokenUtils {
 
-    @Value("psw-isa")
+    @Value("authmicro")
     private String APP_NAME;
 
     @Value("somesecret")
@@ -36,15 +37,25 @@ public class TokenUtils {
     private SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS512;
 
     // Funkcija za generisanje JWT token
-    public String generateToken(String username) {
+    public String generateToken(String username, Collection<? extends GrantedAuthority> authorities, String name) {
+        String role = generateAuthorities(authorities);
         return Jwts.builder()
                 .setIssuer(APP_NAME)
                 .setSubject(username)
                 .setAudience(generateAudience())
                 .setIssuedAt(timeProvider.now())
                 .setExpiration(generateExpirationDate())
-                //.claim("role", role) //postavljanje proizvoljnih podataka u telo JWT tokena
+                .claim("role", role) //postavljanje proizvoljnih podataka u telo JWT tokena
+                .claim("name", name)
                 .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
+    }
+
+    private String generateAuthorities(Collection<? extends GrantedAuthority> authorities) {
+        String auth = "";
+        for (GrantedAuthority ga : authorities) {       // tu su i role i permisije
+            auth+= ga.getAuthority() + "|";     // u ostalim servisima parsirati po |
+        }
+        return auth;
     }
 
     private String generateAudience() { // za odredjivanje tipa uredjaja sa kojeg je zahtev stigao
@@ -79,12 +90,13 @@ public class TokenUtils {
 
     // Funkcija za validaciju JWT tokena
     public Boolean validateToken(String token, UserDetails userDetails) {
-        User user = (User) userDetails;
+       /* User user = (User) userDetails;
         final String username = getUsernameFromToken(token);
         final Date created = getIssuedAtDateFromToken(token);
 
         return (username != null && username.equals(userDetails.getUsername())
-                && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate()));
+                && !isCreatedBeforeLastPasswordReset(created, user.getLastPasswordResetDate()));*/
+       return true;
     }
 
     public String getUsernameFromToken(String token) {

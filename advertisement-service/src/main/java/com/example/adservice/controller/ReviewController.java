@@ -1,5 +1,6 @@
 package com.example.adservice.controller;
 
+import com.example.adservice.datavalidation.RegularExpressions;
 import com.example.adservice.dto.ReviewDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,12 @@ public class ReviewController {
 
     @GetMapping(value = "/{id}")
     public ResponseEntity<ReviewDTO> getReview(@PathVariable Long id) {
-
-        return new ResponseEntity<>(HttpStatus.OK);
+        RegularExpressions regularExpressions = new RegularExpressions();
+        if(regularExpressions.idIdValid(id)){
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        else{
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
     }
 }

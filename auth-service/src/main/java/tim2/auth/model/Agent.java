@@ -1,10 +1,16 @@
 package tim2.auth.model;
 
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.Getter;
+import lombok.Setter;
+import org.owasp.encoder.Encode;
 
 import javax.persistence.*;
 
 @Entity
+@Getter
+@Setter
 public class Agent {
 
     @Id
@@ -35,4 +41,21 @@ public class Agent {
 
     public Agent() {
     }
+
+    public Agent(String companyName, String address, String city, Long registryNumber) {
+        this.companyName = companyName;
+        this.address = address;
+        this.city = city;
+        this.registryNumber = registryNumber;
+    }
+
+
+   public Agent escapeParameters(Agent u) {
+        u.setCompanyName(Encode.forHtml(u.getCompanyName()));
+        u.setAddress(Encode.forHtml(u.getAddress()));
+        u.setCity(Encode.forHtml(u.getCity()));
+        return u;
+    }
+
+
 }

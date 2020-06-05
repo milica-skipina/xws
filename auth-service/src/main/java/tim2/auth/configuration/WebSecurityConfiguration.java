@@ -55,7 +55,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     public AuthenticationTokenFilter authenticationTokenFilterBean() throws Exception {
         AuthenticationTokenFilter authenticationTokenFilter = new AuthenticationTokenFilter();
-        //authenticationTokenFilter.setAuthenticationManager(authenticationManagerBean());
+        authenticationTokenFilter.setAuthenticationManager(authenticationManagerBean());
         return authenticationTokenFilter;
     }
 
@@ -68,25 +68,29 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         http
                 .csrf()
                 .disable()
-                .exceptionHandling()
+                .exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint)
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS).permitAll()
-                .antMatchers("/h2-console/**", "/auth/register", "/auth/login")
+                .antMatchers( "/auth/register", "/auth/login","/dash/verify/**","/user","/user/**","/user/deactivate/**")
                 .permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterAfter(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+
+        /*http.addFilterBefore(new AuthenticationTokenFilter(tokenUtils, jwtUserDetailsService),
+                BasicAuthenticationFilter.class);*/
     }
 
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().antMatchers(HttpMethod.POST);
-        web.ignoring().antMatchers(HttpMethod.GET);
-        web.ignoring().antMatchers(HttpMethod.PUT);
-        web.ignoring().antMatchers(HttpMethod.DELETE);
+        web.ignoring().antMatchers(HttpMethod.OPTIONS , "/auth/login", "/auth/register");
+        web.ignoring().antMatchers(HttpMethod.POST , "/auth/login", "/auth/register");
+        web.ignoring().antMatchers(HttpMethod.GET , "/dash/verify/**","/user","/user/deactivate/**");
+        web.ignoring().antMatchers(HttpMethod.DELETE , "/user/**");
+
     }
 }

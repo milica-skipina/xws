@@ -1,5 +1,6 @@
 package com.example.adservice.repository;
 
+import com.example.adservice.dto.AdvertisementDTO;
 import com.example.adservice.model.Advertisement;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -17,8 +18,9 @@ public interface AdvertisementRepository extends JpaRepository<Advertisement, Lo
     Advertisement save(Advertisement advertisement);
 
 
-    List<Advertisement> findAllByCityIgnoreCaseAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
-            String city, Date startDate, Date endDate);
+    List<Advertisement> findAllByDeletedAndCityIgnoreCaseAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+            Boolean deleted, String city, Date startDate, Date endDate);
 
+    List<Advertisement> findAllByEntrepreneurUsername(String agentUsername);
 }
 
