@@ -11,9 +11,17 @@ services:
       - microservices
     ports:
       - 8761:8761
+    environment:
+      KEYSTORE: /etc/keystore/eureka.keystore.p12
+      KEYSTORE_PASSWORD: password
+      KEYSTORE_ALIAS: eureka
+      TRUSTSTORE: /etc/keystore/eureka.truststore.p12
+      TRUSTSTORE_PASSWORD: password
+    volumes:
+      - ./certs/eureka/keystore:/etc/keystore
 
   zuul:
-    build: ./microservices-app
+    build: ./zuul
     image: zuul
     container_name: zuul
     restart: on-failure
@@ -25,7 +33,14 @@ services:
     environment:
       REGISTRY_HOST: eureka
       REGISTRY_PORT: 8761
+      KEYSTORE: /etc/keystore/zuul.keystore.p12
+      KEYSTORE_PASSWORD: password
+      KEYSTORE_ALIAS: zuul
+      TRUSTSTORE: /etc/keystore/zuul.truststore.p12
+      TRUSTSTORE_PASSWORD: password
     tty: true
+    volumes:
+      - ./certs/zuul/keystore:/etc/keystore
     depends_on:
       - eureka
 
@@ -41,8 +56,8 @@ services:
       POSTGRES_PASSWORD: admin
       POSTGRES_USER: postgres
       POSTGRES_DB: microservices
-    #volumes:
-     # - mysql-data:/var/lib/mysql
+    volumes:
+      - postgres-data:/var/lib/postgres
 
   advertisement:
     build: ./advertisement-service
@@ -62,7 +77,14 @@ services:
       DATABASE_SCHEMA: advertisement
       REGISTRY_HOST: eureka
       REGISTRY_PORT: 8761
+      KEYSTORE: /etc/keystore/advertisement.keystore.p12
+      KEYSTORE_PASSWORD: password
+      KEYSTORE_ALIAS: advertisement
+      TRUSTSTORE: /etc/keystore/advertisement.truststore.p12
+      TRUSTSTORE_PASSWORD: password
     tty: true
+    volumes:
+      - ./certs/advertisement/keystore:/etc/keystore
     depends_on: 
       - postgres
       - eureka
@@ -85,7 +107,14 @@ services:
       DATABASE_SCHEMA: messages
       REGISTRY_HOST: eureka
       REGISTRY_PORT: 8761
+      KEYSTORE: /etc/keystore/message.keystore.p12
+      KEYSTORE_PASSWORD: password
+      KEYSTORE_ALIAS: message
+      TRUSTSTORE: /etc/keystore/message.truststore.p12
+      TRUSTSTORE_PASSWORD: password
     tty: true
+    volumes:
+      - ./certs/message/keystore:/etc/keystore
     depends_on: 
       - postgres
       - eureka
@@ -108,10 +137,22 @@ services:
       DATABASE_SCHEMA: users
       REGISTRY_HOST: eureka
       REGISTRY_PORT: 8761
+      RMQ_HOST: rabbitmq-broker
+      RMQ_PORT: 5672
+      RMQ_USERNAME: guest
+      RMQ_PASSWORD: guest
+      KEYSTORE: /etc/keystore/auth.keystore.p12
+      KEYSTORE_PASSWORD: password
+      KEYSTORE_ALIAS: auth
+      TRUSTSTORE: /etc/keystore/auth.truststore.p12
+      TRUSTSTORE_PASSWORD: password
     tty: true
+    volumes:
+      - ./certs/auth/keystore:/etc/keystore
     depends_on: 
       - postgres
       - eureka
+      - rabbitmq-broker
 
   orders:
     build: ./orders-service
@@ -131,10 +172,55 @@ services:
       DATABASE_SCHEMA: orders
       REGISTRY_HOST: eureka
       REGISTRY_PORT: 8761
+      KEYSTORE: /etc/keystore/order.keystore.p12
+      KEYSTORE_PASSWORD: password
+      KEYSTORE_ALIAS: order
+      TRUSTSTORE: /etc/keystore/order.truststore.p12
+      TRUSTSTORE_PASSWORD: password
+    tty: true
+    volumes:
+      - ./certs/order/keystore:/etc/keystore
     tty: true
     depends_on: 
       - postgres
       - eureka
+
+  email:
+    build: ./email-service
+    image: email
+    container_name: email
+    restart: on-failure
+    networks:
+      - microservices
+    ports:
+      - 8086:8086
+    environment:
+      RMQ_HOST: rabbitmq-broker
+      RMQ_PORT: 5672
+      RMQ_USERNAME: guest
+      RMQ_PASSWORD: guest
+    tty: true
+    depends_on: 
+      - rabbitmq-broker
+
+  rabbitmq-broker:
+    image: rabbitmq:management-alpine
+    container_name: rabbitmq-broker
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - microservices 
+    environment:
+      RABBITMQ_SSL_CACERTFILE: /etc/rabbitmq/tls-ca-chain.pem
+      RABBITMQ_SSL_CERTFILE: /etc/rabbitmq/rabbitmq.crt
+      RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: "true"
+      RABBITMQ_SSL_KEYFILE: /etc/rabbitmq/rabbitmq.key
+      RABBITMQ_SSL_VERIFY: verify_peer
+    tty: true
+    volumes:
+      - ./certs/rabbitmq:/etc/rabbitmq
+      
 
 #AGENTSKA APLIKACIJA
   agent:
@@ -153,7 +239,14 @@ services:
       DATABASE_PORT: 5432
       DATABASE_DB: agent_back
       REGISTRY_HOST: eureka
+      KEYSTORE: /etc/keystore/auth.keystore.p12
+      KEYSTORE_PASSWORD: password
+      KEYSTORE_ALIAS: auth
+      TRUSTSTORE: /etc/keystore/auth.truststore.p12
+      TRUSTSTORE_PASSWORD: password
     tty: true
+    volumes:
+      - ./certs/auth/keystore:/etc/keystore
     depends_on: 
       - postgres_agent
 
@@ -170,8 +263,17 @@ services:
       POSTGRES_PASSWORD: admin
       POSTGRES_USER: postgres
       POSTGRES_DB: agent_back
-    #volumes:
-     # - mysql-data:/var/lib/mysql
+    volumes:
+      - postgres_agent-data:/var/lib/postgres_agent
+
+networks:
+  microservices:
+    name: microservices
+    driver: bridge
+
+volumes:
+  postgres-data:
+  postgres_agent-data:
 
 networks:
   microservices:
