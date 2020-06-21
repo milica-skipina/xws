@@ -12,6 +12,8 @@ public interface AdvertisementRepository extends JpaRepository<Advertisement, Lo
 
     Advertisement findOneById(Long id);
 
+    Advertisement findOneByCarAdId(Long id);
+
     Advertisement save(Advertisement advertisement);
 
    //@Query("select a from Advertisement a where a.startDate <= :startDate and a.endDate >= :endDate " +
@@ -21,4 +23,6 @@ public interface AdvertisementRepository extends JpaRepository<Advertisement, Lo
             Boolean deleted, String city, Date startDate, Date endDate);
 
     //List<Advertisement> findAllByEntrepreneurIdAndIdEqual(Long entrepreneurId, Long id);
+
+    List<Advertisement> findAllByMicroIdIsNull();
 }

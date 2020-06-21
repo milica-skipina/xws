@@ -17,28 +17,26 @@
 
 */
 import Dashboard from "views/Dashboard.jsx";
-import Notifications from "views/Notifications.jsx";
-import Icons from "views/Icons.jsx";
-import Typography from "views/Typography.jsx";
-import TableList from "views/Tables.jsx";
-import Maps from "views/Map.jsx";
-import UserPage from "views/User.jsx";
-import UpgradeToPro from "views/Upgrade.jsx";
 import Codebook from "views/Codebook.jsx";
-import Pricelist from "views/Pricelist.jsx";
-import Ad from "views/Ad.jsx";
-import Ads from "views/Ads.jsx";
-import ShowAd from "views/ShowAd.jsx";
-import Register from "views/Register.jsx";
-import Basket from "views/Basket.jsx";
-import Requests from "views/Requests.jsx";
+import Pricelist from "views/Pricelist.jsx"
+import CommentRequests from "views/CommentRequests";
+import Profile from "views/Profile";
+import Messages from "views/Messages.jsx";
 
 var routes = [
+    {
+        // path: "/profile/" + localStorage.getItem('name'),
+        path: "/profile",
+        name: "Profile",
+        icon: "fa fa-user-circle",
+        component: Profile,
+        layout: "/admin"
+    },
 
     {
         path: "/codebook",
         name: "Codebook",
-        icon: "nc-icon nc-bank",
+        icon: "fa fa-book",
         component: Codebook,
         layout: "/admin"
     },
@@ -59,8 +57,13 @@ var routes = [
 
     },
 
+    {
+        path: "/comments",
+        name: "Comments",
+        icon: "fa fa-comments-o",
+        component: CommentRequests,
 
-
+    }
 
 ];
 export default routes;

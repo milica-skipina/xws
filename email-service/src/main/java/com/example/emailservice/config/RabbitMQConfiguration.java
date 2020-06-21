@@ -24,49 +24,49 @@ public class RabbitMQConfiguration {
     /**
      * TLS version.
      */
-    @Value("${TLS_VERSION:TLSv1.2}")
+    @Value("${server.ssl.algorithm}")
     private String algorithm;
 
     /**
      * Application keystore path.
      */
-    @Value("${KEYSTORE:message.keystore.p12}")
+    @Value("${server.ssl.key-store}")
     private String keystore;
 
     /**
      * Application keystore type.
      */
-    @Value("${KEYSTORE_TYPE:PKCS12}")
+    @Value("${server.ssl.trust-store-type}")
     private String keystoreType;
 
     /**
      * Application keystore password.
      */
-    @Value("${KEYSTORE_PASSWORD:password}")
+    @Value("${server.ssl.key-store-password}")
     private String keystorePassword;
 
     /**
      * Keystore alias for application client credential.
      */
-    @Value("${KEYSTORE_ALIAS:message}")
+    @Value("${server.ssl.key-alias}")
     private String applicationKeyAlias;
 
     /**
      * Application truststore path.
      */
-    @Value("${TRUSTSTORE:message.truststore.p12}")
+    @Value("${server.ssl.trust-store}")
     private String truststore;
 
     /**
      * Application truststore type.
      */
-    @Value("${TRUSTSTORE_TYPE:PKCS12}")
+    @Value("${server.ssl.trust-store-type}")
     private String truststoreType;
 
     /**
      * Application truststore password.
      */
-    @Value("${TRUSTSTORE_PASSWORD:password}")
+    @Value("${server.ssl.trust-store-password}")
     private String truststorePassword;
 
     @Value("${RMQ_HOST:localhost}")

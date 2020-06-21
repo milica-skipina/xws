@@ -31,14 +31,17 @@ public class Pricelist {
     @Column(name = "deleted", nullable = false)
     private boolean deleted;
 
+    @Column
+    private String username;
+
     @JsonManagedReference(value = "pricelist_mov")
-    @OneToMany(mappedBy = "pricelist", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "pricelist", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private Set<Advertisement> pricelistAd = new HashSet<Advertisement>();
 
     public Pricelist() {
     }
 
-    public Pricelist(Double priceDay, Double collisionDW, Double discount20, Double discount30, Set<Advertisement> pricelistAd, Double exceedMileage, boolean deleted) {
+    public Pricelist(Double priceDay, Double collisionDW, Double discount20, Double discount30, Set<Advertisement> pricelistAd, Double exceedMileage, boolean deleted, String username) {
         this.priceDay = priceDay;
         this.collisionDW = collisionDW;
         this.discount20 = discount20;
@@ -46,6 +49,26 @@ public class Pricelist {
         this.pricelistAd = pricelistAd;
         this.exceedMileage = exceedMileage;
         this.deleted = deleted;
+        this.username = username;
+    }
+
+    public Pricelist(rs.ac.uns.ftn.xws_tim2.Pricelist p) {
+        this.deleted = p.isDeleted();
+        this.exceedMileage = p.getExceedMileage();
+        this.collisionDW = p.getCollisionDW();
+        this.discount20 = p.getDiscount20();
+        this.discount30 = p.getDiscount30();
+        this.priceDay = p.getPriceDay();
+    }
+
+    public rs.ac.uns.ftn.xws_tim2.Pricelist getGenerated(com.example.adservice.model.Pricelist p){
+        rs.ac.uns.ftn.xws_tim2.Pricelist ret = new rs.ac.uns.ftn.xws_tim2.Pricelist();
+        ret.setPriceDay(p.getPriceDay());
+        ret.setExceedMileage(p.getExceedMileage());
+        ret.setDiscount30(p.getDiscount20());
+        ret.setDiscount20(p.getDiscount20());
+        ret.setCollisionDW(p.getCollisionDW());
+        return ret;
     }
 
     public boolean isDeleted() {
@@ -110,5 +133,13 @@ public class Pricelist {
 
     public void setExceedMileage(Double exceedMileage) {
         this.exceedMileage = exceedMileage;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

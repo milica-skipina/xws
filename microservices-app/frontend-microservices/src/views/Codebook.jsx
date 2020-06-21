@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
+import { RoleAwareComponent } from 'react-router-role-authorization';
 import axios from 'axios';
+import {Redirect} from 'react-router-dom';
 import {
   Button,
   Card,
@@ -30,7 +32,7 @@ import "../../node_modules/react-notifications/lib/Notifications.js"
 //const url = 'http://localhost:8099/';
 const url = (process.env.REACT_APP_DOMAIN) + ':' + (process.env.REACT_APP_PORT) + '/';
 
-class Codebook extends Component {
+class Codebook extends RoleAwareComponent {
 
   constructor(props) {
     super(props);
@@ -46,6 +48,11 @@ class Codebook extends Component {
       editId:"",
       hideEdit: true,
     };
+
+    let arr = [];
+    arr.push(localStorage.getItem('role'));    
+    this.userRoles = arr;
+    this.allowedRoles = ['ROLE_SELLER','ROLE_ADMIN'];
 
     this.edit = this.edit.bind(this);
     this.getCodebook = this.getCodebook.bind(this);
@@ -320,8 +327,8 @@ sifraValidation(c) {
 }
 
   render() {
-    return (
-        <div className="content">
+    
+      let ret =  (<div className="content">
 
       <div className="animated fadeIn">
 
@@ -507,8 +514,8 @@ sifraValidation(c) {
       </div>
       <NotificationContainer/>
 
-      </div>
-    );
+      </div>)
+    return this.rolesMatched() ? ret : <Redirect to="/ads" />;
   }
 }
 

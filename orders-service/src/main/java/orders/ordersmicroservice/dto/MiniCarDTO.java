@@ -3,6 +3,7 @@ package orders.ordersmicroservice.dto;
 import orders.ordersmicroservice.model.Car;
 
 public class MiniCarDTO {
+    private Long id;
     private String make;
     private String model;
     private String fuel;
@@ -15,9 +16,11 @@ public class MiniCarDTO {
         this.make = c.getMake();
         this.model = c.getModel();
         this.fuel = c.getFuel();
+        this.id = c.getId();
     }
 
-    public MiniCarDTO(String make, String model, String fuel, Double price) {
+    public MiniCarDTO(Long id, String make, String model, String fuel, Double price) {
+        this.id = id;
         this.make = make;
         this.model = model;
         this.fuel = fuel;
@@ -54,6 +57,14 @@ public class MiniCarDTO {
 
     public void setPrice(Double price) {
         this.price = price;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }
 

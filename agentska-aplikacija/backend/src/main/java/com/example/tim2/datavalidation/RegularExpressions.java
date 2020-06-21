@@ -83,6 +83,11 @@ public class RegularExpressions {
         }
     }
 
+    /**
+     * slova i brojevi
+     * @param name
+     * @return
+     */
     public boolean isValidSomeName(String name){
         String nameRegex = "^[a-zA-Z0-9]+$";
         Pattern pattern = Pattern.compile(nameRegex);
@@ -116,6 +121,23 @@ public class RegularExpressions {
         String nameRegex = "^[a-zA-Z]+$";
         Pattern pattern = Pattern.compile(nameRegex);
         System.out.println(name);
+        Matcher matcher = pattern.matcher(name);
+        if(matcher.find()){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    /**
+     * sadrzi slova, brojeve i znak +
+     * @param name
+     * @return
+     */
+    public boolean charNumPlusUnlimited(String name){
+        String nameRegex = "^[a-zA-Z0-9 +]+$";
+        Pattern pattern = Pattern.compile(nameRegex);
         Matcher matcher = pattern.matcher(name);
         if(matcher.find()){
             return true;

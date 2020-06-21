@@ -2,11 +2,12 @@
   "name": "rent-a-car",
   "version": "1.1.0",
   "private": true,
-  "homepage": "https://localhost:8082",
+  "homepage": "http://localhost:8082",
   "dependencies": {
     "axios": "^0.19.2",
     "bootstrap": "4.3.1",
     "chart.js": "2.8.0",
+    "font-awesome": "^4.7.0",
     "history": "4.9.0",
     "mdbreact": "^4.27.0",
     "node-sass": "^4.14.1",
@@ -23,6 +24,7 @@
     "react-router-dom": "5.0.0",
     "react-router-role-authorization": "^1.1.4",
     "react-scripts": "^3.4.1",
+    "react-star-ratings": "^2.3.0",
     "reactstrap": "8.0.0"
   },
   "scripts": {

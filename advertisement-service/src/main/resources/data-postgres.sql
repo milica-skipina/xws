@@ -22,9 +22,9 @@ INSERT INTO codebook(name, code, code_type, deleted) VALUES ('Old tajmer', 'C-42
 INSERT INTO codebook(name, code, code_type, deleted) VALUES ('Gradski', 'C-852', 'class', false);
 INSERT INTO codebook(name, code, code_type, deleted) VALUES ('Ostali', 'C-986', 'class', false);
 
-INSERT INTO pricelist(collisiondw, discount20, discount30, exceed_mileage, price_day, deleted) VALUES (30, 30, 10, 20, 50, false);
-INSERT INTO pricelist(collisiondw, discount20, discount30, exceed_mileage, price_day, deleted) VALUES (24, 12, 10, 20, 50, false);
-INSERT INTO pricelist(collisiondw, discount20, discount30, exceed_mileage, price_day, deleted) VALUES (31, 15, 10, 20, 50, false);
-INSERT INTO pricelist(collisiondw, discount20, discount30, exceed_mileage, price_day, deleted) VALUES (15, 20, 10, 20, 50, false);
-INSERT INTO pricelist(collisiondw, discount20, discount30, exceed_mileage, price_day, deleted) VALUES (140, 40, 10, 20, 50, false);
+INSERT INTO pricelist(collisiondw, discount20, discount30, exceed_mileage, price_day, deleted, username) VALUES (30, 30, 10, 20, 50, false, 'prodavac');
+INSERT INTO pricelist(collisiondw, discount20, discount30, exceed_mileage, price_day, deleted, username) VALUES (24, 12, 10, 20, 50, false, 'prodavac');
+INSERT INTO pricelist(collisiondw, discount20, discount30, exceed_mileage, price_day, deleted, username) VALUES (31, 150, 10, 20, 50, false, 'prodavac');
+INSERT INTO pricelist(collisiondw, discount20, discount30, exceed_mileage, price_day, deleted, username) VALUES (15, 20, 10, 20, 50, false, 'prodavac');
+INSERT INTO pricelist(collisiondw, discount20, discount30, exceed_mileage, price_day, deleted, username) VALUES (140, 40, 10, 20, 50, false, 'prodavac');
 

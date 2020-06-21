@@ -25,23 +25,23 @@ public class Codebook {
     private Boolean deleted;
 
     @JsonManagedReference(value = "car_make_mov")
-    @OneToMany(mappedBy = "make", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "make", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private Set<Car> carMake;
 
     @JsonManagedReference(value = "car_model_mov")
-    @OneToMany(mappedBy = "model", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "model", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private Set<Car> carModel;
 
     @JsonManagedReference(value = "car_fuel_mov")
-    @OneToMany(mappedBy = "fuel", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "fuel", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private Set<Car> carFuel;
 
     @JsonManagedReference(value = "car_gearbox_mov")
-    @OneToMany(mappedBy = "gearbox", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "gearbox", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private Set<Car> carGearbox;
 
     @JsonManagedReference(value = "car_class_mov")
-    @OneToMany(mappedBy = "carClass", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "carClass", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private Set<Car> carClass;
 
     public Codebook() {

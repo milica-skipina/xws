@@ -17,7 +17,7 @@ import java.util.Date;
 @Component
 public class TokenUtils {
 
-    @Value("authmicro")
+    @Value("tim2")
     private String APP_NAME;
 
     @Value("somesecret")

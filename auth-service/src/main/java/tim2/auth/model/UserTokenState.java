@@ -5,17 +5,19 @@ public class UserTokenState {
     private String accessToken;
     private long expiresIn;
     private String role;        // poslati na front ulogu ulogovanog usera
+    private String name;
 
     public UserTokenState() {
         super();
         // TODO Auto-generated constructor stub
     }
 
-    public UserTokenState(String accessToken, long expiresIn, String role) {
+    public UserTokenState(String accessToken, long expiresIn, String role, String name) {
         super();
         this.accessToken = accessToken;
         this.expiresIn = expiresIn;
         this.role = role;
+        this.name = name;
     }
 
     public String getAccessToken() {
@@ -40,6 +42,14 @@ public class UserTokenState {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
 

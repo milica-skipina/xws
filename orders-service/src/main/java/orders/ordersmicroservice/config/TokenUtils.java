@@ -7,6 +7,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 import io.jsonwebtoken.Claims;
@@ -203,6 +205,18 @@ public class TokenUtils {
             claims = null;
         }
         return claims;
+    }
+
+    public ArrayList<String> getAllAuthorities(String token) {
+        String role;
+        try {
+            final Claims claims = this.getAllClaimsFromToken(token);
+            role = (String) claims.get("role");
+        } catch (Exception e) {
+            return null;
+        }
+        String[] rls = role.split("\\|");
+        return new ArrayList<String>(Arrays.asList(rls));
     }
 
 }

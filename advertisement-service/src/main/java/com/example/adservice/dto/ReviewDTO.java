@@ -1,24 +1,56 @@
 package com.example.adservice.dto;
 
+import com.example.adservice.model.Review;
+
+import java.util.Date;
+
 public class ReviewDTO {
     private Long id;
     private int evaluation;
-    private Long userId;
-    private Long advertisementId;
+    private Long carId;
     private String text;
     private String state;
+    private Date date;
+    private String username;
 
     public ReviewDTO(){
 
     }
 
-    public ReviewDTO(Long id, int evaluation, Long userId, Long advertisementId, String text, String state) {
+    public ReviewDTO(Review r){
+        this.id = r.getId();
+        this.evaluation = r.getEvaluation();
+        this.carId = r.getCar().getId();
+        this.state = r.getState();
+        this.text = r.getText();
+        this.date = r.getDate();
+        this.username = r.getUsername();
+    }
+
+    public ReviewDTO(Long id, int evaluation, Long carId, String text, String state, Date date, String userName) {
         this.id = id;
         this.evaluation = evaluation;
-        this.userId = userId;
-        this.advertisementId = advertisementId;
+        this.carId = carId;
         this.text = text;
         this.state = state;
+        this.date = date;
+        this.username = userName;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String userName) {
+        this.username = userName;
     }
 
     public Long getId() {
@@ -37,20 +69,12 @@ public class ReviewDTO {
         this.evaluation = evaluation;
     }
 
-    public Long getUserId() {
-        return userId;
+    public Long getCarId() {
+        return carId;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getAdvertisementId() {
-        return advertisementId;
-    }
-
-    public void setAdvertisementId(Long advertisementId) {
-        this.advertisementId = advertisementId;
+    public void setCarId(Long carId) {
+        this.carId = carId;
     }
 
     public String getText() {

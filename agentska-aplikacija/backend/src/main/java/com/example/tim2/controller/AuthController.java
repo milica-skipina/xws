@@ -8,6 +8,7 @@ import com.example.tim2.model.UserTokenState;
 import com.example.tim2.security.TokenUtils;
 import com.example.tim2.security.auth.JwtAuthenticationRequest;
 import com.example.tim2.service.AuthService;
+import com.example.tim2.service.RequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping(value = "/auth")
@@ -35,6 +38,13 @@ public class AuthController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+
+
+    @Autowired
+    private RequestService requestService;
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
 
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", value = "/login")
     public ResponseEntity<UserTokenState> loginUser(@RequestBody JwtAuthenticationRequest authenticationRequest,
@@ -54,10 +64,11 @@ public class AuthController {
             String jwt = tokenUtils.generateToken(user.getUsername());
             int expiresIn = tokenUtils.getExpiredIn();
             String role = ((Role) user.getRoles().toArray()[0]).getName();
-
+            logger.info("SUCCESS | user with username: " + authenticationRequest.getUsername() + " logged in" );
             return ResponseEntity.ok(new UserTokenState(jwt, expiresIn, role ));
         } else {
             String message = "Username and/or password is invalid.";
+            logger.error(" |FAILED| user with username: " + authenticationRequest.getUsername() + " tried to log in" );
             return new ResponseEntity<UserTokenState>(new UserTokenState(message, 0, "" ), HttpStatus.NOT_FOUND);
         }
 

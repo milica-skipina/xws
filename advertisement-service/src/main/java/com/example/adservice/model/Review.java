@@ -1,6 +1,9 @@
 package com.example.adservice.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import javax.persistence.*;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,28 +18,58 @@ public class Review {
     private int evaluation;
 
     @Column
-    private Long userId;
+    private String username;
 
+    @JsonBackReference(value = "car_review")
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Advertisement advertisement;
+    private Car car;
 
-    @Column(name = "text")
+    @Column(name = "text", columnDefinition = "TEXT")
     private String text;
 
     // postavljen, odobren, odbijen
     @Column(name = "state")
     private String state;
 
+    @Column(name="date")
+    private Date date;
+
     public Review() {
 
     }
 
-    public Review(int evaluation, Long userId, Advertisement advertisement, String text, String state) {
+    public Review(Integer evaluation, Car car, String comment, String username){
         this.evaluation = evaluation;
-        this.userId = userId;
-        this.advertisement = advertisement;
+        this.car = car;
+        this.text = comment;
+        this.username = username;
+        this.state = "PENDING";
+        this.date = new Date();
+    }
+
+    public Review(int evaluation, Car car, String text, String state, Date date, String userName) {
+        this.evaluation = evaluation;
+        this.car = car;
         this.text = text;
         this.state = state;
+        this.date = date;
+        this.username = userName;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String userName) {
+        this.username = userName;
     }
 
     public Long getId() {
@@ -55,21 +88,12 @@ public class Review {
         this.evaluation = evaluation;
     }
 
-    public Long getUserId() {
-        return userId;
+    public Car getCar() {
+        return car;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-
-    public Advertisement getAdvertisement() {
-        return advertisement;
-    }
-
-    public void setAdvertisement(Advertisement advertisement) {
-        this.advertisement = advertisement;
+    public void setCar(Car car) {
+        this.car = car;
     }
 
     public String getText() {

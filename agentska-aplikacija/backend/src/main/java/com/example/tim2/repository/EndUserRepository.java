@@ -12,4 +12,8 @@ public interface EndUserRepository extends JpaRepository<EndUser, Long> {
     EndUser findOneById(Long id);
 
     List<EndUser> findAll();
+
+    List<EndUser> findAllByActivated(boolean activated);
+
+    EndUser findByUserUsername(String username);
 }

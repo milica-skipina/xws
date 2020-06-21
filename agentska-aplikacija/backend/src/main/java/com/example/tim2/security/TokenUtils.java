@@ -50,17 +50,49 @@ public class TokenUtils {
                 .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
     }
 
-    private String generateAudience() {
-//		Moze se iskoristiti org.springframework.mobile.device.Device objekat za odredjivanje tipa uredjaja sa kojeg je zahtev stigao.
+    /**
+     *
+     * @param id
+     * @param username - username vlasnika
+     * @return
+     */
+    public String generateTrackingToken(Long id, String username) {
+        return Jwts.builder()
+                .setIssuer(APP_NAME)
+                .setSubject(username)
+                .setAudience(generateAudience())
+                .setIssuedAt(timeProvider.now())
+                .setExpiration(generateExpirationDate())
+                .claim("id", id) //postavljanje proizvoljnih podataka u telo JWT tokena
+                .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
+    }
 
-//		String audience = AUDIENCE_UNKNOWN;
-//		if (device.isNormal()) {
-//			audience = AUDIENCE_WEB;
-//		} else if (device.isTablet()) {
-//			audience = AUDIENCE_TABLET;
-//		} else if (device.isMobile()) {
-//			audience = AUDIENCE_MOBILE;
-//		}
+    public String getRoleFromToken(String token) {
+        String role;
+        try {
+            final Claims claims = this.getAllClaimsFromToken(token);
+            role = (String) claims.get("role");
+            role = getRoleFromParsingArray(role);
+        } catch (Exception e) {
+            role = null;
+        }
+        return role;
+    }
+
+    private String getRoleFromParsingArray(String roles) {
+        String[] rls = roles.split("\\|");
+        String role = "";
+        for (int i=0; i< rls.length; i++) {
+            if (rls[i].contains("ROLE_")) {
+                role = rls[i];
+                break;
+            }
+        }
+        return role;
+    }
+
+    private String generateAudience() {
+
         return AUDIENCE_WEB;
     }
 

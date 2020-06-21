@@ -2,6 +2,8 @@ package com.example.tim2.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import org.springframework.security.core.parameters.P;
+
 import javax.persistence.*;
 import java.util.*;
 
@@ -53,8 +55,8 @@ public class Car {
     @Column(name = "state", nullable = false)
     private String state;
 
-    // ???
-    @Column(name = "following", nullable = false)
+    // za tracking device
+    @Column(name = "following", nullable = true)
     private boolean following;
 
     // firma ili pojedinac
@@ -73,10 +75,49 @@ public class Car {
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Image>images = new HashSet<Image>();
 
+    @JsonManagedReference(value = "carreport_mov")
+    @OneToMany(mappedBy = "reportCar", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Report> reports = new HashSet<Report>();
+
+    @JsonManagedReference(value = "car_review")
+    @OneToMany(mappedBy = "car", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<Review> reviews = new HashSet<Review>();
+
+    @Column(name = "trackingToken", nullable = true)
+    private String trackingToken;
+
+    @Column
+    private Long microId;
+
     public Car() {
     }
 
-    public Car(Codebook make, Codebook model, Codebook fuel, Codebook gearbox, Codebook carClass, Boolean insurance, Double mileage, Double mileageLimit, Integer kidsSeats, Double raiting, String state, boolean following, Entrepreneur entrepreneur, Set<Request> request, Set<Advertisement> carAdvertisement, Set<Image> images) {
+    public com.example.tim2.soap.gen.Car getGenerated(){
+        com.example.tim2.soap.gen.Car retValue = new com.example.tim2.soap.gen.Car();
+        retValue.setCarClass(getCarClass().getName());
+        retValue.setMake(getMake().getName());
+        retValue.setModel(getModel().getName());
+        retValue.setFollowing(isFollowing());
+        retValue.setEntrepreneurUsername(getEntrepreneur().getUser().getUsername());
+        retValue.setFuel(getFuel().getName());
+        retValue.setGearbox(getGearbox().getName());
+        retValue.setKidsSeats(getKidsSeats());
+        retValue.setRaiting(getRaiting());
+        retValue.setInsurance(insurance);
+        retValue.setMileage(getMileage());
+        retValue.setState(getState());
+        retValue.setMileageLimit(getMileageLimit());
+        retValue.setEntrepreneurUsername("prodavac");
+        for(Image i : getImages()){
+            retValue.getImages().add(i.getGenerated());
+        }
+        return retValue;
+    }
+
+    public Car(Codebook make, Codebook model, Codebook fuel, Codebook gearbox, Codebook carClass, Boolean insurance,
+               Double mileage, Double mileageLimit, Integer kidsSeats, Double raiting, String state, boolean following,
+               Entrepreneur entrepreneur, Set<Request> request, Set<Advertisement> carAdvertisement, Set<Image> images,
+                Set<Review> reviews) {
         this.make = make;
         this.model = model;
         this.fuel = fuel;
@@ -93,6 +134,7 @@ public class Car {
         this.request = request;
         this.carAdvertisement = carAdvertisement;
         this.images = images;
+        this.reviews = reviews;
     }
 
     public Long getId() {
@@ -229,5 +271,37 @@ public class Car {
 
     public void setImages(Set<Image> images) {
         this.images = images;
+    }
+
+    public Set<Report> getReports() {
+        return reports;
+    }
+
+    public void setReports(Set<Report> reports) {
+        this.reports = reports;
+    }
+
+    public Set<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(Set<Review> reviews) {
+        this.reviews = reviews;
+    }
+
+    public String getTrackingToken() {
+        return trackingToken;
+    }
+
+    public void setTrackingToken(String trackingToken) {
+        this.trackingToken = trackingToken;
+    }
+
+    public Long getMicroId() {
+        return microId;
+    }
+
+    public void setMicroId(Long microId) {
+        this.microId = microId;
     }
 }

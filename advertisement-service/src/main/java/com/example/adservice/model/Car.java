@@ -16,26 +16,30 @@ public class Car {
 
     // Tesla
     @JsonBackReference(value = "car_make_mov")
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Codebook make;
 
     // Tesla S (nesto)
     @JsonBackReference(value = "car_model_mov")
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Codebook model;
 
     @JsonBackReference(value = "car_fuel_mov")
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Codebook fuel;
 
     // mjenjac
     @JsonBackReference(value = "car_gearbox_mov")
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Codebook gearbox;
 
     @JsonBackReference(value = "car_class_mov")
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Codebook carClass;
+
+    @JsonManagedReference(value = "car_review")
+    @OneToMany(mappedBy = "car", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    private Set<Review> reviews = new HashSet<Review>();
 
     @Column(name = "insurance", nullable = false)
     private Boolean insurance;
@@ -66,20 +70,40 @@ public class Car {
     private boolean following;
 
     @JsonManagedReference(value = "advertisementcar_mov")
-    @OneToMany(mappedBy = "carAd", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "carAd", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private Set<Advertisement> carAdvertisement = new HashSet<Advertisement>();
 
     @JsonManagedReference(value = "image_mov")
-    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private Set<Image>images = new HashSet<Image>();
 
+    @Column(name = "trackingToken", nullable = true)
+    private String trackingToken;
+
     public Car() {
+    }
+
+    public Car(rs.ac.uns.ftn.xws_tim2.Car c) {
+        this.insurance = c.isInsurance();
+        this.mileage = c.getMileage();
+        this.mileageLimit = c.getMileageLimit();
+        this.kidsSeats = c.getKidsSeats();
+        this.raiting = c.getRaiting();
+        this.state = c.getState();
+        this.following = c.isFollowing();
+        for(rs.ac.uns.ftn.xws_tim2.Image i:c.getImages()){
+            this.getImages().add(new Image(i, c.getId()));
+        }
+       // this.carAdvertisement = c.getCarAdvertisement();
+       // this.images = c.getImages();
+        this.entrepreneurUsername = c.getEntrepreneurUsername();
+     //   this.reviews = c.getReviews();
     }
 
     public Car(Long id, Codebook make, Codebook model, Codebook fuel, Codebook gearbox,
                Codebook carClass, Boolean insurance, Double mileage, Double mileageLimit,
                Integer kidsSeats, Double raiting, String state, boolean following,
-               Set<Advertisement> carAdvertisement, Set<Image> images, String id1) {
+               Set<Advertisement> carAdvertisement, Set<Image> images, String id1, Set<Review> reviews) {
         this.id = id;
         this.make = make;
         this.model = model;
@@ -96,6 +120,7 @@ public class Car {
         this.carAdvertisement = carAdvertisement;
         this.images = images;
         this.entrepreneurUsername = id1;
+        this.reviews = reviews;
     }
 
     public Long getId() {
@@ -124,6 +149,14 @@ public class Car {
 
     public Codebook getFuel() {
         return fuel;
+    }
+
+    public Set<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(Set<Review> reviews) {
+        this.reviews = reviews;
     }
 
     public void setFuel(Codebook fuel) {
@@ -233,4 +266,12 @@ public class Car {
     public void setEntrepreneurName(String entrepreneurName) {
         this.entrepreneurName = entrepreneurName;
     }*/
+
+    public String getTrackingToken() {
+        return trackingToken;
+    }
+
+    public void setTrackingToken(String trackingToken) {
+        this.trackingToken = trackingToken;
+    }
 }

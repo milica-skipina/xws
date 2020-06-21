@@ -5,23 +5,20 @@ export default {
   
         name: 'Advertisements',
         url: '/oglasi',
-        icon: 'icon-drop',
-      },
-      {
-        
-        name: 'New pricelist',
-        url: '/cjenovnik',
-        icon: 'icon-drop',
+        icon: 'fa fa-newspaper-o',
       },
       {
         
         name: 'Codebook',
         url: '/codebook',
-        icon: 'icon-drop',
+        icon: "fa fa-book",
       },
      
-  
-  
+      {
+        url: "/comments",
+        name: "Comments",
+        icon: "fa fa-comments-o",
+    },  
   
     ],
   };

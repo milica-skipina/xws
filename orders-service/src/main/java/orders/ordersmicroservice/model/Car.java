@@ -68,9 +68,12 @@ public class Car {
     @OneToMany(mappedBy = "carAd", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Advertisement> carAdvertisement = new HashSet<Advertisement>();
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "report_id", referencedColumnName = "id")
-    private Report report;
+    @JsonManagedReference(value = "car_report_mov")
+    @OneToMany(mappedBy = "car", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Report> reports = new HashSet<Report>();
+
+    @Column(name = "image_url", nullable = false, length=10485760)
+    String image;
 
     public Car() {
     }
@@ -87,12 +90,13 @@ public class Car {
         this.state = c.getState();
         this.gearbox = c.getGearbox();
         this.entrepreneurUsername = c.getEntrepreneurUsername();
+        this.image = c.getImage();
     }
 
     public Car(String make, String model, String fuel, String gearbox, String carClass,
                boolean insurance, Double mileage,
                Double mileageLimit, double raiting, String state,
-               String entrepreneurUsername, Set<Advertisement> ad) {
+               String entrepreneurUsername, Set<Advertisement> ad, String image, Set<Report> reports) {
         this.make = make;
         this.model = model;
         this.fuel = fuel;
@@ -105,6 +109,8 @@ public class Car {
         this.raiting = raiting;
         this.state = state;
         this.carAdvertisement = ad;
+        this.image = image;
+        this.reports = reports;
     }
 
     public Long getId() {
@@ -195,12 +201,44 @@ public class Car {
         this.carAdvertisement = carAdvertisement;
     }
 
-    public Report getReport() {
-        return report;
+    public boolean isInsurance() {
+        return insurance;
     }
 
-    public void setReport(Report report) {
-        this.report = report;
+    public void setInsurance(boolean insurance) {
+        this.insurance = insurance;
+    }
+
+    public double getRaiting() {
+        return raiting;
+    }
+
+    public void setRaiting(double raiting) {
+        this.raiting = raiting;
+    }
+
+    public String getEntrepreneurUsername() {
+        return entrepreneurUsername;
+    }
+
+    public void setEntrepreneurUsername(String entrepreneurUsername) {
+        this.entrepreneurUsername = entrepreneurUsername;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public Set<Report> getReports() {
+        return reports;
+    }
+
+    public void setReports(Set<Report> reports) {
+        this.reports = reports;
     }
 }
 

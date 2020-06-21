@@ -24,6 +24,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.websocket.server.PathParam;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping(value = "/auth")
@@ -38,6 +40,8 @@ public class AuthController {
     private UserIdentifier userIdentifier;
 
     private MessageProducer messageProducer;
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
     public AuthController(AuthService authService, TokenUtils tokenUtils, AuthenticationManager authenticationManager,
@@ -65,10 +69,12 @@ public class AuthController {
             String jwt = tokenUtils.generateToken(user.getUsername(), user.getAuthorities(), name);
             int expiresIn = tokenUtils.getExpiredIn();
             String role = ((Role) user.getRoles().toArray()[0]).getName();
-            return ResponseEntity.ok(new UserTokenState(jwt, expiresIn, role ));
+            logger.info("SUCCESS | user with username: " + authenticationRequest.getUsername() + " logged in" );
+            return ResponseEntity.ok(new UserTokenState(jwt, expiresIn, role, name ));
         } else {
             String message = "Username and/or password is invalid.";
-            return new ResponseEntity<UserTokenState>(new UserTokenState(message, 0, "" ), HttpStatus.NOT_FOUND);
+            logger.error(" |FAILED| user with username: " + authenticationRequest.getUsername() + " tried to log in" );
+            return new ResponseEntity<UserTokenState>(new UserTokenState(message, 0, "", "" ), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -78,6 +84,7 @@ public class AuthController {
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
         }
+        logger.info(" |NEW REGISTRATION| " );
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -91,13 +98,24 @@ public class AuthController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ENDUSER') or hasRole('AGENT')")
+    @PreAuthorize("hasRole('ENDUSER') or hasRole('SELLER')")
     @RequestMapping(method = RequestMethod.PUT, value = "/change/{id}")
     public ResponseEntity<HttpStatus> changePassword(@PathParam("id") Long id) throws Exception {
         boolean success = authService.changePassword(id);
         if (!success) {
             return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
         }
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_SELLER')")
+    @RequestMapping(method = RequestMethod.POST, value = "/manual", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<Boolean> manualRegistration(@RequestBody String[] data) {
+        boolean success = authService.manualRegistration(data);
+        if (!success) {
+            return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
+        }
+        logger.info(" |NEW MANUAL REGISTRATION| " );
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

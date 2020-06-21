@@ -12,4 +12,7 @@ public interface PricelistRepository  extends JpaRepository<Pricelist, Long> {
     Pricelist findOneById(Long id);
 
     Pricelist save(Pricelist p);
+
+    List<Pricelist> findAllByMicroIdIsNull();
 }
+

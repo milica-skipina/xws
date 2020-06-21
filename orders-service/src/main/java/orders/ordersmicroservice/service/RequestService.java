@@ -1,6 +1,8 @@
 package orders.ordersmicroservice.service;
 
 import orders.ordersmicroservice.common.DateConverter;
+import orders.ordersmicroservice.common.RegularExpressions;
+import orders.ordersmicroservice.config.TLSConfiguration;
 import orders.ordersmicroservice.dto.BasketDTO;
 import orders.ordersmicroservice.dto.CarOrderDTO;
 import orders.ordersmicroservice.dto.MiniCarDTO;
@@ -14,15 +16,34 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class RequestService {
 
     private RestTemplate restTemplate;
 
+    private RegularExpressions regularExpressions;
+
+    private RestTemplateExample restTemplateExample;
+
+    private RequestRepository requestRepository;
+
+    @Autowired
+    public RequestService(RequestRepository requestRepository, RestTemplateExample restTemplate) {
+        this.requestRepository = requestRepository;
+        this.restTemplateExample = restTemplate;
+        this.regularExpressions = new RegularExpressions();
+    }
+
     public boolean adRequest(Long id){
+        if (!regularExpressions.idIdValid(id)) {
+            return false;
+        }
         List<Request>all = requestRepository.findAllByCarsId(id);
         int x = 0;
         for(Request r : all){
@@ -37,21 +58,15 @@ public class RequestService {
         }
     }
 
-    private RestTemplateExample restTemplateExample;
-
-    private RequestRepository requestRepository;
-
-    @Autowired
-    public RequestService(RequestRepository requestRepository, RestTemplateExample restTemplate) {
-        this.requestRepository = requestRepository;
-        this.restTemplateExample = restTemplate;
-    }
-
-    public boolean createRequests(String[] reqs, String[] data) {
+    public boolean createRequests(String[] reqs, String[] data, String jwt) {
+        if (!validateRequests(reqs)) {
+            return false;
+        }
         Hashtable<String, ArrayList<BasketDTO>> bundlePerAgent = new Hashtable<>();
         ArrayList<Long> advertisementIds = parseInput(reqs, 0);
         Hashtable<Long, BasketDTO> advertisements = restTemplateExample
-                                                    .postSender("https://localhost:8083/advertisement/filter", advertisementIds);
+                                                    .postSender(TLSConfiguration.URL +
+                                                     "advertisement/advertisement/filter", advertisementIds, jwt);
         Date startDate = new Date(Long.parseLong(reqs[reqs.length-2]));
         Date endDate = new Date(Long.parseLong(reqs[reqs.length-1]));
         for (int i= 0; i < reqs.length-2 ; i++) {
@@ -61,18 +76,28 @@ public class RequestService {
             } else {    // pojedinacni zahtev
                 BasketDTO adv = advertisements.get(Long.parseLong(array[0]));
                 Request request = new Request("PENDING", adv.getCar().getMileage(), startDate, endDate,
-                                  data[0], adv.getEntrepreneur());
+                                  data[0], adv.getEntrepreneur(), new Date());
                 Set<Car> cars = new HashSet<Car>(1);
                 cars.add(new Car(adv.getCar()));
                 request.setCars(cars);
                 request.setAgentUsername(adv.getCar().getEntrepreneurUsername());
                 request.setAgentNamee(adv.getEntrepreneur());       // name
                 request.setCustomerName(data[1]);
+                request.escapeParameters(request);
                 requestRepository.save(request);
             }
         }
         if (!bundlePerAgent.isEmpty()) {
             createBundle(bundlePerAgent, data, startDate,  endDate);
+        }
+        return true;
+    }
+
+    private boolean validateRequests(String[] reqs) {
+        for (int i =0; i < reqs.length-2; i++) {
+            if (!regularExpressions.charNumPlusUnlimited(reqs[i])) {
+                return false;
+            }
         }
         return true;
     }
@@ -108,7 +133,7 @@ public class RequestService {
                               Date startDate, Date endDate) {
         Set<Car> cars = new HashSet<Car>(1);
         for (String key : bundlePerAgent.keySet()) {    //agent je key
-            Request request = new Request("PENDING", -1, startDate, endDate, customerData[0], key);
+            Request request = new Request("PENDING", -1, startDate, endDate, customerData[0], key, new Date());
             for (BasketDTO adv : bundlePerAgent.get(key)) {   // za sve oglase tog agenta dodati aute u jedan zahtev
                 request.setAgentUsername(adv.getCar().getEntrepreneurUsername());
                 request.setAgentNamee(adv.getEntrepreneur());       // name
@@ -117,6 +142,7 @@ public class RequestService {
                 request.setMileage(adv.getCar().getMileage());
                 cars.add(new Car(adv.getCar()));
                 request.setCars(cars);
+                request.escapeParameters(request);
                 requestRepository.save(request);
             }
         }
@@ -126,6 +152,9 @@ public class RequestService {
         za korisnika
      */
     public ArrayList<RequestDTO> requestedCars(String username) {
+        if (!regularExpressions.isValidCharNum(username)) {
+            return null;
+        }
         ArrayList<Request> requests = (ArrayList<Request>) requestRepository.findAllByCustomerUsername(username);
         ArrayList<RequestDTO> ret = castRequests(requests);
         return ret;
@@ -135,6 +164,9 @@ public class RequestService {
         za agenta
      */
     public ArrayList<RequestDTO> requestsForApproving(String username) {
+        if (!regularExpressions.isValidCharNum(username)) {
+            return null;
+        }
         ArrayList<Request> requests = (ArrayList<Request>) requestRepository.findAllByAgentUsername(username);
         ArrayList<RequestDTO> ret = castRequests(requests);
         return ret;
@@ -154,58 +186,99 @@ public class RequestService {
 
 
     public boolean modifyRequest(Long requestId, boolean flag) {
-        //  TO DO: VALIDIRAJ ID I FLAG!!!!!!
+        if (!regularExpressions.idIdValid(requestId)) {
+            return false;
+        }
         Request r = requestRepository.findOneById(requestId);
         if (r == null) {
             return false;
         }
-        if (flag && r.getState().equals("PENDING")) {   // u slucaju da je manuelno zauzet u medjuvremenu
+        if (flag) {
+            List<Long> carIds = findAllByStateAndStartDateAndEndDate("RESERVED", r.getStartDate(), r.getEndDate());
+            List<Long> paidCarIds = findAllByStateAndStartDateAndEndDate("PAID", r.getStartDate(),r.getEndDate());
+            carIds.addAll(paidCarIds);
+            for (Long id : carIds) {
+                for (Car car : r.getCars()) {
+                    if (id == car.getId()) {
+                        return false;   //ne moze se rezervisati
+                    }
+                }
+            }
+            r.setDateCreated(new Date());       //kasnije se koristi za proveru placanja
             r.setState("RESERVED");
         } else {
             r.setState("CANCELED");
         }
+        r.escapeParameters(r);
         requestRepository.save(r);
         return true;
     }
 
     public boolean isInBasket(Long id, String customerUsername) {
+        if (!regularExpressions.idIdValid(id) && !regularExpressions.isValidCharNum(customerUsername)) {
+            return false;
+        }
         ArrayList<Request> requests = (ArrayList<Request>) requestRepository.findAllByCustomerUsername(customerUsername);
         for (Request r : requests) {
-            for (Car c: r.getCars()) {
-                if (c.getId() == id) {
-                    return true;
+            if (!r.getState().equals("CANCELED")) {
+                for (Car c: r.getCars()) {
+                    if (c.getId() == id) {
+                        return true;
+                    }
                 }
             }
+
         }
         return false;
     }
 
-    public boolean manualRenting(Long id, String startDate, String endDate, String customerUsername, String[] data) {
-        Date start = new Date(Long.parseLong(startDate));
-        Date end = new Date(Long.parseLong(endDate));
-        ArrayList<Request> reservedRequests = (ArrayList<Request>) requestRepository.findAllByState("RESERVED");
+    /**
+     * data je izvadjeno iz jwta, tu ako ga ne isparsira nece dalje proci
+     * @param id
+     * @param startDate
+     * @param endDate
+     * @param customerData - podaci o customeru
+     * @param agentData - username i name agenta
+     * @return
+     */
+    public boolean manualRenting(Long id, String startDate, String endDate, String[] customerData, String[] agentData, String jwt) {
+        if (!regularExpressions.idIdValid(id) && !regularExpressions.isValidInput(customerData[4])) {
+            return false;
+        } else if (customerData[0].equals("true")) {        // treba registrovati novog
+            if (!regularExpressions.isValidInput(customerData[1]) && !regularExpressions.isValidInput(customerData[3])
+                    && !regularExpressions.isValidEmail(customerData[2]) && (customerData[4].length() < 6)) {
+                return false;
+            } else {
+                restTemplateExample.postCreateUser(TLSConfiguration.URL + "authpoint/auth/manual", customerData, jwt);
+            }
+        }
+        after24hOr12h();
+        Date start = DateConverter.stringToDate(startDate);
+        Date end = DateConverter.stringToDate(endDate);
+        ArrayList<Request> reservedRequests = (ArrayList<Request>) requestRepository.findAllByState("PAID");
         for (Request r : reservedRequests) {
             if ( (start.compareTo(r.getEndDate()) < 0 && start.compareTo(r.getStartDate()) > 0 )
                     || (end.compareTo(r.getEndDate()) < 0 && end.compareTo(r.getStartDate()) > 0 )) {
                 return false;
             }
         }
-        CarOrderDTO car = restTemplateExample.getCar("https://localhost:8083/advertisement/",id);
-        Request manualRequest = new Request("RESERVED", -1, start, end, customerUsername, data[0]);
+        CarOrderDTO car = restTemplateExample.getCar(TLSConfiguration.URL + "advertisement/car/order/" + id, jwt);
+        Request manualRequest = new Request("PAID", -1, start, end, customerData[4], agentData[0], new Date());
         manualRequest.setMileage(car.getMileage());
-        manualRequest.setAgentNamee(data[1]);
-        manualRequest.setCustomerName(customerUsername);
+        manualRequest.setAgentNamee(agentData[1]);
+        manualRequest.setCustomerName(customerData[1] + " " + customerData[3]);
         Set<Car> cars = new HashSet<Car>(1);
         cars.add(new Car(car));
         manualRequest.setCars(cars);
+        manualRequest.escapeParameters(manualRequest);
         requestRepository.save(manualRequest);
-
-
+        cancelRequestsByManual(start, end);
         return true;
     }
 
     private void cancelRequestsByManual(Date start, Date end) {
         ArrayList<Request> pendingRequests = (ArrayList<Request>) requestRepository.findAllByState("PENDING");
+        pendingRequests.addAll(requestRepository.findAllByState("RESERVED"));
         for (Request r : pendingRequests) {
             if (start.compareTo(r.getEndDate()) < 0 && start.compareTo(r.getStartDate()) > 0
                     || (end.compareTo(r.getEndDate()) < 0 && end.compareTo(r.getStartDate()) > 0)) {
@@ -216,11 +289,14 @@ public class RequestService {
     }
 
     public List<Long> findAllByStateAndStartDateAndEndDate(String state, Date start, Date end){
+        if (!regularExpressions.isValidInput(state)) {
+            return null;
+        }
         List<Request> requests = requestRepository.findAllByState(state);
         List<Long> ret = new ArrayList<>();
         for(Request r : requests){
-            if((start.compareTo(r.getStartDate()) >= 0 && start.compareTo(r.getEndDate()) <=0)
-                    || (end.compareTo(r.getStartDate()) >= 0 && end.compareTo(r.getEndDate()) <= 0)){
+            if((r.getStartDate().compareTo(start) <=0 && r.getEndDate().compareTo(start) >=0)
+                    || (r.getStartDate().compareTo(end) <=0 && r.getEndDate().compareTo(end) >= 0)){
                 Set<Car> cars = r.getCars();
                 for(Car c : cars){
                     ret.add(c.getId());
@@ -230,5 +306,70 @@ public class RequestService {
         return  ret;
     }
 
+    public void after24hOr12h() {
+        ArrayList<Request> requests = (ArrayList<Request>) requestRepository.findAllByState("PENDING");
+        ArrayList<Request> requestsNotPaid = (ArrayList<Request>) requestRepository.findAllByState("RESERVED");
+        requests.addAll(requestsNotPaid);
+        Date currentDate = new Date();
+        for (Request r : requests) {
+            Date requestCreationDate = r.getDateCreated();
+            long diff = Math.abs(currentDate.getTime() - requestCreationDate.getTime());
+            long hrs = TimeUnit.MILLISECONDS.toHours(diff);
+            if (r.getState().equals("PENDING") && hrs > 24) {
+                r.setState("CANCELED");
+                requestRepository.save(r);
+            }
+            if (r.getState().equals("RESERVED") && hrs > 12) {
+                r.setState("CANCELED");
+                requestRepository.save(r);
+            }
+        }
+    }
 
+    public boolean paymentMethod(Long id, String username) {
+        if (!regularExpressions.idIdValid(id) && !regularExpressions.isValidCharNum(username)) {
+            return false;
+        }
+        Date currentDate = new Date();
+        Request request = requestRepository.findOneById(id);
+        Date requestCreationDate = request.getDateCreated();
+        long diff = Math.abs(currentDate.getTime() - requestCreationDate.getTime());
+        long hrs = TimeUnit.MILLISECONDS.toHours(diff);
+        if (request.getCustomerUsername().equals(username) && request.getState().equals("RESERVED")
+                && hrs <= 12) {
+            request.setState("PAID");
+            requestRepository.save(request);
+            return true;
+        }
+        return false;
+    }
+
+    public Boolean canWriteReview(String username, Long id){
+        String url = TLSConfiguration.URL + "advertisement/review/username/" + username + "/carId" + id;
+        Long reviews = restTemplate.getForObject(url, Long.class);
+        Date endDate = new Date();
+        Long requestsNum = 0L;
+        List<Request> requests = requestRepository.findAllByCustomerUsernameAndEndDateLessThanEqualAndState(username, endDate, "PAID");
+        for(Request r : requests){
+            for(Car c : r.getCars()){
+                if(c.getId() == id){
+                    requestsNum++;
+                }
+            }
+        }
+        if(reviews < requestsNum){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    public boolean messageCheck(String customerUsername,String agentUsername){
+        List<Request> requests = requestRepository.findAllByCustomerUsernameAndAgentUsernameAndState(customerUsername,agentUsername,"RESERVED");
+        if(requests.isEmpty())
+            return false;
+        else
+            return true;
+    }
 }

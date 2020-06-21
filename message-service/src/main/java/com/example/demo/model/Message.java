@@ -20,10 +20,10 @@ public class Message {
     private Date timeSent;
 
     @Column
-    private Long senderId;
+    private String senderUsername;
 
     @Column
-    private Long receiverId;
+    private String receiverUsername;
 
     public Message() {
     }
@@ -52,20 +52,20 @@ public class Message {
         this.timeSent = timeSent;
     }
 
-    public Long getSenderId() {
-        return senderId;
+    public String getSenderUsername() {
+        return senderUsername;
     }
 
-    public void setSenderId(Long senderId) {
-        this.senderId = senderId;
+    public void setSenderUsername(String senderUsername) {
+        this.senderUsername = senderUsername;
     }
 
-    public Long getReceiverId() {
-        return receiverId;
+    public String getReceiverUsername() {
+        return receiverUsername;
     }
 
-    public void setReceiverId(Long receiverId) {
-        this.receiverId = receiverId;
+    public void setReceiverUsername(String receiverUsername) {
+        this.receiverUsername = receiverUsername;
     }
 
     public String getSubject() {

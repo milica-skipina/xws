@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
+import React from 'react';
 import axios from 'axios';
 import { RoleAwareComponent } from 'react-router-role-authorization';
 import {NotificationContainer, NotificationManager} from 'react-notifications';
+import {Redirect} from 'react-router-dom';
 import "../../../node_modules/react-notifications/lib/notifications.css"
 import "../../../node_modules/react-notifications/lib/Notifications.js"
 import {
@@ -23,9 +24,6 @@ import {
   TabContent,
   TabPane,
   Table,
-  Pagination,
-  PaginationItem,
-  PaginationLink
 } from 'reactstrap';
 
 //const url = 'http://localhost:8099/';
@@ -52,7 +50,7 @@ class Codebook extends RoleAwareComponent {
 
 
 
-    let arr = new Array();
+    let arr = [];
     arr.push(localStorage.getItem('role'));
     console.log("KONS",arr);
     this.userRoles = arr;
@@ -143,7 +141,7 @@ class Codebook extends RoleAwareComponent {
         headers: { "Authorization": AuthStr },  
       }).then((response) => {
         console.log(response.status);
-          let temp = this.state.codebook.filter(item=>item.id != id);
+          let temp = this.state.codebook.filter(item=>item.id !== id);
           this.setState({codebook: temp});
           this.reset();
           NotificationManager.success("Successfully deleted!", '', 3000);     
@@ -531,7 +529,7 @@ resetEdit(){
 
     </div>);
 
-    return this.rolesMatched() ? ret : <span>ivana</span>;
+    return this.rolesMatched() ? ret : <Redirect to="/oglasi" />;
   }
 }
 

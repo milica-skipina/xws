@@ -19,23 +19,23 @@
 import Dashboard from "views/Dashboard.jsx";
 import Notifications from "views/Notifications.jsx";
 import Icons from "views/Icons.jsx";
-import Typography from "views/Typography.jsx";
-import TableList from "views/Tables.jsx";
-import Maps from "views/Map.jsx";
 import UserPage from "views/User.jsx";
-import UpgradeToPro from "views/Upgrade.jsx";
 import Codebook from "views/Codebook.jsx";
 import Pricelist from "views/Pricelist.jsx";
 import Ad from "views/Ad.jsx";
 import Ads from "views/Ads.jsx";
 import ShowAd from "views/ShowAd.jsx";
-import Register from "views/Register.jsx";
 import Basket from "views/Basket.jsx";
 import Requests from "views/Requests.jsx";
+import CommentRequests from "views/CommentRequests";
+import Profile from "views/Profile";
+import Orders from "views/Orders.jsx";
+import Messages from "views/Messages";
 
 var routes = [
 
   {
+    authorize: ["ROLE_SELLER", "ROLE_ADMIN"],
     path: "/codebook",
     name: "Codebook",
     icon: "nc-icon nc-bank",
@@ -43,13 +43,22 @@ var routes = [
     layout: "/admin"
   },
   {
+    authorize: ["ROLE_SELLER", 'ROLE_ADMIN', 'ROLE_CUSTOMER'] ,
+    path: "/profile",
+    name: "Profile",
+    icon: "fa fa-user-circle",
+    component: Profile,
+  },
+  {
+    authorize: ["ROLE_SELLER", 'ROLE_ADMIN'] ,
     path: "/pricelist",
     name: "Pricelist",
     icon: "nc-icon nc-tile-56",
     component: Pricelist,
     layout: "/admin"
   },
-   {
+  {
+    authorize: ["fsg"] ,
     path: "/ads",
     name: "Ads",
     icon: "nc-icon nc-caps-small",
@@ -57,7 +66,8 @@ var routes = [
     layout: "/admin"
   },
   {
-    attributes: { hidden: true },  
+    authorize: ["fsg"] ,
+    attributes: { hidden: true },
     path: "/showad/:id",
     name: "Ad Details",
     icon: "nc-icon nc-caps-small",
@@ -65,14 +75,16 @@ var routes = [
     layout: "/admin"
   },
   {
+    authorize: ["ROLE_SELLER", 'ROLE_CUSTOMER'] ,
     path: "/newad",
     name: "New Ad",
     icon: "nc-icon nc-caps-small",
     component: Ad,
     layout: "/admin"
   },
- 
+
   {
+    authorize: ['ROLE_ADMIN'] ,
     path: "/dashboard",
     name: "Dashboard",
     icon: "nc-icon nc-bank",
@@ -80,50 +92,52 @@ var routes = [
     layout: "/admin"
   },
   {
+    authorize: ["fsg"] ,
     path: "/icons",
     name: "Icons",
     icon: "nc-icon nc-diamond",
     component: Icons,
     layout: "/admin"
   },
-  
   {
-    path: "/notifications",
-    name: "Notifications",
-    icon: "nc-icon nc-bell-55",
-    component: Notifications,
-    layout: "/admin"
-  },
-  {
-    path: "/user-page",
-    name: "User Profile",
-    icon: "nc-icon nc-single-02",
-    component: UserPage,
-    layout: "/admin"
-  },
-  
-  {
-    
+    authorize: ["ROLE_SELLER", 'ROLE_CUSTOMER'] ,
     path: '/ad',
     name: "Advertisement",
     icon: "nc-icon nc-tile-56",
     component: UserPage,
-    
+
   },
   {
-    
+    authorize: ['ROLE_CUSTOMER'] ,
     path: '/basket',
-    name: "Your basket",    
+    name: "Your basket",
     component: Basket,
-    
+
   },
   {
-    
+    authorize: ["ROLE_SELLER", 'ROLE_CUSTOMER'] ,
     path: '/requests',
-    name: "Requests",    
+    name: "Requests",
     component: Requests,
-    
+
   },
-  
+  {
+    authorize: ["fsg"] ,
+    path: '/comments',
+    name: "Comments",
+    component: CommentRequests,
+  },
+  {
+    authorize: ['ROLE_CUSTOMER'] ,
+    path: "/orders",
+    name: "Orders",    
+    component: Orders,    
+},
+  {
+    authorize: ['fgs'] ,
+    path: "/messages",
+    name: "Messages",
+    component: Messages,
+  },
 ];
 export default routes;

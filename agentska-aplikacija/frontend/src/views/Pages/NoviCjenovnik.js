@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import axios from 'axios';
 import { RoleAwareComponent } from 'react-router-role-authorization';
 import {NotificationContainer, NotificationManager} from 'react-notifications';
@@ -59,11 +59,11 @@ class NoviCjenovnik extends RoleAwareComponent {
     this.editPricelist = this.editPricelist.bind(this);
     this.deletePricelist = this.deletePricelist.bind(this);
 
-    let arr = new Array();
+    let arr = [];
     arr.push(localStorage.getItem('role'));
     console.log("KONS",arr);
     this.userRoles = arr;
-    this.allowedRoles = ['ROLE_ADMIN'];
+    this.allowedRoles = ['ROLE_SELLER'];
 
   }
 
@@ -199,7 +199,6 @@ edit(e){
       'discount30': this.state.editPopust30,
       'exceedMileage': this.state.editExceed,
     }
-    let id = this.state.editId;
     let token = localStorage.getItem("ulogovan")
     let AuthStr = 'Bearer '.concat(token);
     axios({
@@ -274,7 +273,7 @@ reset(){
 }
 
 resetEdit(){
-  this.setState({hideEdit:true, editCijenaPoDanu:"", editPopust20:"", editPopust30:"", editPopustZaDC:"", editText30:"", ediTextEx:"", editText20:"", editTextDC:"", editTextDay: "", ediTextEx: ""})
+  this.setState({hideEdit:true, editCijenaPoDanu:"", editPopust20:"", editPopust30:"", editPopustZaDC:"", editText30:"", ediTextEx:"", editText20:"", editTextDC:"", editTextDay: ""})
 }
 
 exceedValidation(c) {
@@ -370,7 +369,7 @@ deletePricelist(id,e){
     url: url+ 'pricelist/' + id,
     headers: { "Authorization": AuthStr },  
   }).then((response) => {
-    let temp = this.state.pricelists.filter(item=>item.id!=id)
+    let temp = this.state.pricelists.filter(item=>item.id!==id)
     this.setState({pricelists:temp})
       this.reset();
       NotificationManager.success("Successfully deleted!", '', 3000);     

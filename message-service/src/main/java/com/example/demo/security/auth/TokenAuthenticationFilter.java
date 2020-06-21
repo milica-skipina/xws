@@ -1,54 +1,61 @@
 package com.example.demo.security.auth;
 
 import com.example.demo.security.TokenUtils;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-//Filter koji ce presretati svaki zahtev klijenta ka serveru
-//Sem nad putanjama navedenim u WebSecurityConfig.configure(WebSecurity web)
-public class TokenAuthenticationFilter extends OncePerRequestFilter {
+
+public class TokenAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private TokenUtils tokenUtils;
 
-    private UserDetailsService userDetailsService;
+    public TokenAuthenticationFilter() {
+        this.tokenUtils = new TokenUtils();
+    }
 
-    public TokenAuthenticationFilter(TokenUtils tokenHelper, UserDetailsService userDetailsService) {
+    public TokenAuthenticationFilter(TokenUtils tokenHelper) {
         this.tokenUtils = tokenHelper;
-        this.userDetailsService = userDetailsService;
     }
 
     @Override
-    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
-        String username;
-        String authToken = tokenUtils.getToken(request);
+        String token = ((HttpServletRequest) request).getHeader("Data");
+        if (token == null || token.equals("")) {
+            System.out.println("JEBEM TI SUPU, TOKEN JE NULL");
+            return ;
+        }
+        //String token = tokenUtils.getToken((HttpServletRequest) request);
+        ArrayList<String> authorities = tokenUtils.getAllAuthorities(token);
+        String username = tokenUtils.getUsernameFromToken(token);
 
-        if (authToken != null) {
-            // uzmi username iz tokena
-            username = tokenUtils.getUsernameFromToken(authToken);
+        if (authorities != null) {
+            Set<SimpleGrantedAuthority> auth = new HashSet<>();
 
-            if (username != null) {
-                // uzmi user-a na osnovu username-a
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-                // proveri da li je prosledjeni token validan
-                if (tokenUtils.validateToken(authToken, userDetails)) {
-                    // kreiraj autentifikaciju
-                    com.example.demo.security.auth.TokenBasedAuthentication authentication = new com.example.demo.security.auth.TokenBasedAuthentication(userDetails);
-                    authentication.setToken(authToken);
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
+            for (String a : authorities) {
+                auth.add(new SimpleGrantedAuthority(a));
             }
+
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, null, auth);
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails((HttpServletRequest) request));
+            SecurityContextHolder.getContext().setAuthentication(authToken);
         }
 
-        // prosledi request dalje u sledeci filter
         chain.doFilter(request, response);
     }
 

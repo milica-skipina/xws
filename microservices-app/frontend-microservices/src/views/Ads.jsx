@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { MDBCard, MDBCardTitle, MDBBtn, MDBCardGroup, MDBCardText, MDBCardBody } from "mdbreact";
+import { MDBCard, MDBCardTitle} from "mdbreact";
 import {  Row, Col, Card, CardHeader, CardBody, FormGroup, Label, Input, Modal, Form, InputGroup, InputGroupAddon,
   InputGroupText, Button, Collapse, FormText, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, 
   ListGroup, ListGroupItem} from "reactstrap";
 import axios from 'axios';
 import {NotificationContainer, NotificationManager} from 'react-notifications';
+import StarRatings from 'react-star-ratings';
 
 import Slider, { Range, createSliderWithTooltip } from 'rc-slider';
 // We can just import Slider or Range to reduce bundle size
@@ -34,7 +35,6 @@ class Ads extends Component {
       endDate: '',
       startTime: '',
       endTime: '',
-      codebook: [],
       adsSearch: [],
       adsFiltered: [],
       startDateError: '',
@@ -67,7 +67,19 @@ class Ads extends Component {
       endDateDisable: "",
       showModal: false,
       agentUsername: "",
+      shouldRegister: false,
+      customers: [] ,
+      hideRegModal: true ,
+      manualCustomerUsername: "" ,
+      manualCustomerEmail: "" ,
+      manualCustomerName: "" ,
+      manualCustomerSurname: "" ,
+      manualCustomerEmailMessage: "" ,
+      manualCustomerTextMessage: "" ,
+      formErrorText: "" ,
+      manualId: 0
     };
+
     this.saznajVise = this.saznajVise.bind(this);
     this.toggleAccordion = this.toggleAccordion.bind(this);
     this.startDateValidation = this.startDateValidation.bind(this);
@@ -85,6 +97,10 @@ class Ads extends Component {
     this.startDateValidationModal = this.startDateValidationModal.bind(this);
     this.endDateValidationModal = this.endDateValidationModal.bind(this);
     this.manualRequest = this.manualRequest.bind(this);
+    this.fillCustomers = this.fillCustomers.bind(this);
+    this.CustomerEmailValidation = this.CustomerEmailValidation.bind(this);
+    this.CustomerNameValidation = this.CustomerNameValidation.bind(this);
+    this.validateFields = this.validateFields.bind(this);
   }
 
   componentDidMount() {
@@ -113,22 +129,109 @@ class Ads extends Component {
     this.getCodebook();
   }
 
+  fillCustomers = AuthStr => {
+    axios({
+      method: 'get',
+      url: url + 'authpoint/user/customers',
+      headers: { "Authorization": AuthStr } ,       
+    }).then((response) => {
+      if (response.status !== 404)
+        this.setState({ customers: response.data });
+    }, (error) => {
+      console.log(error);
+    });
+  }
+
 
   manualRequest = event => {
+    event.preventDefault();
+    
+    if (this.validateFields()) {
+      let token = localStorage.getItem("ulogovan")
+    let AuthStr = 'Bearer '.concat(token);
     let ok = true;
-    ok = this.startDateValidationModal();
-    ok = this.endDateValidationModal() && ok;
+    ok = this.startDateValidationModal;
+    ok = this.endDateValidationModal && ok;
+    let start = this.state.manualStartDate;
+    let end = this.state.manualEndDate;
+    let carId = this.state.manualId;
+    let manualCustomerName = this.state.manualCustomerName;
+    let manualCustomerEmail = this.state.manualCustomerEmail;
+    let manualCustomerSurname = this.state.manualCustomerSurname;
+    let manualCustomerUsername = this.state.manualCustomerUsername;
+    let shouldRegister = this.state.shouldRegister;   // da li dodati novog customera
+    let array = [];
+    array.push(shouldRegister);
+    array.push(manualCustomerName);
+    array.push(manualCustomerEmail);
+    array.push(manualCustomerSurname);
+    array.push(manualCustomerUsername);
+    
     if(ok){
       console.log("ok");
-
-      this.setState({startDateDisable:"", endDateDisable:"", manualEndDate:"", manualEndDate:""});
+      axios({
+        method: 'post',
+        url: url + 'orders/request/' + carId +'/' + start + '/' + end ,
+        headers: { "Authorization": AuthStr } , 
+        data: array,     
+      }).then((response) => {
+        if (response.data) {
+          NotificationManager.success("Manual reservation successful!", '', 3000);
+        } else {
+          NotificationManager.error("These days are already booked. Try to change dates.", '', 3000);
+        }
+        this.clearAll();
+      }, (error) => {
+        console.log(error);
+      });
+      this.setState({startDateDisable:"", endDateDisable:"", manualStartDate:"", manualEndDate:"",
+                     showModal: false});
     }
     else{
       console.log("false")
+    }      
+    } else {
+      NotificationManager.error("All fields are required", '', 3000);
+    }
+    
+  }
+
+  CustomerEmailValidation = (event) => {
+    const regex = /\S+@\S+\.\S+/;
+     if ( !regex.test(event.target.value) )   //email not appropriate
+     {
+        this.setState({formValid: true, CustomerEmailMessage: "Expected input: local@domain."})
+     } else {
+      this.setState({formValid: false, CustomerEmailMessage: ""})
+     }
+  }
+
+  CustomerNameValidation = (event) => {
+    const regex = /[a-zA-Z]+/;
+     if ( !regex.test(event.target.value) )   //email not appropriate
+     {
+        this.setState({formValid: true, manualCustomerTextMessage: "Only letters allowed"})
+     } else {
+      this.setState({formValid: false, manualCustomerTextMessage: ""})
+     }
+  }
+
+  validateFields = (event) => {
+    if (this.state.shouldRegister && (this.state.manualCustomerEmail === "" || this.state.manualCustomerName === "" || 
+        this.state.manualCustomerSurname === "" || this.state.manualCustomerUsername === "") )
+    {
+      this.setState({formErrorText: "All fields are required."});
+      return false;
+    }else {
+      this.setState({formErrorText: ""});
+      return true;
     }
   }
 
   openModal(oglas) {
+    let token = localStorage.getItem("ulogovan")
+    let AuthStr = 'Bearer '.concat(token);
+    this.fillCustomers(AuthStr);
     let date = new Date(oglas.startDate);
     let month = date.getMonth() + 1;
     let pom = date.getDate();
@@ -151,7 +254,7 @@ class Ads extends Component {
       pom = '0'+date.getDate();
     }
     ret = date.getFullYear() + '-' + month + '-' + pom;
-    this.setState({manualEndDate:ret});
+    this.setState({manualEndDate:ret, manualId: oglas.carAd.id});
     this.setState({endDateDisable:ret});
     this.setState({showModal:true});
   }
@@ -426,8 +529,15 @@ if (godina < year) {
     ok = this.startTimeValidation(this.state.startTime) && ok;
     ok = this.endTimeValidation(this.state.endTime) && ok;
     ok = this.cityValidation(this.state.city) && ok;
-    if (ok) {
-      let startDate = new Date(this.state.startDate);
+    if (ok) {   // pre pretrage proveri da li se u medjuvremenu promenila dostupnost oglasa
+      let token = localStorage.getItem("ulogovan")
+      let AuthStr = 'Bearer '.concat(token);
+      axios({
+        method: 'post',
+        url: url + 'orders/request/available',
+        headers: { "Authorization": AuthStr } ,   
+      }).then((response) => {
+        let startDate = new Date(this.state.startDate);
       let startTime = this.state.startTime.split(':');
       startDate.setHours(startTime[0], startTime[1], 0, 0);
       startDate = startDate.getTime();
@@ -438,8 +548,7 @@ if (godina < year) {
       endDate = endDate.getTime();
       localStorage.setItem('end', endDate)
       let city = this.state.city;
-      let token = localStorage.getItem("ulogovan")
-      let AuthStr = 'Bearer '.concat(token);
+      
       axios({
         method: 'get',
         url: url + '/advertisement/advertisement/search',
@@ -474,6 +583,10 @@ if (godina < year) {
       }, (error) => {
         console.log(error);
       });
+      }, (error) => {
+        console.log(error);
+      });
+
     }
   }
 
@@ -501,7 +614,7 @@ if (godina < year) {
       temp = temp.filter(item => item.carAd.mileageLimit <= this.state.selectedMileageLimit);
     }
     else {
-      temp = temp.filter(item => item.carAd.mileageLimit == -1);
+      temp = temp.filter(item => item.carAd.mileageLimit === -1);
     }
     if (this.state.damageWaiver) {
       temp = temp.filter(item => item.carAd.insurance);
@@ -513,7 +626,7 @@ if (godina < year) {
       temp.sort(function(a,b){return a.carAd.mileage - b.carAd.mileage})
     }
     else if(this.state.selectedSort === "Rating"){
-      temp.sort(function(a,b){return a.carAd.raiting - b.carAd.raiting})
+      temp.sort(function(a,b){return b.carAd.raiting - a.carAd.raiting})
     }
     this.setState({ adsFiltered: temp });
     this.toggle();
@@ -522,7 +635,16 @@ if (godina < year) {
   clearAll = () => {
     this.setState({
       selectedCodes: [[], [], [], [], []], selectedPrice: [0, this.state.maxPrice], damageWaiver: false, selectedSort:"Price",
-      selectedKids: 0, selectedMileage: this.state.maxMileage, unlimitedMileage: false, selectedMileageLimit: this.state.maxMileageLimit
+      selectedKids: 0, selectedMileage: this.state.maxMileage, unlimitedMileage: false, selectedMileageLimit: this.state.maxMileageLimit,
+      shouldRegister: false, customers: [] ,
+      hideRegModal: true ,
+      manualCustomerUsername: "" ,
+      manualCustomerEmail: "" ,
+      manualCustomerName: "" ,
+      manualCustomerSurname: "" ,
+      manualCustomerEmailMessage: "" ,
+      manualCustomerTextMessage: "" ,
+      formErrorText: "" 
     })
   }
 
@@ -531,7 +653,7 @@ if (godina < year) {
     let AuthStr = 'Bearer '.concat(token);
     let dodaj = true;
       axios({
-        method: 'get',
+        method: 'post',
         url: url + 'orders/request/' + id,    // provera da li je taj oglas vec rezervisan
         headers: { "Authorization": AuthStr } ,       
       }).then((response) => {
@@ -541,7 +663,7 @@ if (godina < year) {
         } else {
           let array = JSON.parse(sessionStorage.getItem('basket')) || [] ;
           for (let i = 0 ; i < array.length ; i++) {
-            if (array[i] == id) {
+            if (array[i] === id) {
               NotificationManager.error("Item already in basket!", '', 3000);
               dodaj=false;
               break;
@@ -553,6 +675,7 @@ if (godina < year) {
             console.log(array);
             sessionStorage.setItem('basket', JSON.stringify(array));   
             NotificationManager.success("Item successfully added!", '', 3000);
+           
           }
           
         }
@@ -597,34 +720,87 @@ if (godina < year) {
     return (
       <div className="content">
 
-<Modal modalClassName="modal-register" isOpen={this.state.showModal}>
+<Modal className="modal-register" isOpen={this.state.showModal}>
         <div className="modal-header no-border-header text-center">
                   <button
                     aria-label="Close"
                     className="close"
                     data-dismiss="modal"
                     type="button"
-                    onClick={event => this.setState({showModal:false} )}
+                    onClick={event => this.setState({showModal:false, shouldRegister: false,                      
+                      hideRegModal: true ,
+                      manualCustomerUsername: "" ,
+                      manualCustomerEmail: "" ,
+                      manualCustomerName: "" ,
+                      manualCustomerSurname: "" ,
+                      manualCustomerEmailMessage: "" ,
+                      manualCustomerTextMessage: "" ,
+                      formErrorText: "" } )}
                   >
                   <span aria-hidden={true}>x</span>
                   </button>
                   </div>
-                  <div className="modal-body">     
+                  <div className="modal-body size-md-24">     
             <Form onSubmit={this.manualRequest}>
-                  <FormGroup>
-                  <Label>Od:</Label>
-                  <Input type="date" className="form-control" value={this.state.manualStartDate}  onChange={(event) => this.startDateValidationModal(event.target.value)}/>
-                  <p style={{color:'red'}} > {this.state.textStartManualValidation} </p>
+                  <Row form>
+                    <Col md="6">
+                    <FormGroup>
+                      <Label>From:</Label>
+                      <Input type="date" className="form-control" value={this.state.manualStartDate}  onChange={(event) => this.startDateValidationModal(event.target.value)}/>
+                      <p style={{color:'red'}} > {this.state.textStartManualValidation} </p>
+                    </FormGroup>
+                    </Col>
+                    <Col md="6">
+                    <FormGroup>
+                      <Label>Until:</Label>
+                      <Input type="date" className="form-control" value={this.state.manualEndDate}  onChange={(event) => this.endDateValidationModal(event.target.value)}/>
+                      <p style={{color:'red'}} > {this.state.textEndManualValidation} </p>
+                    </FormGroup> 
+                    </Col>
+                  </Row>
+                  <FormGroup hidden={!this.state.hideRegModal}>
+                        <Label>Choose customer:</Label>
+                        <Input type="select"  name="customers" onChange={(event) => this.setState({manualCustomerUsername: event.target.value})}>
+                          {(this.state.customers.map((customer) => <option key={customer} value={customer} > {customer}</option>))}
+                        </Input>   
+                  </FormGroup> 
+                  <FormGroup hidden={this.state.hideRegModal}>
+                  <Label>Username:</Label>
+                  <Input type="text" className="form-control" value={this.state.manualCustomerUsername}  onChange={(event) => this.setState({manualCustomerUsername: event.target.value})}/>
+                  
                   </FormGroup>
-                  <FormGroup>
-                  <Label>Do:</Label>
-                  <Input type="date" className="form-control" value={this.state.manualEndDate}  onChange={(event) => this.endDateValidationModal(event.target.value)}/>
-                  <p style={{color:'red'}} > {this.state.textEndManualValidation} </p>
+                  <FormGroup hidden={this.state.hideRegModal}>
+                  <Label>Email:</Label>
+                  <Input type="text" className="form-control" value={this.state.manualCustomerEmail}  onChange={(event) => this.setState({manualCustomerEmail: event.target.value})}
+                         onBlur={this.CustomerEmailValidation}/>
+                  <p style={{color:'red'}} > {this.state.CustomerEmailMessage} </p>
                   </FormGroup>
-                  <Button block className="btn-round" color="info">
-                    Potvrdi
+                  <Row form hidden={this.state.hideRegModal}>
+                      <Col md="6">
+                        <FormGroup>
+                          <Label>Name:</Label>
+                          <Input type="text" className="form-control" value={this.state.manualCustomerName}  onChange={(event) => this.setState({manualCustomerName: event.target.value})}
+                                 onBlur={this.CustomerNameValidation}/>
+                          <p style={{color:'red'}} > {this.state.manualCustomerTextMessage} </p>
+                        </FormGroup>
+                      </Col>
+                      <Col md="6">
+                        <FormGroup >
+                            <Label>Surname:</Label>
+                            <Input type="text" className="form-control" value={this.state.manualCustomerSurname}  onChange={(event) => this.setState({manualCustomerSurname: event.target.value})}
+                                   onBlur={this.CustomerNameValidation}/>
+                            <p style={{color:'red'}} > {this.state.manualCustomerTextMessage} </p>
+                          </FormGroup>
+                      </Col>
+                  </Row>                  
+                    <Button block color="link" onClick={event => this.setState({hideRegModal: !this.state.hideRegModal, shouldRegister: !this.state.shouldRegister})} >
+                    Customer not found? Register him.
+                  </Button>                
+                  <Button block className="btn-round" color="info" >
+                    Confirm
                   </Button>
-              </Form>         
+              </Form>    
+              <p style={{color:'red'}} > {this.state.formErrorText} </p>     
             </div>
         </Modal>
 
@@ -632,7 +808,7 @@ if (godina < year) {
           <Col xs="12" md="12" sm="12">
             <Card>
               <CardHeader>
-                <Button block color="link" className="text-center m-0 p-0" onClick={() => this.toggleAccordion(0)} aria-expanded={this.state.accordion[0]} aria-controls="collapseOne">
+                <Button block color="info" className="text-center m-0 p-0" onClick={() => this.toggleAccordion(0)} aria-expanded={this.state.accordion[0]} aria-controls="collapseOne">
                   <h5 className="m-0 p-0">Start your search here</h5>
                 </Button>              </CardHeader>
               <Collapse isOpen={this.state.accordion[0]} data-parent="#accordion" id="collapseOne" aria-labelledby="headingOne">
@@ -729,12 +905,20 @@ if (godina < year) {
         <section className="bar pt-0" hidden={this.state.hideAll}>
               <div className="row">
                 {this.state.oglasi.map(oglas => (
-                  <MDBCard style={{ width: "20rem", textAlign: "left", alignItems: "center", margin: 9 }} key={oglas.id} data-key={oglas.id}>
-                      <div style={{ width: "19rem", height: "13rem" }}>
-                        <img style={{ maxWidth: "19rem", maxHeight: "12rem", textAlign: "center", alignItems: "center", margin: 5 }} src={oglas.carAd.images[0].imageUrl} alt="Fotografija" top hover
+                  <MDBCard style={{ width: "18rem", textAlign: "left", alignItems: "center", margin: 9 }} key={oglas.id} data-key={oglas.id}>
+                      <div style={{ width: "17rem", height: "13rem" }}>
+                        <img style={{ maxWidth: "17rem", maxHeight: "12rem", textAlign: "center", alignItems: "center", margin: 5 }} src={oglas.carAd.images[0].imageUrl} alt="Fotografija" top hover
                           overlay="white-slight" />
                       </div>
                       <div>
+                      <StarRatings style={{ justifyContent: "right" }}
+                        rating={oglas.carAd.raiting}
+                        starRatedColor="gold"
+                        numberOfStars={5}
+                        name='rating'
+                        starDimension="20px"
+                        starSpacing="5px"
+                      />
                         <h4 style={{ textAlign: "center" }} className="text-primary font-weight-bold">{oglas.carAd.model} {oglas.carAd.make}</h4>
                         <MDBCardTitle tag="h6"> Pick up location: {oglas.city} </MDBCardTitle>
                     <MDBCardTitle tag="h6"> Start date: {this.getDateString(oglas.startDate)}  </MDBCardTitle>
@@ -744,10 +928,12 @@ if (godina < year) {
                         <Button color="primary" size="md" onClick={(e) => this.saznajVise(oglas.id)}>
                           Details
                     </Button>
-                    {localStorage.getItem('name') === oglas.name && <Button color="warning" size="md" onClick={(e) => this.openModal(oglas)}> {}
+                    {localStorage.getItem('name') === oglas.name && <Button color="success" size="md" onClick={(e) => this.openModal(oglas)}> {}
                      Reserve
                     </Button>}
-                    {localStorage.getItem('role') === "ROLE_CUSTOMER" && <Button color="warning" size="md" onClick={(e) => this.addToBasket(oglas.id)}> {/*hidden={this.state.hideBasket}*/}
+
+                    {localStorage.getItem('name') !== oglas.name  && <Button color="warning" size="md" hidden={this.state.hideBasket} onClick={(e) => this.addToBasket(oglas.id)}> {/**/}
+
                       Add to basket
                     </Button>}
                       </div>
@@ -764,7 +950,7 @@ if (godina < year) {
                 <Button color="link" className="text-right m-0 p-0" onClick={() => this.setState({ hideSearch: false })}>
                   <h6 className="m-0 p-0">Change search <i className="fa fa-search"></i></h6>
                 </Button>
-                <Button style={{marginLeft:"1rem"}} type="button" color="danger" onClick={(e) => this.setState({ adsSearch: this.state.oglasi, adsFiltered: this.state.oglasi, hideSearch: false })}>Reset</Button>
+                <Button style={{marginLeft:"1rem"}} type="button" color="danger" onClick={(e) => this.setState({ adsSearch: this.state.oglasi, adsFiltered: this.state.oglasi, hideSearch: false, hideBasket: true })}>Reset</Button>
               </Col>
             </Row>
             <Row style={{ flex: 1, flexDirection: "column" }}>
@@ -885,6 +1071,14 @@ if (godina < year) {
                             overlay="white-slight" />
                         </div>
                         <div>
+                        <StarRatings style={{ justifyContent: "right" }}
+                        rating={oglas.carAd.raiting}
+                        starRatedColor="gold"
+                        numberOfStars={5}
+                        name='rating'
+                        starDimension="20px"
+                        starSpacing="5px"
+                      />
                           <h4 style={{ textAlign: "center" }} className="text-primary font-weight-bold">{oglas.carAd.model} {oglas.carAd.make}</h4>
                           <Row>
                             <Col>

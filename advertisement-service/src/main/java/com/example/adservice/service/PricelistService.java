@@ -35,7 +35,7 @@ public class PricelistService {
         return  true;
     }
 
-    public boolean addPricelist(PricelistDTO p){
+    public Pricelist addPricelist(PricelistDTO p, String username){
         Pricelist pricelist = new Pricelist();
         if(validatePricelist(p)){
             pricelist.setPriceDay(p.getPriceDay());
@@ -44,11 +44,12 @@ public class PricelistService {
             pricelist.setDiscount30(p.getDiscount30());
             pricelist.setExceedMileage(p.getExceedMileage());
             pricelist.setDeleted(false);
+            pricelist.setUsername(username);
             pricelistRepository.save(pricelist);
-            return true;
+            return pricelist;
         }
         else{
-            return false;
+            return null;
         }
     }
 
@@ -84,15 +85,20 @@ public class PricelistService {
         return new PricelistDTO(p);
     }
 
-    public PricelistDTO editPricelist(PricelistDTO p, Long id){
+    public PricelistDTO editPricelist(PricelistDTO p, Long id, String username){
         if(validatePricelist(p)) {
             Pricelist current = pricelistRepository.findOneById(id);
-            current.setDiscount30(p.getDiscount30());
-            current.setDiscount20(p.getDiscount20());
-            current.setPriceDay(p.getPriceDay());
-            current.setCollisionDW(p.getCollisionDW());
-            current.setExceedMileage(p.getExceedMileage());
-            return new PricelistDTO(pricelistRepository.save(current));
+            if(current.getUsername().equals(username)){
+                current.setDiscount30(p.getDiscount30());
+                current.setDiscount20(p.getDiscount20());
+                current.setPriceDay(p.getPriceDay());
+                current.setCollisionDW(p.getCollisionDW());
+                current.setExceedMileage(p.getExceedMileage());
+                return new PricelistDTO(pricelistRepository.save(current));
+            }
+           else {
+               return null;
+            }
         }
         else{
             return null;

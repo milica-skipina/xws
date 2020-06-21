@@ -302,7 +302,7 @@ class Basket extends RoleAwareComponent {
                 <NotificationContainer/>
     </div>);
 
-    return ret; {/*this.rolesMatched() ?: <Redirect to="/oglasi" />*/};
+    return this.rolesMatched() ? ret : <Redirect to="/ads" />;
   }
 }
 

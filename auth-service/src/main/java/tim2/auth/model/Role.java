@@ -21,10 +21,13 @@ public class Role implements GrantedAuthority {
     @Column(name = "name")
     String name;        // role
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "roles_privileges", joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "privilege_id", referencedColumnName = "id"))
     private Set<Privilege> privileges;
+
+    @ManyToMany(mappedBy = "authorities" , fetch = FetchType.LAZY)
+    private Set<User> users;
 
     @Override
     public String getAuthority() {

@@ -31,7 +31,7 @@ public class CodebookService {
                 || cb.getName() == null || cb.getName().equals("")) {
             return false;
         }
-        if (codebookRepository.findOneByNameAndCodeTypeAndDeleted(cb.getName(), cb.getCodeType(), false) != null) {
+        if (codebookRepository.findOneByNameAndCodeTypeAndDeletedAndCode(cb.getName(), cb.getCodeType(), false, cb.getCode()) != null) {
             return false;
         }
         RegularExpressions regularExpressions = new RegularExpressions();

@@ -253,7 +253,6 @@ services:
     depends_on: 
       - postgres_agent
 
-
   postgres_agent:
     image: postgres
     container_name: postgres_agent
@@ -268,11 +267,6 @@ services:
       POSTGRES_DB: agent_back
     volumes:
       - postgres_agent-data:/var/lib/postgres_agent
-
-networks:
-  microservices:
-    name: microservices
-    driver: bridge
 
 volumes:
   postgres-data:

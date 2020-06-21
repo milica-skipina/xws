@@ -17,7 +17,7 @@ public class Advertisement {
     private Long id;
 
     @JsonBackReference(value = "advertisementcar_mov")
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Car carAd;
 
     @Column(name = "start_date", nullable = false)
@@ -36,11 +36,8 @@ public class Advertisement {
     private boolean request;
 
     @JsonBackReference(value = "pricelist_mov")
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Pricelist pricelist;
-
-    @OneToMany(mappedBy = "advertisement", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<Review> reviews = new HashSet<Review>();
 
     @Column(name = "city", nullable = false)
     private String city;
@@ -48,6 +45,14 @@ public class Advertisement {
     @Column(name = "deleted", nullable = false)
     private boolean deleted;
 
+    public Advertisement(rs.ac.uns.ftn.xws_tim2.Advertisement advertisement) {
+        //this.carAd = new P;
+        this.startDate = advertisement.getStartDate().toGregorianCalendar().getTime();
+        this.endDate = advertisement.getEndDate().toGregorianCalendar().getTime();
+        this.entrepreneurName = advertisement.getEntrepreneurName();
+        this.city = advertisement.getCity();
+        this.deleted = advertisement.isDeleted();
+    }
     public String getCity() {
         return city;
     }
@@ -60,13 +65,12 @@ public class Advertisement {
     public Advertisement() {
     }
 
-    public Advertisement(Car car, Date startDate, Date endDate, String entrepreneurName, Pricelist pricelist, Set<Review> reviews, String city, boolean request) {
+    public Advertisement(Car car, Date startDate, Date endDate, String entrepreneurName, Pricelist pricelist, String city, boolean request) {
         this.carAd = car;
         this.startDate = startDate;
         this.endDate = endDate;
         this.entrepreneurName = entrepreneurName;
         this.pricelist = pricelist;
-        this.reviews = reviews;
         this.city = city;
         this.request = request;
     }
@@ -116,14 +120,6 @@ public class Advertisement {
 
     public void setPricelist(Pricelist pricelist) {
         this.pricelist = pricelist;
-    }
-
-    public Set<Review> getReviews() {
-        return reviews;
-    }
-
-    public void setReviews(Set<Review> reviews) {
-        this.reviews = reviews;
     }
 
     public boolean isDeleted() {

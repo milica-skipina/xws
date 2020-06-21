@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="xws_tim2">
+
+  <xs:import namespace="xws_tim2" schemaLocation="image.xsd"/>
+
+  <xs:element name="image" type="ns1:imageDTO"/>
+
+
+  <xs:complexType name="car">
+    <xs:sequence>
+      <xs:element name="carAdvertisement" type="advertisement" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="carClass" type="codebook" minOccurs="0"/>
+      <xs:element name="entrepreneurUsername" type="xs:string" minOccurs="0"/>
+      <xs:element name="following" type="xs:boolean"/>
+      <xs:element name="fuel" type="codebook" minOccurs="0"/>
+      <xs:element name="gearbox" type="codebook" minOccurs="0"/>
+      <xs:element name="id" type="xs:long" minOccurs="0"/>
+      <xs:element name="images" type="image" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="insurance" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="kidsSeats" type="xs:int" minOccurs="0"/>
+      <xs:element name="make" type="codebook" minOccurs="0"/>
+      <xs:element name="mileage" type="xs:double" minOccurs="0"/>
+      <xs:element name="mileageLimit" type="xs:double" minOccurs="0"/>
+      <xs:element name="model" type="codebook" minOccurs="0"/>
+      <xs:element name="raiting" type="xs:double" minOccurs="0"/>
+      <xs:element name="reviews" type="review" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="state" type="xs:string" minOccurs="0"/>
+      <xs:element name="trackingToken" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="advertisement">
+    <xs:sequence>
+      <xs:element name="carAd" type="car" minOccurs="0"/>
+      <xs:element name="city" type="xs:string" minOccurs="0"/>
+      <xs:element name="deleted" type="xs:boolean"/>
+      <xs:element name="endDate" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="entrepreneurName" type="xs:string" minOccurs="0"/>
+      <xs:element name="entrepreneurUsername" type="xs:string" minOccurs="0"/>
+      <xs:element name="id" type="xs:long" minOccurs="0"/>
+      <xs:element name="pricelist" type="pricelist" minOccurs="0"/>
+      <xs:element name="request" type="xs:boolean"/>
+      <xs:element name="startDate" type="xs:dateTime" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="pricelist">
+    <xs:sequence>
+      <xs:element name="collisionDW" type="xs:double" minOccurs="0"/>
+      <xs:element name="deleted" type="xs:boolean"/>
+      <xs:element name="discount20" type="xs:double" minOccurs="0"/>
+      <xs:element name="discount30" type="xs:double" minOccurs="0"/>
+      <xs:element name="exceedMileage" type="xs:double" minOccurs="0"/>
+      <xs:element name="id" type="xs:long" minOccurs="0"/>
+      <xs:element name="priceDay" type="xs:double" minOccurs="0"/>
+      <xs:element name="pricelistAd" type="advertisement" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="microId" type="xs:long" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="codebook">
+    <xs:sequence>
+      <xs:element name="code" type="xs:string" minOccurs="0"/>
+      <xs:element name="codeType" type="xs:string" minOccurs="0"/>
+      <xs:element name="deleted" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="id" type="xs:long" minOccurs="0"/>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="image">
+    <xs:sequence>
+      <xs:element name="id" type="xs:long" minOccurs="0"/>
+      <xs:element name="imageUrl" type="xs:string" minOccurs="0"/>
+      <xs:element name="owner" type="car" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="review">
+    <xs:sequence>
+      <xs:element name="car" type="car" minOccurs="0"/>
+      <xs:element name="date" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="evaluation" type="xs:int"/>
+      <xs:element name="id" type="xs:long" minOccurs="0"/>
+      <xs:element name="state" type="xs:string" minOccurs="0"/>
+      <xs:element name="text" type="xs:string" minOccurs="0"/>
+      <xs:element name="username" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+

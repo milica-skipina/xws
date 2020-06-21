@@ -1,6 +1,10 @@
 package com.example.adservice.dto;
 
 import com.example.adservice.model.Car;
+import com.example.adservice.model.Image;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CarOrderDTO {
     private String make;
@@ -14,12 +18,14 @@ public class CarOrderDTO {
     private String state;
     private String gearbox;
     private String entrepreneurUsername;
+    private String entrepreneurName;
+    private String image;
 
     public CarOrderDTO() {
     }
 
     public CarOrderDTO(String make, String model, String fuel, String carClass, Boolean insurance,
-                  Double mileage, Double mileageLimit, Double raiting, String state) {
+                  Double mileage, Double mileageLimit, Double raiting, String state, String image) {
         this.make = make;
         this.model = model;
         this.fuel = fuel;
@@ -29,6 +35,7 @@ public class CarOrderDTO {
         this.mileageLimit = mileageLimit;
         this.raiting = raiting;
         this.state = state;
+        this.image = image;
     }
 
     public CarOrderDTO(Car c) {
@@ -43,6 +50,10 @@ public class CarOrderDTO {
         this.state = c.getState();
         this.gearbox = c.getGearbox().getName();
         this.entrepreneurUsername = c.getEntrepreneurUsername();
+
+        List<Image> images = new ArrayList<>();
+        images.addAll(c.getImages());
+        this.image = images.get(0).getImageUrl();
     }
 
     public String getMake() {
@@ -131,5 +142,21 @@ public class CarOrderDTO {
 
     public void setEntrepreneurUsername(String entrepreneurUsername) {
         this.entrepreneurUsername = entrepreneurUsername;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getEntrepreneurName() {
+        return entrepreneurName;
+    }
+
+    public void setEntrepreneurName(String entrepreneurName) {
+        this.entrepreneurName = entrepreneurName;
     }
 }

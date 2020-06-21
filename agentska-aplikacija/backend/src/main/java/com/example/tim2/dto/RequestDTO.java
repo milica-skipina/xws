@@ -2,7 +2,6 @@ package com.example.tim2.dto;
 
 import com.example.tim2.model.Request;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,18 +11,22 @@ public class RequestDTO {
     private String state;
     private Date startDate;
     private Date endDate;
-    private Long userId;
-    private Long agentId;
+    private String userName;
+    private String agentName;
     private Set<MiniCarDTO> cars;
+    private String userUsername;
+    private String agentUsername;
 
-    public RequestDTO(Long id, String state, Date startDate, Date endDate, Long userId, Long agentId, Set<MiniCarDTO> cars) {
+    public RequestDTO(Long id, String state, Date startDate, Date endDate, String userName, String agentName, Set<MiniCarDTO> cars,String userUsername,String agentUsername) {
         this.id = id;
         this.state = state;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.userId = userId;
-        this.agentId = agentId;
+        this.userName = userName;
+        this.agentName = agentName;
         this.cars = cars;
+        this.userUsername = userUsername;
+        this.agentUsername = agentUsername;
     }
 
     public RequestDTO(Request r) {
@@ -31,9 +34,11 @@ public class RequestDTO {
         this.state = r.getState();
         this.startDate = r.getStartDate();
         this.endDate = r.getEndDate();
-        this.userId = r.getUser().getId();
-        this.agentId = r.getSender().getId();
+        this.userName = r.getUser().getUsername();
+        this.agentName = r.getSender().getCompanyName();
         this.cars = new HashSet<>();
+        this.agentUsername = r.getEntrepreneur().getUser().getUsername();
+        this.userUsername = r.getUser().getUsername();
     }
 
     public RequestDTO() {
@@ -55,27 +60,59 @@ public class RequestDTO {
         this.state = state;
     }
 
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getAgentId() {
-        return agentId;
-    }
-
-    public void setAgentId(Long agentId) {
-        this.agentId = agentId;
-    }
-
     public Set<MiniCarDTO> getCars() {
         return cars;
     }
 
     public void setCars(Set<MiniCarDTO> cars) {
         this.cars = cars;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
+    }
+
+    public String getUserUsername() {
+        return userUsername;
+    }
+
+    public void setUserUsername(String userUsername) {
+        this.userUsername = userUsername;
+    }
+
+    public String getAgentUsername() {
+        return agentUsername;
+    }
+
+    public void setAgentUsername(String agentUsername) {
+        this.agentUsername = agentUsername;
     }
 }

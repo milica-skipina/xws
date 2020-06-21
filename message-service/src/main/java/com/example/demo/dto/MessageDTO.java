@@ -1,72 +1,32 @@
 package com.example.demo.dto;
 
+import com.example.demo.model.Message;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.Date;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class MessageDTO {
     private Long id;
     private String text;
     private String subject;
     private Date timeSent;
-    private Long senderId;
-    private Long receiverId;
+    private String senderUsername;
+    private String receiverUsername;
 
-    public MessageDTO() {
+    public MessageDTO(Message message) {
+        this.id = message.getId();
+        this.text = message.getText();
+        this.subject = message.getSubject();
+        this.timeSent = message.getTimeSent();
+        this.senderUsername = message.getSenderUsername();
+        this.receiverUsername = message.getReceiverUsername();
     }
 
-    public MessageDTO(Long id, String text, String subject, Date timeSent, Long senderId, Long receiverId) {
-        this.id = id;
-        this.text = text;
-        this.subject = subject;
-        this.timeSent = timeSent;
-        this.senderId = senderId;
-        this.receiverId = receiverId;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-    public Date getTimeSent() {
-        return timeSent;
-    }
-
-    public void setTimeSent(Date timeSent) {
-        this.timeSent = timeSent;
-    }
-
-    public Long getSenderId() {
-        return senderId;
-    }
-
-    public void setSenderId(Long senderId) {
-        this.senderId = senderId;
-    }
-
-    public Long getReceiverId() {
-        return receiverId;
-    }
-
-    public void setReceiverId(Long receiverId) {
-        this.receiverId = receiverId;
-    }
 }

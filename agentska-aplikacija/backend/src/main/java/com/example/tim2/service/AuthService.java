@@ -49,6 +49,8 @@ public class AuthService implements UserDetailsService {
             user.setUsername(reg.getUsername());
             Set<Role> auth = authorityService.findByname("ROLE_CUSTOMER");
             user.setRoles(auth);
+            customer.setActivated(false);
+            customer.setFirstLogin(false);
             customer.setUser(user.escapeParameters(user));
             customerRepo.save(customer.escapeParameters(customer));
             return customer;
@@ -72,7 +74,7 @@ public class AuthService implements UserDetailsService {
         return user;
     }
 
-    public boolean acceptRequest(String token) {
+    /*public boolean acceptRequest(String token) {
         String username = tokenUtils.getUsernameFromToken(token);
         User user = (User) loadUserByUsername(username);
         if (user != null) {
@@ -80,7 +82,7 @@ public class AuthService implements UserDetailsService {
             return true;
         }
         return false;
-    }
+    }*/
 
 
     @Override
@@ -93,11 +95,32 @@ public class AuthService implements UserDetailsService {
         RegularExpressions regx = new RegularExpressions();
         return regx.isValidInput(dto.getCity()) && regx.isValidInput(dto.getName()) && regx.isValidInput(dto.getSurname())
                 && regx.isValidPassword(dto.getPassword()) && regx.isValidEmail(dto.getEmail())
-                && regx.isValidSomeName(dto.getUsername()) && regx.isValidSomeName(dto.getAddress());
+                && regx.isValidSomeName(dto.getUsername()) && regx.isValidSomeName(dto.getAddress())
+                && (dto.getUsername().length() >=6);
     }
 
     public User findOneByUsername(String username) {
        return userRepo.findOneByUsername(username);
+    }
+
+    /**
+     * data[0] - shouldRegister data[1] - customer name data[2] - email  data[3] - surname data[4] - username
+     * @param data
+     */
+    public User manualRegistration(String[] data) {
+        EndUser customer = new EndUser(data[1], data[3]);
+        User user = new User();
+        user.setPassword(passwordEncoder.encode("w7$Q.R[xB8"));
+        user.setEnabled(true);
+        user.setEmail(data[2]);
+        user.setUsername(data[4]);
+        Set<Role> auth = authorityService.findByname("ROLE_CUSTOMER");
+        user.setRoles(auth);
+        customer.setActivated(true);
+        customer.setFirstLogin(true);
+        customer.setUser(user.escapeParameters(user));
+        customerRepo.save(customer.escapeParameters(customer));
+        return user;
     }
 
 }

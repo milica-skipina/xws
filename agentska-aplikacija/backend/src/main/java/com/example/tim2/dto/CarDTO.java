@@ -28,6 +28,7 @@ public class CarDTO {
     private String state;
     private boolean following;
     private Set<Image> images = new HashSet<Image>();
+    private Long commentsNumber;
 
     public CarDTO() {
     }
@@ -182,5 +183,11 @@ public class CarDTO {
         this.images = images;
     }
 
+    public Long getCommentsNumber() {
+        return commentsNumber;
+    }
 
+    public void setCommentsNumber(Long commentsNumber) {
+        this.commentsNumber = commentsNumber;
+    }
 }

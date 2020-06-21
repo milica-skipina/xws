@@ -3,6 +3,8 @@ package com.example.tim2.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import javax.persistence.*;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
 import java.util.*;
 import java.time.LocalDate;
 
@@ -44,13 +46,16 @@ public class Advertisement {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Pricelist pricelist;
 
+    @Column
+    private Long microId;
+
 
     //slike
 
     public Advertisement() {
     }
 
-    public Advertisement(Car car, Date startDate, Date endDate, Entrepreneur entrepreneur, Pricelist pricelist, String city, boolean deleted) {
+    public Advertisement(Car car, Date startDate, Date endDate, Entrepreneur entrepreneur, Pricelist pricelist, String city, boolean deleted, Long micro) {
         this.carAd = car;
         this.startDate = startDate;
         this.endDate = endDate;    
@@ -58,6 +63,22 @@ public class Advertisement {
         this.pricelist = pricelist;
         this.city = city;
         this.deleted = deleted;
+        this.microId = micro;
+    }
+
+    public com.example.tim2.soap.gen.Advertisement getGenerated() throws DatatypeConfigurationException {
+        com.example.tim2.soap.gen.Advertisement ret =  new com.example.tim2.soap.gen.Advertisement();
+        ret.setEntrepreneurUsername(getEntrepreneur().getUser().getUsername());
+        ret.setEntrepreneurName(getEntrepreneur().getName());
+        ret.setDeleted(isDeleted());
+        ret.setCity(getCity());
+        ret.setCarAd(getCarAd().getGenerated());
+        GregorianCalendar c = new GregorianCalendar();
+        c.setTime(getEndDate());
+        ret.setEndDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
+        c.setTime(getStartDate());
+        ret.setStartDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
+        return ret;
     }
 
     public String getCity() {
@@ -134,5 +155,13 @@ public class Advertisement {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public Long getMicroId() {
+        return microId;
+    }
+
+    public void setMicroId(Long microId) {
+        this.microId = microId;
     }
 }

@@ -15,29 +15,8 @@ import java.security.NoSuchAlgorithmException;
 @EnableEurekaClient
 public class OrdersMicroserviceApplication {
 
-
-	@Bean
-	public RestTemplate getRestTemplate() {
-		return new RestTemplate();
-	}
-
 	public static void main(String[] args) {
 		SpringApplication.run(OrdersMicroserviceApplication.class, args);
 	}
-/*
-	@Bean
-	public DiscoveryClient.DiscoveryClientOptionalArgs discoveryClientOptionalArgs() throws NoSuchAlgorithmException {
-		DiscoveryClient.DiscoveryClientOptionalArgs args = new DiscoveryClient.DiscoveryClientOptionalArgs();
-		System.setProperty("javax.net.ssl.keyStore", "src/main/resources/order.keystore.p12");
-		System.setProperty("javax.net.ssl.keyStorePassword", "password");
-		System.setProperty("javax.net.ssl.trustStore", "src/main/resources/order.truststore.p12");
-		System.setProperty("javax.net.ssl.trustStorePassword", "password");
-		EurekaJerseyClientImpl.EurekaJerseyClientBuilder builder = new EurekaJerseyClientImpl.EurekaJerseyClientBuilder();
-		builder.withClientName("order");
-		builder.withSystemSSLConfiguration();
-		builder.withMaxTotalConnections(10);
-		builder.withMaxConnectionsPerHost(10);
-		args.setEurekaJerseyClient(builder.build());
-		return args;
-	}*/
+
 }

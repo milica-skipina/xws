@@ -1,8 +1,3 @@
-
-let renderAdmin = localStorage.getItem("ulogovan") === "ROLE_ADMIN" ? false : true ;
-let renderCustomer = localStorage.getItem("ulogovan") === "ROLE_CUSTOMER" ? false : true ;
-let renderSeller = localStorage.getItem("ulogovan") === "ROLE_SELLER" ? false : true ;
-
 console.log("mojeee")
 console.log(localStorage.getItem("ulogovan"))
 
@@ -33,8 +28,6 @@ export default {
       url: '/codebook',
       icon: 'icon-drop',
     },
-
-
 
   ],
 };

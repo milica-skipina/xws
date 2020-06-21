@@ -17,6 +17,7 @@ public interface AdvertisementRepository extends JpaRepository<Advertisement, Lo
 
     Advertisement save(Advertisement advertisement);
 
+    Advertisement findOneByCarAdId(Long id);
 
     List<Advertisement> findAllByDeletedAndCityIgnoreCaseAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
             Boolean deleted, String city, Date startDate, Date endDate);

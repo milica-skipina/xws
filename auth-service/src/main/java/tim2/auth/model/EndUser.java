@@ -28,6 +28,9 @@ public class EndUser {
     @Column(name = "city", nullable = true)
     private String city;
 
+    @Column(name = "firstLogin", nullable = true)
+    private boolean firstLogin;
+
     @JsonManagedReference(value = "enduser_movement")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private User user;
@@ -40,6 +43,11 @@ public class EndUser {
         this.name = name;
         this.surname = surname;
         this.city = city;
+    }
+
+    public EndUser(String name, String surname) {
+        this.name = name;
+        this.surname = surname;
     }
 
     public Long getId() {

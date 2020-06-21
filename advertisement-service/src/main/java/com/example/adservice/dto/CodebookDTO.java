@@ -2,11 +2,20 @@ package com.example.adservice.dto;
 
 import com.example.adservice.model.Codebook;
 
+import javax.xml.bind.annotation.*;
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name = "codebook")
+@XmlType(namespace = "xws_tim2", propOrder = { "id", "code", "name", "codeType"})
 public class CodebookDTO {
 
+    @XmlElement(required = true)
     private Long id;
+    @XmlElement(name = "code", required = true)
     private String code;
+    @XmlElement(name = "name", required = true)
     private String name;
+    @XmlElement(name = "codeType", required = true)
     private String codeType;
 
     public CodebookDTO() {

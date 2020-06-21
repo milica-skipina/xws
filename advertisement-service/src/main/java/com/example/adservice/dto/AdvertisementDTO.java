@@ -20,6 +20,8 @@ public class AdvertisementDTO {
 
 
     public AdvertisementDTO() {
+        this.carAd = new CarDTO();
+        this.pricelist = new Pricelist();
     }
 
     public AdvertisementDTO(Advertisement a){
@@ -39,6 +41,17 @@ public class AdvertisementDTO {
         this.request = request;
         this.name = name;
         this.username = username;
+    }
+
+    public AdvertisementDTO(rs.ac.uns.ftn.xws_tim2.Advertisement ad){
+        this.carAd = new CarDTO(ad.getCarAd());
+        this.startDate = ad.getStartDate().toGregorianCalendar().getTime();
+        this.endDate = ad.getEndDate().toGregorianCalendar().getTime();
+        this.city = ad.getCity();
+        this.deleted = ad.isDeleted();
+        this.request = ad.isRequest();
+        this.name = ad.getEntrepreneurName();
+        this.username = ad.getEntrepreneurUsername();
     }
 
     public boolean isRequest() {

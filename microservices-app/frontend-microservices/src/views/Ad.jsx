@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { Carousel, Card, CardHeader, CardBody, CarouselIndicators, CarouselControl, Col, CarouselCaption, CarouselItem, Row, Badge,
+import { RoleAwareComponent } from 'react-router-role-authorization';
+import {Redirect} from 'react-router-dom';
+import {Card, CardHeader, CardBody, Col, Row,
   Button,  
   FormGroup,
   FormText,
@@ -15,7 +17,7 @@ import "../../node_modules/react-notifications/lib/Notifications.js"
 const url = (process.env.REACT_APP_DOMAIN) + ':' + (process.env.REACT_APP_PORT) + '/';
 const pricelistPerPage = 7;
 
-class Ad extends Component {
+class Ad extends RoleAwareComponent {
 
   fileObj = [];
   fileArray = [];
@@ -63,8 +65,15 @@ class Ad extends Component {
       pricelists:[],
       showpricelist:[],
       canAdd: false,
-      unlimitedMileage: false
+      unlimitedMileage: false,
+      following: false
+
     };
+
+    let arr = [];
+    arr.push(localStorage.getItem('role'));    
+    this.userRoles = arr;
+    this.allowedRoles = ['ROLE_CUSTOMER', 'ROLE_SELLER'];
 
     this.uploadMultipleFiles = this.uploadMultipleFiles.bind(this);
     this.uploadFiles = this.uploadFiles.bind(this)
@@ -77,14 +86,6 @@ class Ad extends Component {
    handlePageChange(pageNumber) {
     let temp = (pageNumber - 1) * pricelistPerPage;
     this.setState({ activePage: pageNumber, showpricelist: this.state.pricelists.slice(temp, temp + pricelistPerPage) })
-  }
-
-  toggle() {
-    this.setState({ collapse: !this.state.collapse });
-  }
-
-  toggleFade() {
-    this.setState((prevState) => { return { fadeIn: !prevState } });
   }
   
   getPricelist = () => {
@@ -222,48 +223,9 @@ class Ad extends Component {
     ok = this.mjenjacValidation(this.state.mjenjac) && ok;
     ok = this.daLiJeDodao(this.state.dodaoSlike) && ok;
     ok = this.cityValidation(this.state.city) && ok;
-
-    console.log(this.state.drugiZahtjev)
-    if (this.state.drugiZahtjev && this.startDateValidation(this.state.startDate) && this.endDateValidation(this.state.endDate)) {
-
-      let data = {
-        'startDate': this.state.startDate,
-        'endDate': this.state.endDate,
-        'city': this.state.city,
-      }
-      axios({
-        method: 'post',
-        url: url + 'advertisement/advertisement/' + this.state.trenutniId + '/' + this.state.cjenovnikId,
-        headers: { "Authorization": AuthStr } ,       
-        data: data,
-      }).then((response) => {
-        console.log(response.status);
-      }, (error) => {
-        console.log(error);
-      });
-    }
-    else if (ok && this.state.dodaoSlike) {
-      if (this.novoAuto === true) {
-
-        let data = {
-          'startDate': this.state.startDate,
-          'endDate': this.state.endDate,
-          'city': this.startDateValidation.city,
-        }
-        axios({
-          method: 'post',
-           url: url + 'advertisement/advertisement/' + this.state.trenutniId + '/' + this.state.cjenovnikId,
-          data: data,
-          headers: { "Authorization": AuthStr } ,       
-        }).then((response) => {
-          console.log(response.status);
-          this.reset();
-          this.setState({ oglasiText: "" });
-        }, (error) => {
-          console.log(error);
-        });
-
-      } else {
+    ok = this.startDateValidation(this.state.startDate) && ok;
+    ok = this.endDateValidation(this.state.endDate) && ok;
+    if (ok && this.state.dodaoSlike) {
         let data = {
           "carAd": {
             'make': this.state.marka,
@@ -280,6 +242,7 @@ class Ad extends Component {
             'raiting': 0,
             'state': 'shared',
             'following': false,
+            'following': this.state.following,
           },
           'city': this.state.city,
           'startDate': this.state.startDate,
@@ -321,9 +284,6 @@ class Ad extends Component {
           console.log(error);
         });
       }
-
-
-    }
   }
 
   vratiFormu(e) {
@@ -603,6 +563,10 @@ class Ad extends Component {
     let godina;
     let mjesec;
     let dan;
+    if(ddatum === "" || ddatum === undefined){
+      this.setState({ startDateText: "Morate unijeti datum" });
+      return false;
+    }
     if (ddatum !== "" && ddatum !== undefined) {
       godina = ddatum[0] + ddatum[1] + ddatum[2] + ddatum[3]
 
@@ -649,6 +613,10 @@ class Ad extends Component {
     let godina;
     let mjesec;
     let dan;
+    if(ddatum === "" || ddatum === undefined){
+      this.setState({ startDateText: "Morate unijeti datum" });
+      return false;
+    }
     if (ddatum !== "" && ddatum !== undefined) {
       godina = ddatum[0] + ddatum[1] + ddatum[2] + ddatum[3]
 
@@ -721,33 +689,7 @@ class Ad extends Component {
               </CardHeader>
               <CardBody hidden={this.state.possible}>
                 <Form action="" method="post" encType="multipart/form-data" className="form-horizontal">
-                  <FormGroup row hidden={this.state.prikazAuto}>
-                    <Col md="3">
-                      <Label htmlFor="select">Izaberi automobil</Label>
-                    </Col>
-                    <Row xs="12" md="9">
-                      <Col >
-                        <Input type="select" name="select" id="select" onChange={(event) => this.autoValidation(event.target.value)}>
-                          {this.state.cars.map((car) => <option key={car.id} value={car.id} > {car.model}-{car.make}-{car.gearbox}-{car.mileage}km </option>)}
-                        </Input>
-                      </Col>
-                    </Row>
-                  </FormGroup>
-                  <FormGroup row hidden={this.state.prikazAuto}>
-                    <Row>
-                      <Col className="mb-3 mb-xl-0">
-                        <Button block color="primary" onClick={(e) => this.vratiFormu(e)}>Ponisti izabrani automobil</Button>
-                      </Col>
-                    </Row>
-                  </FormGroup>
-                  <FormGroup row hidden={this.state.dugmeAuto}>
-                    <Row>
-                      <Col className="mb-3 mb-xl-0">
-                        <Button block color="primary" onClick={(e) => this.vratiAuto(e)}>Nadji automobil</Button>
-                      </Col>
-                    </Row>
-                  </FormGroup>
-                  <Row hidden={this.state.sakrij}>
+                  <Row >
                     <Col>
                       <FormGroup row>
                         <Col md="3">
@@ -774,7 +716,7 @@ class Ad extends Component {
                       </FormGroup>
                     </Col>
                   </Row>
-                  <Row hidden={this.state.sakrij}>
+                  <Row >
                     <Col>
                       <FormGroup row>
                         <Col md="3">
@@ -801,7 +743,7 @@ class Ad extends Component {
                       </FormGroup>
                     </Col>
                   </Row>
-                  <Row hidden={this.state.sakrij}>
+                  <Row >
                     <Col>
                       <FormGroup row>
                         <Col md="3">
@@ -827,7 +769,7 @@ class Ad extends Component {
                       </FormGroup>
                     </Col>
                   </Row>
-                  <Row hidden={this.state.sakrij}>
+                  <Row >
                     <Col>
                       <FormGroup row>
                         <Col md="3">
@@ -916,21 +858,39 @@ class Ad extends Component {
                       </FormGroup>
                     </Col>
                   </Row>
-                  <FormGroup row hidden={this.state.sakrij}>
-                    <Col md="3"><Label>Collision Damage Waiver</Label></Col>
-                    <Col md="9">
-                      <FormGroup className="checkbox">
-                        <Input  type="checkbox" onChange={this.collisionValidation} checked={this.state.collision} name="collision" value="collision" />
-                        <Col md="3">
-                          <Label check className="form-check-label" htmlFor="checkbox1">Da </Label>
-                        </Col>
+                  <Row md="24">
+                <Col>
+                    <FormGroup row>
+                    <Col md="9"><Label>Collision Damage Waiver</Label></Col>
+                  <Col md="9">
+                    <FormGroup check className="checkbox">
+                      <Input className="form-check-input" type="checkbox" onChange={this.collisionValidation} checked={this.state.collision} name="collision" value="collision" />
+                      <Col md="3">
+                        <Label check className="form-check-label" htmlFor="checkbox1">Yes </Label>
+                      </Col>
                       </FormGroup>
-                    </Col>
+                  </Col>
                   </FormGroup>
+                  </Col>
+                  <Col md="6">
+                  <FormGroup row>
+                  <Col md="6"><Label>Tracking device</Label></Col>
+                  <Col md="9">
+                    <FormGroup check className="checkbox">
+                      <Input className="form-check-input" type="checkbox" onChange={e => this.setState({following: !this.state.following})} checked={this.state.following} name="collision" value="following" />
+                      <Col md="3">
+                        <Label check className="form-check-label" htmlFor="checkbox1">Yes</Label>
+                      </Col>
+                    </FormGroup>
+                  </Col>
+                  </FormGroup>
+                  </Col>
+                  </Row>
+                
 
-                  <FormGroup hidden={this.state.sakrij}>
-                    <Row md="3">
-                      <strong> Fotografije </strong>
+                <FormGroup>
+                  <Row md="3">
+                    <strong> Fotografije </strong>
                     </Row>
                     <br>
                     </br>
@@ -940,9 +900,6 @@ class Ad extends Component {
                       ))}
                     </div>
 
-                   
-                     
-                   
                     <FormText color="danger">{this.state.slikeText}</FormText>
 
                   </FormGroup>
@@ -1048,7 +1005,7 @@ class Ad extends Component {
 
       </div>
     );
-    return ret;
+    return this.rolesMatched() ? ret : <Redirect to="/ads" />;
   }
 }
 

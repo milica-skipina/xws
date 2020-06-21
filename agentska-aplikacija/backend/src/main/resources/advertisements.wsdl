@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:sch="http://www.ftn.uns.ac.rs/xws_tim2" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.ftn.uns.ac.rs/xws_tim2" targetNamespace="http://www.ftn.uns.ac.rs/xws_tim2">
+  <wsdl:types>
+    <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.ftn.uns.ac.rs/xws_tim2" version="1.0">
+
+  <xs:element name="addImagesRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="username" type="xs:string"/>
+        <xs:element maxOccurs="unbounded" minOccurs="0" name="images" nillable="false" type="xs:string"/>
+        <xs:element name="carId" nillable="false" type="xs:long"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="addImagesResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ok" type="xs:boolean"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="deleteAdvertisementRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="username" type="xs:string"/>
+        <xs:element name="id" type="xs:long"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="deleteAdvertisementResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ok" type="xs:boolean"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="deletePricelistRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="username" type="xs:string"/>
+        <xs:element name="id" type="xs:long"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="deletePricelistResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ok" type="xs:boolean"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="editPricelistRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="username" type="xs:string"/>
+        <xs:element name="pricelist" type="tns:pricelist"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="editPricelistResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ok" type="xs:boolean"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="editAdvertisementRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="username" type="xs:string"/>
+        <xs:element name="id" type="xs:long"/>
+        <xs:element name="startDate" type="xs:dateTime"/>
+        <xs:element name="endDate" type="xs:dateTime"/>
+        <xs:element name="mileage" type="xs:double"/>
+        <xs:element name="mileageLimit" type="xs:double"/>
+        <xs:element name="pricelist" type="xs:long"/>
+        <xs:element name="city" type="xs:string"/>
+        <xs:element name="collisionDW" type="xs:boolean"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="editAdvertisementResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ok" type="xs:boolean"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="allPricelistsRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="username" type="xs:string"/>
+        <xs:element maxOccurs="unbounded" minOccurs="0" name="pricelists" nillable="true" type="tns:pricelist"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="allPricelistsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ok" type="xs:boolean"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="allAdvertisementsRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="username" type="xs:string"/>
+        <xs:element maxOccurs="unbounded" minOccurs="0" name="advertisements" nillable="true" type="tns:advertisement"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="allAdvertisementsResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ok" type="xs:boolean"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="newAdvertisementRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="username" type="xs:string"/>
+        <xs:element name="advertisement" type="tns:advertisement"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="newAdvertisementResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="microId" type="xs:long"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="newPricelistResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="microId" type="xs:long"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="newPricelistRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="username" type="xs:string"/>
+        <xs:element name="pricelist" type="tns:pricelist"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="advertisement">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="carAd" type="tns:car"/>
+      <xs:element minOccurs="0" name="city" type="xs:string"/>
+      <xs:element name="deleted" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="endDate" type="xs:dateTime"/>
+      <xs:element minOccurs="0" name="entrepreneurName" type="xs:string"/>
+      <xs:element minOccurs="0" name="entrepreneurUsername" type="xs:string"/>
+      <xs:element minOccurs="0" name="id" type="xs:long"/>
+      <xs:element minOccurs="0" name="pricelist" type="xs:long"/>
+      <xs:element name="request" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="startDate" type="xs:dateTime"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="car">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="carClass" nillable="false" type="xs:string"/>
+      <xs:element minOccurs="0" name="entrepreneurUsername" nillable="false" type="xs:string"/>
+      <xs:element name="following" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="fuel" nillable="false" type="xs:string"/>
+      <xs:element minOccurs="0" name="gearbox" nillable="false" type="xs:string"/>
+      <xs:element minOccurs="0" name="id" type="xs:long"/>
+      <xs:element minOccurs="0" name="insurance" nillable="false" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="kidsSeats" nillable="false" type="xs:int"/>
+      <xs:element minOccurs="0" name="make" nillable="false" type="xs:string"/>
+      <xs:element minOccurs="0" name="mileage" nillable="false" type="xs:double"/>
+      <xs:element minOccurs="0" name="mileageLimit" nillable="false" type="xs:double"/>
+      <xs:element minOccurs="0" name="model" nillable="false" type="xs:string"/>
+      <xs:element minOccurs="0" name="state" type="xs:string"/>
+      <xs:element minOccurs="0" name="raiting" type="xs:double"/>
+      <xs:element minOccurs="0" name="trackingToken" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="codebook">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="code" type="xs:string"/>
+      <xs:element minOccurs="0" name="codeType" type="xs:string"/>
+      <xs:element minOccurs="0" name="deleted" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="id" type="xs:long"/>
+      <xs:element minOccurs="0" name="name" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="review">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="car" nillable="false" type="xs:long"/>
+      <xs:element minOccurs="0" name="date" nillable="false" type="xs:dateTime"/>
+      <xs:element name="evaluation" type="xs:int"/>
+      <xs:element minOccurs="0" name="id" type="xs:long"/>
+      <xs:element minOccurs="0" name="state" nillable="false" type="xs:string"/>
+      <xs:element minOccurs="0" name="text" type="xs:string"/>
+      <xs:element minOccurs="0" name="username" nillable="false" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="pricelist">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="collisionDW" nillable="false" type="xs:double"/>
+      <xs:element name="deleted" type="xs:boolean"/>
+      <xs:element minOccurs="0" name="discount20" nillable="false" type="xs:double"/>
+      <xs:element minOccurs="0" name="discount30" nillable="false" type="xs:double"/>
+      <xs:element minOccurs="0" name="exceedMileage" nillable="false" type="xs:double"/>
+      <xs:element minOccurs="0" name="id" type="xs:long"/>
+      <xs:element minOccurs="0" name="priceDay" nillable="false" type="xs:double"/>
+      <xs:element minOccurs="0" name="username" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+  </wsdl:types>
+  <wsdl:message name="editPricelistRequest">
+    <wsdl:part element="tns:editPricelistRequest" name="editPricelistRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="deletePricelistRequest">
+    <wsdl:part element="tns:deletePricelistRequest" name="deletePricelistRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="editAdvertisementResponse">
+    <wsdl:part element="tns:editAdvertisementResponse" name="editAdvertisementResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="allPricelistsResponse">
+    <wsdl:part element="tns:allPricelistsResponse" name="allPricelistsResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="deleteAdvertisementRequest">
+    <wsdl:part element="tns:deleteAdvertisementRequest" name="deleteAdvertisementRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="addImagesRequest">
+    <wsdl:part element="tns:addImagesRequest" name="addImagesRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="newAdvertisementRequest">
+    <wsdl:part element="tns:newAdvertisementRequest" name="newAdvertisementRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="newAdvertisementResponse">
+    <wsdl:part element="tns:newAdvertisementResponse" name="newAdvertisementResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="editAdvertisementRequest">
+    <wsdl:part element="tns:editAdvertisementRequest" name="editAdvertisementRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="allAdvertisementsRequest">
+    <wsdl:part element="tns:allAdvertisementsRequest" name="allAdvertisementsRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="editPricelistResponse">
+    <wsdl:part element="tns:editPricelistResponse" name="editPricelistResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="allAdvertisementsResponse">
+    <wsdl:part element="tns:allAdvertisementsResponse" name="allAdvertisementsResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="addImagesResponse">
+    <wsdl:part element="tns:addImagesResponse" name="addImagesResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="deletePricelistResponse">
+    <wsdl:part element="tns:deletePricelistResponse" name="deletePricelistResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="newPricelistResponse">
+    <wsdl:part element="tns:newPricelistResponse" name="newPricelistResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="deleteAdvertisementResponse">
+    <wsdl:part element="tns:deleteAdvertisementResponse" name="deleteAdvertisementResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="newPricelistRequest">
+    <wsdl:part element="tns:newPricelistRequest" name="newPricelistRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="allPricelistsRequest">
+    <wsdl:part element="tns:allPricelistsRequest" name="allPricelistsRequest">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="AdvertisementPort">
+    <wsdl:operation name="editPricelist">
+      <wsdl:input message="tns:editPricelistRequest" name="editPricelistRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:editPricelistResponse" name="editPricelistResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="deletePricelist">
+      <wsdl:input message="tns:deletePricelistRequest" name="deletePricelistRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:deletePricelistResponse" name="deletePricelistResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="editAdvertisement">
+      <wsdl:input message="tns:editAdvertisementRequest" name="editAdvertisementRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:editAdvertisementResponse" name="editAdvertisementResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="allPricelists">
+      <wsdl:input message="tns:allPricelistsRequest" name="allPricelistsRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:allPricelistsResponse" name="allPricelistsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="deleteAdvertisement">
+      <wsdl:input message="tns:deleteAdvertisementRequest" name="deleteAdvertisementRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:deleteAdvertisementResponse" name="deleteAdvertisementResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="addImages">
+      <wsdl:input message="tns:addImagesRequest" name="addImagesRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:addImagesResponse" name="addImagesResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="newAdvertisement">
+      <wsdl:input message="tns:newAdvertisementRequest" name="newAdvertisementRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:newAdvertisementResponse" name="newAdvertisementResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="allAdvertisements">
+      <wsdl:input message="tns:allAdvertisementsRequest" name="allAdvertisementsRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:allAdvertisementsResponse" name="allAdvertisementsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="newPricelist">
+      <wsdl:input message="tns:newPricelistRequest" name="newPricelistRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:newPricelistResponse" name="newPricelistResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="AdvertisementPortSoap11" type="tns:AdvertisementPort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="editPricelist">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="editPricelistRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="editPricelistResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="deletePricelist">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="deletePricelistRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="deletePricelistResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="editAdvertisement">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="editAdvertisementRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="editAdvertisementResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="allPricelists">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="allPricelistsRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="allPricelistsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="deleteAdvertisement">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="deleteAdvertisementRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="deleteAdvertisementResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="addImages">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="addImagesRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="addImagesResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="newAdvertisement">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="newAdvertisementRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="newAdvertisementResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="allAdvertisements">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="allAdvertisementsRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="allAdvertisementsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="newPricelist">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="newPricelistRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="newPricelistResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="AdvertisementPortService">
+    <wsdl:port binding="tns:AdvertisementPortSoap11" name="AdvertisementPortSoap11">
+      <soap:address location="https://localhost:8083/ws"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

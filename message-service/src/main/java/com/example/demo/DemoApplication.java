@@ -16,21 +16,5 @@ public class DemoApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(DemoApplication.class, args);
 	}
-/*
-	@Bean
-	public DiscoveryClient.DiscoveryClientOptionalArgs discoveryClientOptionalArgs() throws NoSuchAlgorithmException {
-		DiscoveryClient.DiscoveryClientOptionalArgs args = new DiscoveryClient.DiscoveryClientOptionalArgs();
-		System.setProperty("javax.net.ssl.keyStore", "src/main/resources/message.keystore.p12");
-		System.setProperty("javax.net.ssl.keyStorePassword", "password");
-		System.setProperty("javax.net.ssl.trustStore", "src/main/resources/message.truststore.p12");
-		System.setProperty("javax.net.ssl.trustStorePassword", "password");
-		EurekaJerseyClientImpl.EurekaJerseyClientBuilder builder = new EurekaJerseyClientImpl.EurekaJerseyClientBuilder();
-		builder.withClientName("message");
-		builder.withSystemSSLConfiguration();
-		builder.withMaxTotalConnections(10);
-		builder.withMaxConnectionsPerHost(10);
-		args.setEurekaJerseyClient(builder.build());
-		return args;
-	}
-*/
+
 }

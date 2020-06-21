@@ -1,6 +1,5 @@
 import React, {Component, Suspense} from 'react';
-import {RouterGuard} from 'react-router-guard';
-import {BrowserRouter, Route, Switch} from 'react-router-dom';
+import {Route, Switch} from 'react-router-dom';
 import {Redirect} from 'react-router-dom';
 import * as router from 'react-router-dom';
 import "../../../node_modules/react-notifications/lib/notifications.css"
@@ -8,13 +7,12 @@ import "../../../node_modules/react-notifications/lib/Notifications.js"
 import axios from 'axios';
 import {
   Container, Modal, ModalBody, ModalFooter,
-  Button, Card, CardBody, CardFooter, Col, Form, Input, InputGroup, FormText,
-  InputGroupAddon, InputGroupText, Row, FormGroup, Label, ModalHeader
+  Button, Form, Input, InputGroup, FormText,
+  InputGroupAddon, InputGroupText, Row, ModalHeader
 } from 'reactstrap';
 import {NotificationContainer, NotificationManager} from 'react-notifications';
 import {
   AppAside,
-  AppFooter,
   AppHeader,
   AppSidebar,
   AppSidebarFooter,
@@ -34,7 +32,6 @@ import routes from '../../routes';
 import '../../scss/vendors/custom.css';
 
 const DefaultAside = React.lazy(() => import('./DefaultAside'));
-const DefaultFooter = React.lazy(() => import('./DefaultFooter'));
 const DefaultHeader = React.lazy(() => import('./DefaultHeader'));
 
 const url = (process.env.REACT_APP_DOMAIN) + ':' + (process.env.REACT_APP_PORT) + '/';
@@ -87,7 +84,7 @@ class DefaultLayout extends Component {
   };
 
   validateUsername = () => {
-    let regex = /^[A-Za-z0-9\-\_]+/;
+    let regex = /^[A-Za-z0-9\-_]+/;
     if (this.state.username === "") {
       this.setState({usernameErrorText: "Username is required.", formValid: true, formErrorText: ""});
     } else if (!regex.test(this.state.username)) {
@@ -126,7 +123,7 @@ class DefaultLayout extends Component {
         if (response.status === 200) {
           localStorage.setItem("ulogovan", response.data.accessToken);
           localStorage.setItem("role", response.data.role);
-          let array = [] ;          
+          let array = [] ;
           sessionStorage.setItem("basket", JSON.stringify(array));
           NotificationManager.success("Successfully logged in", 'Success!', 3000);
           this.props.history.push('/oglasi')
@@ -154,7 +151,13 @@ class DefaultLayout extends Component {
     localStorage.removeItem("start");
     localStorage.removeItem("end");
     sessionStorage.removeItem('basket');
-    this.props.history.push('/oglasi')
+    if (window.location != "https://localhost:3000/oglasi") {
+      this.props.history.push('/oglasi');
+    }else {
+      window.location.reload();
+    }
+    
+   
   }
 
   navig = () => {
@@ -169,7 +172,7 @@ class DefaultLayout extends Component {
     }
 
   }
-  
+
 
 
   navBar = () => {
@@ -207,7 +210,6 @@ class DefaultLayout extends Component {
 
                 <Switch>
                   {routes.map((route, idx) => {
-                    console.log(route.authorize);
                     return route.component ? (
                       <Route authorize={route.authorize}
                              key={idx}

@@ -54,7 +54,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Bean
     public AuthenticationTokenFilter authenticationTokenFilterBean() throws Exception {
-        AuthenticationTokenFilter authenticationTokenFilter = new AuthenticationTokenFilter();
+        AuthenticationTokenFilter authenticationTokenFilter = new AuthenticationTokenFilter(tokenUtils, jwtUserDetailsService);
         authenticationTokenFilter.setAuthenticationManager(authenticationManagerBean());
         return authenticationTokenFilter;
     }
@@ -74,8 +74,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.OPTIONS).permitAll()
-                .antMatchers( "/auth/register", "/auth/login","/dash/verify/**","/user","/user/**","/user/deactivate/**")
+                .antMatchers( "/auth/register", "/auth/login")
                 .permitAll()
                 .anyRequest().authenticated();
 
@@ -87,10 +86,10 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().antMatchers(HttpMethod.OPTIONS , "/auth/login", "/auth/register");
         web.ignoring().antMatchers(HttpMethod.POST , "/auth/login", "/auth/register");
+        /*web.ignoring().antMatchers(HttpMethod.POST , "/auth/login", "/auth/register");
         web.ignoring().antMatchers(HttpMethod.GET , "/dash/verify/**","/user","/user/deactivate/**");
-        web.ignoring().antMatchers(HttpMethod.DELETE , "/user/**");
+        web.ignoring().antMatchers(HttpMethod.DELETE , "/user/**");*/
 
     }
 }

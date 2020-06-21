@@ -5,7 +5,6 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tim2.auth.rabbitmq.EmailRequestMessage;
 import tim2.auth.rabbitmq.RabbitMQConfiguration;
 
 import java.io.IOException;

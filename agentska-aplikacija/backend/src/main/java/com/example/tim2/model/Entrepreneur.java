@@ -41,13 +41,9 @@ public class Entrepreneur {
     @OneToMany(mappedBy = "toCom", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Comment> commentIn= new HashSet<Comment>();
 
-    @JsonManagedReference(value = "entrepreneuroutmes_mov")
-    @OneToMany(mappedBy = "fromMes", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<Message> mesOut = new HashSet<Message>();
-
-    @JsonManagedReference(value = "entrepreneurinmes_mov")
-    @OneToMany(mappedBy = "toMes", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<Message> mesIn = new HashSet<Message>();
+    @JsonManagedReference(value = "entrepreneurmes_mov")
+    @OneToMany(mappedBy = "entrepreneur", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<Message> messages = new HashSet<Message>();
 
     @JsonManagedReference(value = "agent_movement")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -138,20 +134,20 @@ public class Entrepreneur {
         this.commentIn = commentIn;
     }
 
-    public Set<Message> getMesOut() {
-        return mesOut;
+    public Set<Message> getMessages() {
+        return messages;
     }
 
-    public void setMesOut(Set<Message> mesOut) {
-        this.mesOut = mesOut;
+    public void setMessages(Set<Message> messages) {
+        this.messages = messages;
     }
 
-    public Set<Message> getMesIn() {
-        return mesIn;
+    public Set<Request> getRequests() {
+        return requests;
     }
 
-    public void setMesIn(Set<Message> mesIn) {
-        this.mesIn = mesIn;
+    public void setRequests(Set<Request> requests) {
+        this.requests = requests;
     }
 
     public User getUser() {

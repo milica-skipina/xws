@@ -1,18 +1,21 @@
-import React, { Component } from 'react';
+import React from 'react';
 //import { Card, CardBody, CardHeader, Col, Row, Table, Button } from 'reactstrap';
 //import { MDBCard, MDBCardTitle, MDBBtn, MDBCardGroup, MDBCardImage, MDBCardText, MDBCardBody } from "mdbreact";
 
 import axios from 'axios';
-import { Carousel, Card, CardHeader, CardBody, CarouselIndicators, CarouselControl, Col, CarouselCaption, CarouselItem, Row, Badge,
+import { Carousel, Card, CardHeader, CardBody, CarouselIndicators, CarouselControl, Col, CarouselCaption, CarouselItem, Row,
   Button,
   Form,
   FormGroup,
   FormText,
   Input,
-  Label, CardFooter,  Pagination, PaginationItem, PaginationLink } from 'reactstrap';
-import { MDBCard, MDBCardTitle, MDBBtn, MDBCardGroup, MDBCardImage, MDBCardText, MDBCardBody } from "mdbreact";
+  Label, CardFooter,  Pagination, PaginationItem, PaginationLink, Table, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
+import { MDBCardTitle} from "mdbreact";
 import { RoleAwareComponent } from 'react-router-role-authorization';
 import {NotificationContainer, NotificationManager} from 'react-notifications';
+import {Redirect} from 'react-router-dom';
+import  StarRatings  from 'react-star-ratings';
+
 import "../../../node_modules/react-notifications/lib/notifications.css"
 import "../../../node_modules/react-notifications/lib/Notifications.js"
 
@@ -24,6 +27,7 @@ class Oglas extends RoleAwareComponent {
     super(props);
     this.state = {
       activeIndex: 0,
+      activePage: 1,
       canEdit:false,
       idOglasa:"",
       brSjedista: "",
@@ -31,7 +35,6 @@ class Oglas extends RoleAwareComponent {
       cjenovnikId: "",
       startDate:"",
       hideForm: true,
-      brSjedista:"",
       maxKilometraza:"",
       kilometraza:"",
       endDate:"",
@@ -43,6 +46,12 @@ class Oglas extends RoleAwareComponent {
       collision: false,
       userRoles: [],
       cjenovnik:"",
+      comment: "",
+      openWriteReview: false,
+      rating: 0,
+      reviewValidation: "",
+      reviews: [],
+      hideWriteComment: true,
       oglas: {
         carAd: {
           images: []
@@ -54,7 +63,7 @@ class Oglas extends RoleAwareComponent {
     arr.push(localStorage.getItem('role'));
     console.log("KONS",arr);
     this.userRoles = arr;
-    this.allowedRoles = ['ROLE_SELLER', 'ROLE_CUSTOMER'];
+    this.allowedRoles = ['ROLE_SELLER', 'ROLE_CUSTOMER', ];
 
     this.next = this.next.bind(this);
     this.previous = this.previous.bind(this);
@@ -65,6 +74,10 @@ class Oglas extends RoleAwareComponent {
     this.getDateStringPicker = this.getDateStringPicker.bind(this);
     this.editAd = this.editAd.bind(this);
     this.getPricelist = this.getPricelist.bind(this);
+    this.changeRating = this.changeRating.bind(this);
+    this.postReview = this.postReview.bind(this);
+    this.getReviews = this.getReviews.bind(this);
+    this.getCanComment = this.getCanComment.bind(this);
   }
 
   getPricelist = () => {
@@ -88,7 +101,7 @@ class Oglas extends RoleAwareComponent {
   }
 
   reset(){
-    this.setState({hideForm:true, cjenovnikId:this.state.oglas.pricelist.id,  dugme:false,  startDate: "", endDate:"", brSjedista: this.state.oglas.carAd.kidsSeats, kilometraza:this.state.oglas.carAd.mileage, maxKilometraza:this.state.oglas.carAd.mileageLimit, city : this.state.oglas.city})
+    this.setState({hideForm:true, canEdit:false, cjenovnikId:this.state.oglas.pricelist.id,  dugme:false,  startDate: "", endDate:"", brSjedista: this.state.oglas.carAd.kidsSeats, kilometraza:this.state.oglas.carAd.mileage, maxKilometraza:this.state.oglas.carAd.mileageLimit, city : this.state.oglas.city})
   }
 
   edit(e){
@@ -147,7 +160,7 @@ this.setState({hideForm:false, canEdit:true})
       this.setState({idOglasa: response.data.id})
       console.log("id")
       console.log(this.state.idOglasa)
-      this.setState({ cjenovnikId: response.data.pricelist.id, kilometraza:response.data.carAd.mileage, maxKilometraza:response.data.carAd.mileageLimit, city:response.data.city, cjenovnikId:response.data.pricelist.id, brSjedista:response.data.carAd.kidsSeats})
+      this.setState({ kilometraza:response.data.carAd.mileage, maxKilometraza:response.data.carAd.mileageLimit, city:response.data.city, cjenovnikId:response.data.pricelist.id, brSjedista:response.data.carAd.kidsSeats})
      this.setState({cjenovnik:response.data.pricelist})
       if(response.data.carAd.insurance === true){
         this.setState({collision: true})
@@ -196,6 +209,11 @@ this.setState({hideForm:false, canEdit:true})
       console.log(error);
     });
 
+    this.getReviews();
+    if(localStorage.getItem('role') === "ROLE_CUSTOMER"){
+      this.getCanComment();
+    }
+
   }
 
   cjenovnikValidation(e) {
@@ -240,6 +258,13 @@ this.setState({hideForm:false, canEdit:true})
     }
   }
 
+  commentValidation(c){
+    c = c.replace(/</g,'');
+    c = c.replace(/>/g,'');
+    c = c.replace(/script/g,'');
+    c = c.replace(/alert/g,'');
+    this.setState({comment:c});
+  }
 
   kilometrazaValidation(c) {
    
@@ -358,7 +383,6 @@ this.setState({hideForm:false, canEdit:true})
       NotificationManager.success("Successfully edited!", '', 3000);     
     },(error)=>{
       console.log(error);
-      this.reset();
     });
       }
     }
@@ -484,259 +508,341 @@ this.setState({hideForm:false, canEdit:true})
     return ret;
   }
 
-  render() {
-    const { activeIndex } = this.state;
-    const len = this.state.pricelists.length;
-    const pageNumbers = Array.from(Array(Math.ceil(len / pricelistPerPage)).keys());
+  getReviews(){
+    const { id } = this.props.match.params;
+    axios({
+      method: 'get',
+      url: url + 'review/carId/' + id,
+    }).then((response) => {
+      let temp = response.data;
+      temp.sort(function(a,b){return b.date-a.date})
+      this.setState({ reviews: temp })
+    }, (error) => {
+      console.log(error);
+    });
+  }
 
-    const slides = this.state.oglas.carAd.images.map((item) => {
-      return (
-        <CarouselItem
-          onExiting={this.onExiting}
-          onExited={this.onExited}
-          key={item.imageUrl}
-        >
-          <img style={{ maxWidth: "38rem", maxHeight:"35rem"}} className="d-block w-100" src={item.imageUrl}/>
-          <CarouselCaption/>
-        </CarouselItem>
-      );
+  changeRating(newRating, name) {
+    this.setState({ rating: newRating });
+  }
+
+  postReview(){
+    if(this.state.rating === 0 && this.state.comment === ""){
+      this.setState({reviewValidation: "You must leave comment or rate service"})
+    }
+    else if(this.state.comment.length > 255){
+      this.setState({reviewValidation: "Maximum allowed length of the comment is 255 characters"})
+    }
+    else{
+      this.setState({reviewValidation: ""})
+    }
+    const { id } = this.props.match.params;
+    let token = localStorage.getItem("ulogovan")
+    let AuthStr = 'Bearer '.concat(token);
+    axios({
+      method: 'post',
+      url: url + 'review',
+      headers: { "Authorization": AuthStr },
+      data:{
+        evaluation: this.state.rating,
+        carId: Number(id),
+        text: this.state.comment,
+      }
+    }).then((response) => {
+      if (response.status === 200) {
+        NotificationManager.info("You have successfully submitted your review", '', 3000);
+        this.setState({openWriteReview: false, comment: "", rating: 0})
+      }
+      this.getCanComment();
+    }, (error) => {
+      console.log(error);
     });
 
-    let ret = (<div>
-        <Row hidden = {this.state.izbrisan}>
-          <Col xs="12" sm="6" md="4">
-            <Card style={{ width: "18rem", textAlign: "left", alignItems: "center", margin: 9 }} key={this.state.oglas.id} data-key={this.state.oglas.id}>
-              <CardBody>
-                <div>
-                  <h4 style={{ textAlign: "center" }} className="text-primary font-weight-bold">{this.state.oglas.carAd.model} {this.state.oglas.carAd.make}</h4>
-                  <Row>
-                    <Col>
-                      <MDBCardTitle tag="h6"> Car class: <p style={{ color: "red" }}>{this.state.oglas.carAd.carClass}</p>  </MDBCardTitle>
-                      <MDBCardTitle tag="h6"> Mileage limit: <p style={{ color: "red" }}>{this.state.oglas.carAd.mileageLimit}km</p>  </MDBCardTitle>
-                      <MDBCardTitle tag="h6"> Gearbox type: <p style={{ color: "red" }}>{this.state.oglas.carAd.gearbox}</p>  </MDBCardTitle>
-                      <MDBCardTitle tag="h6"> Kids seats: <p style={{ color: "red" }}>{this.state.oglas.carAd.kidsSeats}</p>  </MDBCardTitle>
-                      <MDBCardTitle tag="h6"> Mileage: <p style={{ color: "red" }}>{this.state.oglas.carAd.mileage}km</p>  </MDBCardTitle>
-                    </Col>
-                    <Col>
-                      <MDBCardTitle tag="h6"> Fuel type: <p style={{ color: "red" }}>{this.state.oglas.carAd.fuel}</p> </MDBCardTitle>
-                      <MDBCardTitle tag="h6"> Pick up location:<p style={{ color: "red" }}> {this.state.oglas.city} </p></MDBCardTitle>
-                      <MDBCardTitle tag="h6"> Start date: <p style={{ color: "red" }}>{this.getDateString(this.state.oglas.startDate)}  </p> </MDBCardTitle>
-                      <MDBCardTitle tag="h6"> End date: <p style={{ color: "red" }}>{this.getDateString(this.state.oglas.endDate)}   </p></MDBCardTitle>
-                      <MDBCardTitle hidden={!this.state.collision}  tag="h6"> Collision Damage Waiver: <i style={{ color: "red" }} className="fa fa-check" /><i style={{ color: "red" }} hidden={this.state.oglas.carAd.insurance} className="fa fa-close" />  </MDBCardTitle>
-                    </Col>
-                    <Col>
-                      <MDBCardTitle tag="h6"> Day price: <p style={{ color: "red" }}>{this.state.cjenovnik.priceDay}RSD</p> </MDBCardTitle>
-                      <MDBCardTitle tag="h6"> Discount for 20 days:<p style={{ color: "red" }}> {this.state.cjenovnik.discount20}RSD </p></MDBCardTitle>
-                      <MDBCardTitle tag="h6"> Discount for 30 days: <p style={{ color: "red" }}>{this.state.cjenovnik.discount30}RSD  </p> </MDBCardTitle>
-                      <MDBCardTitle tag="h6"> Exceed: <p style={{ color: "red" }}>{this.state.cjenovnik.exceedMileage}RSD   </p></MDBCardTitle>
-                    </Col>
-                   
-                  </Row>
-                </div>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col xs="12" md = "6" xl="6">
-            <Card style={{ maxWidth: "40rem", maxHeight:"40rem"}}>
-              <CardHeader>
-                <i className="fa fa-image fa-lg"></i><strong>Images</strong>
-              </CardHeader>
-              <CardBody>
-                <Carousel activeIndex={activeIndex} next={this.next} previous={this.previous}>
-                  <CarouselIndicators items={this.state.oglas.carAd.images} activeIndex={activeIndex} onClickHandler={this.goToIndex} />
-                  {slides}
-                  <CarouselControl direction="prev" directionText="Previous" onClickHandler={this.previous} />
-                  <CarouselControl direction="next" directionText="Next" onClickHandler={this.next} />
-                </Carousel>
-              </CardBody>
-            </Card>
-          </Col>
-          <Col hidden ={this.state.canEdit} className="mb-3 mb-xl-0">
-            <Row>
-                      <Button block color="primary" onClick={(e) => this.edit(e)}>Edit</Button>
-            </Row>
-            <br></br> 
-            <Row>        
-                    <Button block color="primary" onClick={(e) => this.delete(e)}>Delete</Button>
-            </Row>
-          </Col>
-         
-        </Row>
-        <Row hidden = {this.state.hideForm}>
-          <Col xs="12" md = "6" xl="6"> 
-          <Card>
-          <CardHeader>
-              <strong>Editing advertisement</strong>
-            </CardHeader>
-            <CardBody>
-            <Form action="" method="post" encType="multipart/form-data" className="form-horizontal">
-              <Row>
-            <Col>
-                    <FormGroup row>
-                      <Col md="3">
-                        <Label>Kids seats</Label>
-                      </Col>
-                      <Col xs="12" md="9">
-                        <Input type="number" id="date-input" value={this.state.brSjedista} onChange={(event) => this.sjedisteValidation(event.target.value)} name="date-input" placeholder="broj sjedista" />
-                        <FormText color="danger">{this.state.sjedisteText}</FormText>
-                      </Col>
-                    </FormGroup>
-              </Col>
-              <Col md="6">
-                    <FormGroup row>
-                      <Col md="3">
-                        <Label>City</Label>
-                      </Col>
-                      <Col md="9">
-                        <Input type="text" name="city" value={this.state.city} onChange={(event) => this.cityValidation(event.target.value)} placeholder="Pick up location" />
-                        <FormText color="danger">{this.state.cityText}</FormText>
-                      </Col>
-                    </FormGroup>
-                  </Col>
-              </Row>   
-              <Row >
-                  <Col>
-                    <FormGroup row>
-                      <Col md="3">
-                        <Label htmlFor="password-input">Kilometraza</Label>
-                      </Col>
-                      <Col xs="12" md="9">
-                        <Input type="number" value={this.state.kilometraza} id="password-input" onChange={(event) => this.kilometrazaValidation(event.target.value)} name="password-input" placeholder="predjeni kilometri" autoComplete="new-password" />
-                        <FormText color="danger">{this.state.kilometrazaText}</FormText>
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  <Col>
-                    <FormGroup row>
-                      <Col md="3">
-                        <Label htmlFor="password-input">Max kilometara</Label>
-                      </Col>
-                      <Col xs="12" md="9">
-                        <Input type="number" id="date-input" value={this.state.maxKilometraza} onChange={(event) => this.maxKilometrazaValidation(event.target.value)} name="date-input" placeholder="max kilometara" />
-                        <FormText color="danger">{this.state.maxKilometrazaText}</FormText>
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col>
-                </Col>
-                </Row>
-                <Row hidden = {this.state.editDate}>
-                  <Col>
-                    <FormGroup row>
-                      <Col md="3">
-                        <Label htmlFor="password-input">Od</Label>
-                      </Col>
-                      <Col xs="12" md="9">
-                        <Input type="date" id="password-input" value={this.state.startDate}   onChange={(event) => this.startDateValidation(event.target.value)} name="password-input" placeholder="od" autoComplete="new-password" />
-                        <FormText color="danger">{this.state.startDateText}</FormText>
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                  <Col>
-                    <FormGroup row>
-                      <Col md="3">
-                        <Label htmlFor="password-input">Do</Label>
-                      </Col>
-                      <Col xs="12" md="9">
-                        <Input type="date" id="date-input" value={this.state.endDate}   onChange={(event) => this.endDateValidation(event.target.value)} name="date-input" placeholder="do" />
-                        <FormText color="danger">{this.state.endDateText}</FormText>
-                      </Col>
-                    </FormGroup>
-                  </Col>
-                </Row>
-                <Row >
-                    <FormGroup row>
-                    <Col xs="12" md="9">
-                        <Input disabled = {true} type="select" value={this.state.cjenovnikId}
-                               onChange={(e) => {
-                                 this.cjenovnikValidation(e.target.value)
-                               }}>
-                          {this.state.cjenovnici.map((c) => <option key={c.id} value={c.id} >Po danu:{c.priceDay} DC:{c.collisionDW} Popust na 20 dana:{c.discount20}% Popust na 30 dana:{c.discount30}%  </option>)}
-                        </Input>
-                      </Col>
-                    </FormGroup>
-                </Row>
-                 <FormGroup >
-                    <Col md="3"><Label>Collision Damage Waiver</Label></Col>
-                    <Col md="9">
-                      <FormGroup className="checkbox">
-                        <Input  type="checkbox" onChange={this.collisionValidation} checked={this.state.collision} name="collision" value="collision" />
-                        <Col md="3">
-                          <Label check className="form-check-label" htmlFor="checkbox1">Da </Label>
+  }
+
+  getCanComment(){
+    const { id } = this.props.match.params;
+    let token = localStorage.getItem("ulogovan")
+    let AuthStr = 'Bearer '.concat(token);
+    axios({
+      method: 'get',
+      url: url + 'car/' + id +'/writeReview',
+      headers: { "Authorization": AuthStr },
+    }).then((response) => {
+      if (response.status === 200) {
+        this.setState({hideWriteComment: !response.data})
+      }
+    }, (error) => {
+      console.log(error);
+    });
+  }
+
+  render() {
+    const { activeIndex } = this.state;
+      const len = this.state.pricelists.length;
+      const pageNumbers = Array.from(Array(Math.ceil(len / pricelistPerPage)).keys());
+  
+      const slides = this.state.oglas.carAd.images.map((item) => {
+        return (
+          <CarouselItem
+            onExiting={this.onExiting}
+            onExited={this.onExited}
+            key={item.imageUrl}
+          >
+            <img style={{ maxWidth: "38rem", maxHeight: "35rem" }} alt="" className="d-block w-100" src={item.imageUrl} />
+            <CarouselCaption />
+          </CarouselItem>
+        );
+      });
+  
+      let ret = (
+        <div className="content">
+          <div>
+            <Row hidden={this.state.izbrisan}>
+              <Col xs="12" sm="6" md="6" xl="6">
+                <Card style={{ textAlign: "left" }} key={this.state.oglas.id} data-key={this.state.oglas.id}>
+                  <CardHeader>
+                    <h4 style={{ textAlign: "center" }} className="text-primary font-weight-bold">{this.state.oglas.carAd.model} {this.state.oglas.carAd.make}</h4>
+                  </CardHeader>
+                  <CardBody>
+                    <div>
+                      <Row>
+                        <Col md="4">
+                          <MDBCardTitle tag="h6"> Car class: <p style={{ color: "red" }}>{this.state.oglas.carAd.carClass}</p>  </MDBCardTitle>
+                          <MDBCardTitle tag="h6"> Mileage limit: <p style={{ color: "red" }}>{this.state.oglas.carAd.mileageLimit}km</p>  </MDBCardTitle>
+                          <MDBCardTitle tag="h6"> Gearbox type: <p style={{ color: "red" }}>{this.state.oglas.carAd.gearbox}</p>  </MDBCardTitle>
+                          <MDBCardTitle tag="h6"> Mileage: <p style={{ color: "red" }}>{this.state.oglas.carAd.mileage}km</p>  </MDBCardTitle>
+                          <MDBCardTitle tag="h6"> Kids seats: <p style={{ color: "red" }}>{this.state.oglas.carAd.kidsSeats}</p>  </MDBCardTitle>
                         </Col>
-                      </FormGroup>
-                    </Col>
-                  </FormGroup>
-            </Form>
-            </CardBody>
-            <CardFooter>
-              <FormText color="danger">{this.state.oglasiText}</FormText>
-
-              <Button  type="submit" size="sm" color="primary" onClick={(e) => this.editAd(e)}><i className="fa fa-dot-circle-o"></i> Edit</Button>
-              <Button type="reset" size="sm" color="danger" onClick={(e) => this.reset(e)}><i className="fa fa-ban"></i> Cancel</Button>
-            </CardFooter>
-          </Card>
-          </Col>
-
-          <Row>
-      <Col xs="12" md="12">
+                        <Col md="4">
+                          <MDBCardTitle tag="h6"> Fuel type: <p style={{ color: "red" }}>{this.state.oglas.carAd.fuel}</p> </MDBCardTitle>
+                          <MDBCardTitle tag="h6"> Pick up location:<p style={{ color: "red" }}> {this.state.oglas.city} </p></MDBCardTitle>
+                          <MDBCardTitle tag="h6"> Start date: <p style={{ color: "red" }}>{this.getDateString(this.state.oglas.startDate)}  </p> </MDBCardTitle>
+                          <MDBCardTitle tag="h6"> End date: <p style={{ color: "red" }}>{this.getDateString(this.state.oglas.endDate)}   </p></MDBCardTitle>
+                          <MDBCardTitle tag="h6" hidden={!this.state.oglas.carAd.insurance}> Collision Damage Waiver: <i style={{ color: "red" }} className="fa fa-check" />  </MDBCardTitle>
+                          <MDBCardTitle tag="h6" hidden={this.state.oglas.carAd.insurance}> Collision Damage Waiver: <i style={{ color: "red" }} className="fa fa-close" />  </MDBCardTitle>
+                        </Col>
+                        <Col md="4">
+                          <MDBCardTitle tag="h6"> Daily price: <p style={{ color: "red" }}>{this.state.cjenovnik.priceDay} RSD</p> </MDBCardTitle>
+                          <MDBCardTitle tag="h6"> Discount for 20 days:<p style={{ color: "red" }}> {this.state.cjenovnik.discount20} RSD </p></MDBCardTitle>
+                          <MDBCardTitle tag="h6"> Discount for 30 days: <p style={{ color: "red" }}>{this.state.cjenovnik.discount30} RSD  </p> </MDBCardTitle>
+                          <MDBCardTitle tag="h6"> Exceed: <p style={{ color: "red" }}>{this.state.cjenovnik.exceedMileage} RSD   </p></MDBCardTitle>
+                        </Col>
+                      </Row>
+                      <Row>
+                        {localStorage.getItem('role') === "ROLE_SELLER" && <Col sm="3" xl="3" md="3" hidden={this.state.canEdit} className="mb-3 mb-xl-0">
+                          <Button block color="primary" onClick={(e) => this.edit(e)}>Edit</Button>
+                        </Col>}
+                        {localStorage.getItem('role') === "ROLE_SELLER" && <Col sm="3" xl="3" md="3" hidden={this.state.canEdit} className="mb-3 mb-xl-0">
+                          <Button block color="primary" onClick={(e) => this.delete(e)}>Delete</Button>
+                        </Col>}
+                      </Row>
+                    </div>
+                  </CardBody>
+                </Card>
+              </Col>
+              <Col xs="12" md="6" xl="6">
+                <Card style={{ maxWidth: "40rem", maxHeight: "40rem" }}>
+                  <CardHeader>
+                    <Row>
+                      <Col md="8">
+                        <i className="fa fa-image fa-lg"></i><strong>Images</strong>
+                      </Col>
+                      <Col>
+                        <StarRatings style={{ justifyContent: "right" }}
+                          rating={this.state.oglas.carAd.rating}
+                          starRatedColor="orange"
+                          numberOfStars={5}
+                          name='rating'
+                          starDimension="20px"
+                          starSpacing="5px"
+                        />
+                      </Col>
+                    </Row>
+                  </CardHeader>
+                  <CardBody>
+                    <Carousel activeIndex={activeIndex} next={this.next} previous={this.previous}>
+                      <CarouselIndicators items={this.state.oglas.carAd.images} activeIndex={activeIndex} onClickHandler={this.goToIndex} />
+                      {slides}
+                      <CarouselControl direction="prev" directionText="Previous" onClickHandler={this.previous} />
+                      <CarouselControl direction="next" directionText="Next" onClickHandler={this.next} />
+                    </Carousel>
+                  </CardBody>
+                  <CardFooter>
+                  </CardFooter>
+                </Card>
+                <Row hidden={localStorage.getItem('role') !== "ROLE_CUSTOMER"} style={{ float: "right" }}>
+                  <Button style={{ width: "250px", float: "right", marginRight: "2rem" }} block color="primary" 
+                          onClick={(e) => this.setState({ openWriteReview: true })} hidden={this.state.hideWriteComment}>
+                    Write a customer review
+                  </Button>
+                </Row>
+              </Col>
+            </Row>
+            <Row hidden={this.state.hideForm}>
+  
+              <Col xs="12" md="6" xl="6">
+                <Card>
+                  <CardHeader>
+                    <strong>Editing advertisement</strong>
+                  </CardHeader>
+                  <CardBody>
+                    <Form action="" method="post" encType="multipart/form-data" className="form-horizontal">
+                      <Row>
+                        <Col>
+                          <FormGroup row>
+                            <Col md="3">
+                              <Label>Kids seats</Label>
+                            </Col>
+                            <Col xs="12" md="9">
+                              <Input type="number" id="date-input" value={this.state.brSjedista} onChange={(event) => this.sjedisteValidation(event.target.value)} name="date-input" placeholder="broj sjedista" />
+                              <FormText color="danger">{this.state.sjedisteText}</FormText>
+                            </Col>
+                          </FormGroup>
+                        </Col>
+                        <Col md="6">
+                          <FormGroup row>
+                            <Col md="3">
+                              <Label>City</Label>
+                            </Col>
+                            <Col md="9">
+                              <Input type="text" name="city" value={this.state.city} onChange={(event) => this.cityValidation(event.target.value)} placeholder="Pick up location" />
+                              <FormText color="danger">{this.state.cityText}</FormText>
+                            </Col>
+                          </FormGroup>
+                        </Col>
+                      </Row>
+                      <Row >
+                        <Col>
+                          <FormGroup row>
+                            <Col md="3">
+                              <Label htmlFor="password-input">Kilometraza</Label>
+                            </Col>
+                            <Col xs="12" md="9">
+                              <Input type="number" value={this.state.kilometraza} id="password-input" onChange={(event) => this.kilometrazaValidation(event.target.value)} name="password-input" placeholder="predjeni kilometri" autoComplete="new-password" />
+                              <FormText color="danger">{this.state.kilometrazaText}</FormText>
+                            </Col>
+                          </FormGroup>
+                        </Col>
+                        <Col>
+                          <FormGroup row>
+                            <Col md="3">
+                              <Label htmlFor="password-input">Max kilometara</Label>
+                            </Col>
+                            <Col xs="12" md="9">
+                              <Input type="number" id="date-input" value={this.state.maxKilometraza} onChange={(event) => this.maxKilometrazaValidation(event.target.value)} name="date-input" placeholder="max kilometara" />
+                              <FormText color="danger">{this.state.maxKilometrazaText}</FormText>
+                            </Col>
+                          </FormGroup>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col>
+                        </Col>
+                      </Row>
+                      <Row hidden={this.state.editDate}>
+                        <Col>
+                          <FormGroup row>
+                            <Col md="3">
+                              <Label htmlFor="password-input">Od</Label>
+                            </Col>
+                            <Col xs="12" md="9">
+                              <Input type="date" id="password-input" value={this.state.startDate} onChange={(event) => this.startDateValidation(event.target.value)} name="password-input" placeholder="od" autoComplete="new-password" />
+                              <FormText color="danger">{this.state.startDateText}</FormText>
+                            </Col>
+                          </FormGroup>
+                        </Col>
+                        <Col>
+                          <FormGroup row>
+                            <Col md="3">
+                              <Label htmlFor="password-input">Do</Label>
+                            </Col>
+                            <Col xs="12" md="9">
+                              <Input type="date" id="date-input" value={this.state.endDate} onChange={(event) => this.endDateValidation(event.target.value)} name="date-input" placeholder="do" />
+                              <FormText color="danger">{this.state.endDateText}</FormText>
+                            </Col>
+                          </FormGroup>
+                        </Col>
+                      </Row>
+                      <Row ><Col>
+                        <FormGroup row>
+                          <Col xs="12" md="1">
+                            <Label htmlFor="password-input">Pricelist</Label>
+                          </Col>
+                          <Col md="11">
+                            <Input disabled={true} type="select" value={this.state.cjenovnikId}
+                              onChange={(e) => {
+                                this.cjenovnikValidation(e.target.value)
+                              }}>
+                              {this.state.cjenovnici.map((c) => <option key={c.id} value={c.id} >Po danu:{c.priceDay} DC:{c.collisionDW} Popust na 20 dana:{c.discount20}% Popust na 30 dana:{c.discount30}%  </option>)}
+                            </Input>
+                          </Col>
+                        </FormGroup>
+                      </Col>
+                      </Row>
+                      <Row>
+                        <Col>
+                          <FormGroup row>
+                            <Col md="3"><Label>Collision Damage Waiver</Label></Col>
+                            <Col md="9">
+                              <FormGroup className="checkbox">
+                                <Input type="checkbox" onChange={this.collisionValidation} checked={this.state.collision} name="collision" value="collision" />
+                                <Label check className="form-check-label" htmlFor="checkbox1">Da </Label>
+                              </FormGroup>
+                            </Col>
+                          </FormGroup>
+                        </Col>
+                      </Row>
+                    </Form>
+                  </CardBody>
+                  <CardFooter>
+                    <FormText color="danger">{this.state.oglasiText}</FormText>
+  
+                    <Button type="submit" size="sm" color="primary" onClick={(e) => this.editAd(e)}><i className="fa fa-dot-circle-o"></i> Edit</Button>
+                    <Button type="reset" size="sm" color="danger" onClick={(e) => this.reset(e)}><i className="fa fa-ban"></i> Cancel</Button>
+                  </CardFooter>
+                </Card>
+              </Col>
+              <Col xs="6" md="6">
                 <Card>
                   <CardHeader>
                     <strong>Pricelists</strong>
                   </CardHeader>
                   <CardBody>
-                    <div>
-                      <section className="bar pt-0">
-                        <div className="row">
-                          <div className="col-md-12">
-
-                            <div className="box mt-0 mb-lg-0">
-                              <div className="table-responsive">
-                                <table className="table table-hover">
-                                  <thead>
-                                  <tr>
-                                    <th className="text-primary font-weight-bold">Day price</th>
-                                    <th className="text-primary font-weight-bold">Collision DW</th>
-                                    <th className="text-primary font-weight-bold">Discount 20 days</th>
-                                    <th className="text-primary font-weight-bold">Discount 30 days</th>
-                                    <th className="text-primary font-weight-bold">Exceed mileage</th>
-                                  </tr>
-                                  </thead>
-
-                                  <tbody>
-                                  {this.state.showpricelist.map(price => (
-                                    <tr key={price.id}>
-                                      <td>{price.priceDay} RSD</td>
-                                      <td>{price.collisionDW} RSD</td>
-                                      <td>{price.discount20} %</td>
-                                      <td>{price.discount30} %</td>
-                                      <td>{price.exceedMileage} RSD</td>
-                                      <td><Button block className="btn-round" color="info"
-                                                   onClick={(e) => this.cjenovnikValidation(price.id, e)}>Select</Button>
-                                      </td>
-                                    </tr>
-                                  ))}
-
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </section>
-                    </div>
+                    <Table responsive hover>
+                      <thead>
+                        <tr>
+                          <th className="text-primary font-weight-bold">Daily price (RSD)</th>
+                          <th className="text-primary font-weight-bold">Collision DW (RSD)</th>
+                          <th className="text-primary font-weight-bold">Discount 20 days</th>
+                          <th className="text-primary font-weight-bold">Discount 30 days</th>
+                          <th className="text-primary font-weight-bold">Exceed mileage</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {this.state.showpricelist.map(price => (
+                          <tr key={price.id}>
+                            <td>{price.priceDay}</td>
+                            <td>{price.collisionDW}</td>
+                            <td>{price.discount20} %</td>
+                            <td>{price.discount30} %</td>
+                            <td>{price.exceedMileage}</td>
+                            <td><Button block className="btn-round" color="info"
+                              onClick={(e) => this.cjenovnikValidation(price.id, e)}>Select</Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
                   </CardBody>
                   <CardFooter>
                     <nav>
                       <Pagination>
-                        <PaginationItem><PaginationLink disabled={this.state.activePage === 1} previous tag="button"
-                                                        onClick={(event) => this.handlePageChange(this.state.activePage - 1)}></PaginationLink></PaginationItem>
+                        <PaginationItem><PaginationLink disabled={this.state.activePage === 1} previous tag="button" onClick={(event) => this.handlePageChange(this.state.activePage - 1)}></PaginationLink></PaginationItem>
                         {pageNumbers.map((pageNumber) =>
                           <div>
                             <PaginationItem active hidden={this.state.activePage !== pageNumber + 1}>
-                              <PaginationLink tag="button">{pageNumber + 1}</PaginationLink>
+                              <PaginationLink tag="button" >{pageNumber + 1}</PaginationLink>
                             </PaginationItem>
                             <PaginationItem hidden={this.state.activePage === pageNumber + 1}>
                               <PaginationLink tag="button" onClick={(event) => this.handlePageChange(pageNumber + 1)}>
@@ -745,22 +851,78 @@ this.setState({hideForm:false, canEdit:true})
                             </PaginationItem>
                           </div>
                         )}
-                        <PaginationItem><PaginationLink
-                          disabled={this.state.activePage === (Math.ceil(len / pricelistPerPage))} next tag="button"
-                          onClick={(event) => this.handlePageChange(this.state.activePage + 1)}></PaginationLink></PaginationItem>
+                        <PaginationItem><PaginationLink disabled={this.state.activePage === (Math.ceil(len / pricelistPerPage))} next tag="button" onClick={(event) => this.handlePageChange(this.state.activePage + 1)}></PaginationLink></PaginationItem>
                       </Pagination>
                     </nav>
                   </CardFooter>
                 </Card>
               </Col>
-              </Row>
+            </Row>
+            <Modal isOpen={this.state.openWriteReview}>
+              <ModalHeader>Review</ModalHeader>
+              <ModalBody>
+                <FormGroup>
+                  <label>Comment:</label>
+                  <Input type="textarea" value={this.comment} onChange={(event) => this.commentValidation(event.target.value)}></Input>
+                  <br></br>
+                  <label style={{marginRight:"1rem"}}>Rating:</label>
+                  <StarRatings
+                      rating={this.state.rating}
+                      starRatedColor="orange"
+                      changeRating={this.changeRating}
+                      numberOfStars={5}
+                      name="rating"
+                      starHoverColor="yellow"
+                      starDimension="20px"
+                      starSpacing="5px"
+                    />
+                    <p style={{ color: 'red' }}>{this.state.reviewValidation}</p>
+                </FormGroup>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="primary" onClick={this.postReview}>Post review</Button>{' '}
+                <Button color="secondary" onClick={() => this.setState({ openWriteReview: false, rating: 0, comment: "" })}>Cancel</Button>
+              </ModalFooter>
+            </Modal>
+            <Row style={{ justifyContent: "center", marginTop:10 }}>
+              <Col xs="12" md="8" xl="8">
+                <Card>
+                  <CardHeader>
+                    <h5><strong>Customer reviews</strong></h5>
+                  </CardHeader>
+                  <CardBody >
+  
+                  {this.state.reviews.map(review => (
+                    <div key={review.id} data-key={review.id}>
+                      <br></br>
+                      <Row>
+                        <Col xs="12" md="8" xl="8"><h7><strong>{review.username}</strong></h7></Col>
+                        <Col xs="4" md="4" xl="4">Posted on: {this.getDateString(review.date)}</Col>
+                      </Row>
+                    <StarRatings hidden={review.evaluation == 0}
+                      rating={review.evaluation}
+                      starRatedColor="orange"
+                      numberOfStars={5}
+                      name="rating"
+                      starDimension="15px"
+                      starSpacing="5px"
+                    />
+                    <br></br>
+                  <Label style={{color:"black", fontSize:"12", marginTop:"0.5rem"}} >{review.text}</Label>
+                  <hr style={{color:"black", backgroundColor:"black"}}></hr>
+                  <br></br>                
+                    </div>
+                  ))}
+                  </CardBody>
+                </Card>
+              </Col>
+            </Row>
+          </div>
+          <NotificationContainer />
+        </div>
+      );
 
-        </Row>
-        <NotificationContainer/>
-      </div>
-    );
-
-    return this.rolesMatched() ? ret : <span>ivana</span>;
+    return ret;
   }
 }
 

@@ -1,6 +1,7 @@
 package com.example.tim2.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import org.owasp.encoder.Encode;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -26,15 +27,18 @@ public class Request {
     @Column(name = "mileage", nullable = false)
     private double mileage;
 
-    @Column(name = "startDate", nullable = false)       // date when created
+    @Column(name = "startDate", nullable = false)
     private Date startDate;
 
     @Column(name = "endDate", nullable = false)
     private Date endDate;
 
+    @Column(name = "dateCreated", nullable = false)
+    private Date dateCreated;
+
     @JsonBackReference(value = "request_mov")
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private User user;       // end user koji je napravio zahtev
+    private User user;       // end user koji je napravio zahtev, tj customer
 
     @JsonBackReference(value = "entrepreneurrequest_mov")
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -43,7 +47,7 @@ public class Request {
     public Request() {
     }
 
-    public Request(Set<Car> cars, String state, double mileage, Date startDate, Date endDate, User user, Entrepreneur entrepreneur) {
+    public Request(Set<Car> cars, String state, double mileage, Date startDate, Date endDate, User user, Entrepreneur entrepreneur, Date dateCreated) {
         this.cars = cars;
         this.state = state;
         this.mileage = mileage;
@@ -51,6 +55,7 @@ public class Request {
         this.endDate = endDate;
         this.user = user;
         this.entrepreneur = entrepreneur;
+        this.dateCreated = dateCreated;
     }
 
     public Long getId() {
@@ -101,12 +106,13 @@ public class Request {
         this.cars = cars;
     }
 
-    public Request(String state, Double mileage, Date startDate, Date endDate, User user) {
+    public Request(String state, Double mileage, Date startDate, Date endDate, User user, Date dateCreated) {
         this.state = state;
         this.mileage = mileage;
         this.startDate = startDate;
         this.endDate = endDate;
         this.user = user;
+        this.dateCreated = dateCreated;
     }
 
     public User getUser() {
@@ -123,5 +129,26 @@ public class Request {
 
     public void setSender(Entrepreneur sender) {
         this.entrepreneur = sender;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Entrepreneur getEntrepreneur() {
+        return entrepreneur;
+    }
+
+    public void setEntrepreneur(Entrepreneur entrepreneur) {
+        this.entrepreneur = entrepreneur;
+    }
+
+    public Request escapeParameters(Request r) {
+        r.setState(Encode.forHtml(r.getState()));
+        return r;
     }
 }

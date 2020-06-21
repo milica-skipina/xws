@@ -1,6 +1,7 @@
 package com.example.tim2.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import org.springframework.context.annotation.ScopeMetadata;
 
 import javax.persistence.*;
 
@@ -24,6 +25,13 @@ public class Image {
     public Image(String imageUrl, Car owner) {
         this.imageUrl = imageUrl;
         this.owner = owner;
+    }
+
+    public com.example.tim2.soap.gen.Image getGenerated(){
+        com.example.tim2.soap.gen.Image image = new com.example.tim2.soap.gen.Image();
+        image.setCarId(owner.getMicroId());
+        image.setImageUrl(getImageUrl());
+        return  image;
     }
 
     public Long getId() {

@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
+import { RoleAwareComponent } from 'react-router-role-authorization';
 import axios from 'axios';
+import {Redirect} from 'react-router-dom';
 import {
   Button,
   Card,
@@ -22,7 +24,7 @@ import "../../node_modules/react-notifications/lib/Notifications.js"
 const url = (process.env.REACT_APP_DOMAIN) + ':' + (process.env.REACT_APP_PORT) + '/';
 const pricelistPerPage = 5;
 
-class Pricelist extends Component {
+class Pricelist extends RoleAwareComponent {
 
   constructor(props) {
     super(props);
@@ -56,6 +58,11 @@ class Pricelist extends Component {
       ediTextEx:"",
       editId:"",
     };
+
+    let arr = [];
+    arr.push(localStorage.getItem('role'));    
+    this.userRoles = arr;
+    this.allowedRoles = ['ROLE_SELLER', 'ROLE_ADMIN'];
 
     this.editPricelist = this.editPricelist.bind(this);
 
@@ -374,8 +381,8 @@ popust30Validation(c) {
     const len = this.state.pricelists.length;
     const pageNumbers = Array.from(Array(Math.ceil(len / pricelistPerPage)).keys())
 
-    return (
-        <div className="content">
+    
+        let ret = (<div className="content">
 
       <div className="animated fadeIn">
 
@@ -622,8 +629,8 @@ popust30Validation(c) {
 
         </Row>
       </div>
-      </div>
-    );
+      </div>);
+    return this.rolesMatched() ? ret : <Redirect to="/ads" />;
   }
 }
 

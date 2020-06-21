@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 @Component
@@ -45,6 +47,23 @@ public class TokenUtils {
                 .setIssuedAt(timeProvider.now())
                 .setExpiration(generateExpirationDate())
                 //.claim("role", role) //postavljanje proizvoljnih podataka u telo JWT tokena
+                .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
+    }
+
+    /**
+     *
+     * @param id
+     * @param username - username vlasnika
+     * @return
+     */
+    public String generateTrackingToken(Long id, String username) {
+        return Jwts.builder()
+                .setIssuer(APP_NAME)
+                .setSubject(username)
+                .setAudience(generateAudience())
+                .setIssuedAt(timeProvider.now())
+                .setExpiration(generateExpirationDate())
+                .claim("id", id)
                 .signWith(SIGNATURE_ALGORITHM, SECRET).compact();
     }
 
@@ -103,6 +122,11 @@ public class TokenUtils {
         return name;
     }
 
+    /**
+     * vraca bas rolu korisnika
+     * @param token
+     * @return
+     */
     public String getRoleFromToken(String token) {
         String role;
         try {
@@ -113,6 +137,23 @@ public class TokenUtils {
             role = null;
         }
         return role;
+    }
+
+    /**
+     * vraca role i permisije
+     * @param token - jwt
+     * @return
+     */
+    public ArrayList<String> getAllAuthorities(String token) {
+       String role;
+        try {
+            final Claims claims = this.getAllClaimsFromToken(token);
+            role = (String) claims.get("role");
+        } catch (Exception e) {
+            return null;
+        }
+        String[] rls = role.split("\\|");
+        return new ArrayList<String>(Arrays.asList(rls));
     }
 
     private String getRoleFromParsingArray(String roles) {

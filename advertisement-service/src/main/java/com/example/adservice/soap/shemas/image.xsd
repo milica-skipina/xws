@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" targetNamespace="xws_tim2" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:import schemaLocation="schema.xsd"/>
+
+  <xs:complexType name="imageDTO">
+    <xs:sequence>
+      <xs:element name="id" type="xs:long"/>
+      <xs:element name="imageUrl" type="xs:string"/>
+      <xs:element name="owner" type="xs:long"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+

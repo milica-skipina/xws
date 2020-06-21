@@ -46,7 +46,7 @@ public class AuthService implements UserDetailsService {
     }
 
     public User loginUser(String username, String password) {
-        if (!RegexExpressions.isValidCharNumSpace(username)) {
+        if (!RegexExpressions.isValidSomeName(username)) {
             return null;
         }
         User user = (User) loadUserByUsername(username);
@@ -108,5 +108,25 @@ public class AuthService implements UserDetailsService {
                 && RegexExpressions.isValidInput(dto.getSurname()) && RegexExpressions.isValidPassword(dto.getPassword())
                 && RegexExpressions.isValidEmail(dto.getEmail()) && RegexExpressions.isValidSomeName(dto.getUsername())
                 && RegexExpressions.isValidSomeName(dto.getAddress());
+    }
+
+    /**
+     * data[0] - shouldRegister data[1] - customer name data[2] - email  data[3] - surname data[4] - username
+     * @param data
+     */
+    public boolean manualRegistration(String[] data) {
+        EndUser customer = new EndUser(data[1], data[3]);
+        User user = new User();
+        user.setPassword(passwordEncoder.encode("w7$Q.R[xB8"));
+        user.setEnabled(true);
+        user.setEmail(data[2]);
+        user.setUsername(data[4]);
+        Set<Role> auth = authorityService.findByname("ROLE_CUSTOMER");
+        user.setRoles(auth);
+        user.setActivated(true);
+        customer.setFirstLogin(true);
+        customer.setUser(user.escapeParameters(user));
+        endUserRepository.save(customer.escapeParameters(customer));
+        return true;
     }
 }

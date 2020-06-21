@@ -10,4 +10,6 @@ public interface EntrepreneurRepository extends JpaRepository<Entrepreneur, Long
     Entrepreneur findOneByCompanyName(String companyName);
 
     Entrepreneur findOneByUserId(Long id);
+
+    Entrepreneur findByUserUsername(String username);
 }

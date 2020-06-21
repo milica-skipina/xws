@@ -3,6 +3,7 @@ package com.example.tim2.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -18,22 +19,26 @@ public class Message {
     @Column(name = "Subject", nullable = false)
     private String subject;
 
-    @JsonBackReference(value = "entrepreneuroutmes_mov")
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Entrepreneur fromMes;
+    @Column(name = "timeSent", nullable = false)
+    private Date timeSent;
 
-    @JsonBackReference(value = "entrepreneurinmes_mov")
+    @JsonBackReference(value = "endusermes_mov")
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Entrepreneur toMes;
+    private EndUser endUser;
+
+    @JsonBackReference(value = "entrepreneurmes_mov")
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Entrepreneur entrepreneur;
 
     public Message() {
     }
 
-    public Message(String text, String subject, Entrepreneur from, Entrepreneur to) {
+    public Message(String text, String subject, Entrepreneur entrepreneur,EndUser endUser,Date timeSent) {
         this.text = text;
         this.subject = subject;
-        this.fromMes = from;
-        this.toMes = to;
+        this.entrepreneur = entrepreneur;
+        this.endUser = endUser;
+        this.timeSent = timeSent;
     }
 
     public Long getId() {
@@ -60,19 +65,27 @@ public class Message {
         this.subject = subject;
     }
 
-    public Entrepreneur getFromMes() {
-        return fromMes;
+    public EndUser getEndUser() {
+        return endUser;
     }
 
-    public void setFromMes(Entrepreneur from) {
-        this.fromMes = from;
+    public void setEndUser(EndUser endUser) {
+        this.endUser = endUser;
     }
 
-    public Entrepreneur getToMes() {
-        return toMes;
+    public Entrepreneur getEntrepreneur() {
+        return entrepreneur;
     }
 
-    public void setToMes(Entrepreneur toMes) {
-        this.toMes = toMes;
+    public void setEntrepreneur(Entrepreneur entrepreneur) {
+        this.entrepreneur = entrepreneur;
+    }
+
+    public Date getTimeSent() {
+        return timeSent;
+    }
+
+    public void setTimeSent(Date timeSent) {
+        this.timeSent = timeSent;
     }
 }

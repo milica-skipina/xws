@@ -12,3 +12,4 @@ COPY --from=zuul /usr/src/zuul/target/zuul.jar ./
 EXPOSE 8082
 
 CMD ["java", "-jar", "zuul.jar"]
+

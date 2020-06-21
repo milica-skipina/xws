@@ -3,15 +3,12 @@ package com.example.tim2.common;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class DateConverter {
-    private static DateTimeFormatter dtf1 = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss.S");       // promeniti patern ili dodati novi
+    private static DateTimeFormatter dtf1 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");       // promeniti patern ili dodati novi
     private static DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
     private static DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -26,6 +23,11 @@ public class DateConverter {
 
     public static LocalDate dateToLocalDate(String date) {
         return LocalDate.parse(date, dtf1);
+    }
+
+    public static LocalDateTime dateToDateTime(String date) {
+        LocalDateTime ret = LocalDateTime.parse(date, dtf1);
+        return ret;
     }
 
     public static String currentDate() {

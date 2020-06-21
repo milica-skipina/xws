@@ -5,6 +5,10 @@ import com.example.tim2.dto.PricelistDTO;
 import com.example.tim2.model.Pricelist;
 import com.example.tim2.repository.PricelistRepository;
 import com.example.tim2.datavalidation.RegularExpressions;
+import com.example.tim2.soap.clients.AdvertisementClient;
+import com.example.tim2.soap.gen.DeletePricelistResponse;
+import com.example.tim2.soap.gen.EditPricelistResponse;
+import com.example.tim2.soap.gen.NewPricelistResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +23,9 @@ public class PricelistService {
 
     @Autowired
     AdvertisementService advertisementService;
+
+    @Autowired
+    AdvertisementClient advertisementClient;
 
     public boolean validatePricelist(PricelistDTO p){
 
@@ -35,7 +42,7 @@ public class PricelistService {
         return  true;
     }
 
-    public PricelistDTO addPricelist(PricelistDTO p){
+    public PricelistDTO addPricelist(PricelistDTO p, String username){
         Pricelist pricelist = new Pricelist();
         if(validatePricelist(p)){
             pricelist.setPriceDay(p.getPriceDay());
@@ -44,6 +51,14 @@ public class PricelistService {
             pricelist.setDiscount30(p.getDiscount30());
             pricelist.setExceedMileage(p.getExceedMileage());
             pricelist.setDeleted(false);
+            pricelist.setUsername(username);
+            try{
+                NewPricelistResponse response = advertisementClient.addPricelist(pricelist);
+                pricelist.setMicroId(response.getMicroId());
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
             return new PricelistDTO(pricelistRepository.save(pricelist));
         }
         else{
@@ -62,6 +77,11 @@ public class PricelistService {
        if(ok){
            Pricelist pricelist = pricelistRepository.findOneById(id);
            pricelist.setDeleted(true);
+           try{
+               DeletePricelistResponse response = advertisementClient.deletePricelist(pricelist, pricelist.getUsername());
+           }catch (Exception e){
+               e.printStackTrace();
+           }
            pricelistRepository.save(pricelist);
            ok = true;
            return  true;
@@ -69,15 +89,25 @@ public class PricelistService {
        return  ok;
     }
 
-    public PricelistDTO editPricelist(PricelistDTO p, Long id){
+    public PricelistDTO editPricelist(PricelistDTO p, Long id, String username){
         if(validatePricelist(p)) {
             Pricelist current = pricelistRepository.findOneById(id);
-            current.setDiscount30(p.getDiscount30());
-            current.setDiscount20(p.getDiscount20());
-            current.setPriceDay(p.getPriceDay());
-            current.setCollisionDW(p.getCollisionDW());
-            current.setExceedMileage(p.getExceedMileage());
-            return new PricelistDTO(pricelistRepository.save(current));
+            if(current.getUsername().equals(username)){
+                current.setDiscount30(p.getDiscount30());
+                current.setDiscount20(p.getDiscount20());
+                current.setPriceDay(p.getPriceDay());
+                current.setCollisionDW(p.getCollisionDW());
+                current.setExceedMileage(p.getExceedMileage());
+                try{
+                    EditPricelistResponse response = advertisementClient.editPricelist(current, current.getUsername());
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                return new PricelistDTO(pricelistRepository.save(current));
+            }
+            else{
+                return null;
+            }
         }
         else{
             return null;

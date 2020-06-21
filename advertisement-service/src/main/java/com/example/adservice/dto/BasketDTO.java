@@ -3,7 +3,6 @@ package com.example.adservice.dto;
 import com.example.adservice.model.Advertisement;
 
 import java.util.Date;
-import java.util.Set;
 
 public class BasketDTO {
     private Long advertisementId;
@@ -31,6 +30,7 @@ public class BasketDTO {
         this.entrepreneur = ad.getEntrepreneurName();
         this.advertisementId = ad.getId();
         this.car = new CarOrderDTO(ad.getCarAd());
+        this.car.setEntrepreneurName(ad.getEntrepreneurName());
     }
 
 

@@ -1,7 +1,6 @@
-import React, { Component } from 'react';
+import React from 'react';
 import axios from 'axios';
 import { RoleAwareComponent } from 'react-router-role-authorization';
-import Checkbox from '@material-ui/core/Checkbox';
 import {NotificationContainer, NotificationManager} from 'react-notifications';
 import "../../../node_modules/react-notifications/lib/notifications.css"
 import "../../../node_modules/react-notifications/lib/Notifications.js"
@@ -10,24 +9,7 @@ import {
   Button, Modal, ModalBody, ModalFooter, ModalHeader,
   Card,
   CardBody,
-  CardFooter,
-  CardHeader,
-  Col,
-  Form,
-  FormGroup,
-  FormText,
-  Input,
-  Label,
-  Row,
-  Nav,
-  NavItem,
-  NavLink,
-  TabContent,
-  TabPane,
   Table,
-  Pagination,
-  PaginationItem,
-  PaginationLink
 } from 'reactstrap';
 
 //const url = 'http://localhost:8099/';
@@ -44,11 +26,12 @@ class Basket extends RoleAwareComponent {
       checkedAds: [],        // ids of selected cars for rent
       bundle: false,
       openModal: false ,
-      agentForBundle: []
+      agentForBundle: [],
+      readyForRequest: true
     };
 
     
-    let arr = new Array();
+    let arr = [];
     arr.push(localStorage.getItem('role'));
     console.log("KONS",arr);
     this.userRoles = arr;
@@ -71,7 +54,6 @@ class Basket extends RoleAwareComponent {
   }
 
   fillBasket = () => {
-    let data = sessionStorage.getItem('basket');
     let token = localStorage.getItem("ulogovan")
     let AuthStr = 'Bearer '.concat(token);
     let array = JSON.parse(sessionStorage.getItem('basket')) || [] ;
@@ -82,9 +64,12 @@ class Basket extends RoleAwareComponent {
         headers: { "Authorization": AuthStr } ,   
         data: array    
       }).then((response) => {
-        if (response.status === 200)
+        if (response.status === 200) {
           this.setState({ ads: response.data });
-         
+        }else {
+          this.setState({ ads: [] });
+          //NotificationManager.info("Your basket is empty!", '', 3000);
+        }
       }, (error) => {
         console.log(error);
       });
@@ -129,7 +114,7 @@ class Basket extends RoleAwareComponent {
      // this.setState({checkedAds: [...this.state.checkedAds, str]})
     }
 
-    if (this.state.checkedAds.length == 0) {
+    if (this.state.checkedAds.length === 0) {
       this.setState({readyForRequest: true})    // nek bude dugme disabled
     }else {
       this.setState({readyForRequest: false})
@@ -145,7 +130,7 @@ class Basket extends RoleAwareComponent {
   }
 
   askForRent = () => {      // rentiraaaj ove noci poveruj da je ljubav dosla samaaaa
-    let flag = this.state.bundle ;
+    //let flag = this.state.bundle ;
     let data = this.state.checkedAds;
     data.push(localStorage.getItem('start'))  // posalji i datume pretrage
     data.push(localStorage.getItem('end'))
@@ -161,8 +146,8 @@ class Basket extends RoleAwareComponent {
             for (let i=0 ; i <  this.state.checkedAds.length ; i++) {
               this.removeFromBasket(this.state.checkedAds[i].split("+")[0]);
             }
-            this.setState({checkedAds: []}) ;
-
+            this.setState({checkedAds: [], agentForBundle: [], readyForRequest: true}) ;
+            NotificationManager.success("Order is sent!", '', 3000);
         }         
          
       }, (error) => {
@@ -183,7 +168,7 @@ class Basket extends RoleAwareComponent {
     let array = JSON.parse(sessionStorage.getItem('basket')) || [] ;
     let tempArray = []
     for (let i = 0; i < array.length ; i++) {
-      if (array[i] != id) {
+      if (array[i] !== id) {
           tempArray.push(array[i]);
       }
     }    
@@ -272,7 +257,7 @@ class Basket extends RoleAwareComponent {
                     ))}
                   </tbody>
                 </Table>
-                <Button block color="info" onClick={this.handleSelectedCars}>Create request</Button>
+                <Button block color="info" onClick={this.handleSelectedCars} disabled={this.state.readyForRequest}>Create request</Button>
                 </CardBody>
          </Card>
 

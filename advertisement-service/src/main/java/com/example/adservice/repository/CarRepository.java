@@ -16,4 +16,5 @@ public interface CarRepository extends JpaRepository<Car, Long> {
 
     boolean deleteCarById(Long id);
 
+    List<Car> findAllByEntrepreneurUsername(String username);
 }

@@ -10,12 +10,13 @@ public class PricelistDTO {
     private Double discount30;
     private Double exceedMileage;
     private boolean deleted;
+    private String username;
 
     public PricelistDTO(){
 
     }
 
-    public PricelistDTO(Long id, Double priceDay, Double collisionDW, Double discount20, Double discount30, Double exceedMileage, boolean deleted){
+    public PricelistDTO(Long id, Double priceDay, Double collisionDW, Double discount20, Double discount30, Double exceedMileage, boolean deleted, String username){
         this.id = id;
         this.priceDay = priceDay;
         this.collisionDW = collisionDW;
@@ -23,10 +24,11 @@ public class PricelistDTO {
         this.discount30 = discount30;
         this.exceedMileage = exceedMileage;
         this.deleted = deleted;
+        this.username = username;
     }
 
     public PricelistDTO(Pricelist p){
-        this(p.getId(), p.getPriceDay(), p.getCollisionDW(), p.getDiscount20(), p.getDiscount30(), p.getExceedMileage(), p.isDeleted());
+        this(p.getId(), p.getPriceDay(), p.getCollisionDW(), p.getDiscount20(), p.getDiscount30(), p.getExceedMileage(), p.isDeleted(), p.getUsername());
     }
 
     public Long getId() {
@@ -83,5 +85,13 @@ public class PricelistDTO {
 
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

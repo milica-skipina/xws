@@ -1,6 +1,6 @@
 package com.example.adservice.service;
 
-import com.example.adservice.common.DateConverter;
+import com.example.adservice.config.TLSConfiguration;
 import com.example.adservice.config.TokenUtils;
 import com.example.adservice.datavalidation.RegularExpressions;
 import com.example.adservice.dto.AdvertisementDTO;
@@ -8,22 +8,22 @@ import com.example.adservice.dto.BasketDTO;
 import com.example.adservice.dto.CarDTO;
 import com.example.adservice.dto.SearchDTO;
 import com.example.adservice.model.*;
-import com.example.adservice.repository.*;
-import com.netflix.discovery.converters.Auto;
+import com.example.adservice.repository.AdvertisementRepository;
+import com.example.adservice.repository.CarRepository;
+import com.example.adservice.repository.ImageRepository;
+import com.example.adservice.repository.PricelistRepository;
 import org.owasp.encoder.Encode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
-
-import org.springframework.web.client.RestTemplate;
 
 @Service
 public class AdvertisementService {
@@ -49,16 +49,20 @@ public class AdvertisementService {
     @Autowired
     private RestTemplate restTemplate;
 
-    public List<AdvertisementDTO> search(String start, String end, String city){
+    public List<AdvertisementDTO> search(String start, String end, String city, String jwt){
         city = Encode.forHtml(city);
         Date startDate = new Date(Long.parseLong(start));
         Date endDate = new Date(Long.parseLong(end));
         List<Advertisement> ads = advertisementRepository.findAllByDeletedAndCityIgnoreCaseAndStartDateLessThanEqualAndEndDateGreaterThanEqual(false, city, startDate, endDate);
         List<AdvertisementDTO> ret = new ArrayList<>();
-        String url = "https://localhost:8082/orders/request/car/" + start + "/" + end;
-        List<Long> ids = restTemplate.getForObject(url, ArrayList.class);
+        String url = TLSConfiguration.URL + "orders/request/car/" + start + "/" + end;
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", jwt);
+        HttpEntity header = new HttpEntity(headers);
+        ResponseEntity<Long[]> ids = restTemplate.exchange(url, HttpMethod.GET, header, Long[].class);
+        List<Long> iids = Arrays.asList(ids.getBody());
         for (Advertisement a: ads) {
-            if(!ids.contains(a.getCarAd().getId())) {
+            if(!iids.contains(a.getCarAd().getId())) {
                 AdvertisementDTO aDTO = new AdvertisementDTO(a);
                 aDTO.getCarAd().setPrice(countPricePerAdv(startDate, endDate, a.getPricelist()));
                 ret.add(aDTO);
@@ -67,8 +71,8 @@ public class AdvertisementService {
         return ret;
     }
 
-    public List<AdvertisementDTO> advancedSearch(SearchDTO search){
-        List<AdvertisementDTO> ads = search(search.getStartDate(), search.getEndDate(), search.getCity());
+    public List<AdvertisementDTO> advancedSearch(SearchDTO search, String jwt){
+        List<AdvertisementDTO> ads = search(search.getStartDate(), search.getEndDate(), search.getCity(), jwt);
         List<AdvertisementDTO> ret = new ArrayList<>();
         boolean ok;
         for (AdvertisementDTO a: ads){
@@ -198,7 +202,7 @@ public class AdvertisementService {
     }
 
 
-    public AdvertisementDTO editAdvertisement(AdvertisementDTO a, Long aId, Long pId, String useername, String name){
+    public AdvertisementDTO editAdvertisement(AdvertisementDTO a, Long aId, Long pId, String useername){
         RegularExpressions regularExpressions = new RegularExpressions();
         Advertisement ad = new Advertisement();
         if(regularExpressions.idIdValid(aId)){
@@ -207,14 +211,14 @@ public class AdvertisementService {
         else{
             return null;
         }
-        if(ad.getEntrepreneurName().equals(name) && ad.getEntrepreneurUsername().equals(useername)) {
+        if(ad != null && ad.getEntrepreneurUsername().equals(useername)) {
             Car car = carRepository.findOneById(ad.getCarAd().getId());
-            if (validateAdDates(a.getStartDate(), a.getEndDate(), car, ad)) {
+//            if (validateAdDates(a.getStartDate(), a.getEndDate(), car, ad)) {
                 ad.setStartDate(a.getStartDate());
                 ad.setEndDate(a.getEndDate());
-            } else {
-                return null;
-            }
+//            } else {
+  //              return null;
+ //           }
             if (regularExpressions.isValidSomeName(a.getCity())) {
                 ad.setCity(a.getCity());
             } else {
@@ -301,6 +305,9 @@ public class AdvertisementService {
         Codebook carClass = codebookService.findOneByNameAndCodeType(advertisement.getCarAd().getCarClass(), "class");
         car.setCarClass(carClass);
         car.setFollowing(advertisement.getCarAd().isFollowing());
+        if (advertisement.getCarAd().isFollowing()) {
+            car.setTrackingToken(tokenUtils.generateTrackingToken(advertisement.getCarAd().getId(), username));
+        }
         Codebook fuel = codebookService.findOneByNameAndCodeType(advertisement.getCarAd().getFuel(), "fuel");
         car.setFuel(fuel);
         Codebook gearbox = codebookService.findOneByNameAndCodeType(advertisement.getCarAd().getGearbox(), "gearbox");
@@ -326,8 +333,9 @@ public class AdvertisementService {
         Pricelist p = pricelistRepository.findOneById(id);
         newAd.setPricelist(p);
         if(carValidation(advertisement.getCarAd()) && adValidation(newAd) && id!=null){
-            carRepository.save(car);
+            Car c = carRepository.save(car);
             for(Image i : advertisement.getCarAd().getImages()){
+                i.setOwner(c);
                 imageRepository.save(i);
             }
             advertisementRepository.save(newAd);
@@ -336,6 +344,12 @@ public class AdvertisementService {
         else{
             return null;
         }
+    }
+
+
+    public Advertisement getByCar(Long id){
+        Advertisement ad = advertisementRepository.findOneByCarAdId(id);
+        return  ad;
     }
 
     public boolean canAdd(String name, String username, String role){
@@ -402,5 +416,36 @@ public class AdvertisementService {
             }
         }
         return retVal;
+    }
+
+    public <T> HttpEntity<T> createAuthHeader(String token, T bodyType) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", token);
+        HttpEntity<T> request = new HttpEntity<>(bodyType, headers);
+        return request;
+    }
+
+    public rs.ac.uns.ftn.xws_tim2.Advertisement transform(rs.ac.uns.ftn.xws_tim2.Advertisement ad){
+        Codebook model = codebookService.findOneByNameAndCodeType(ad.getCarAd().getModel(), "model");
+        if(model == null){
+            ad.getCarAd().setModel("Other");
+        }
+        Codebook brand = codebookService.findOneByNameAndCodeType(ad.getCarAd().getMake(), "brand");
+        if(brand == null){
+            ad.getCarAd().setMake("Other");
+        }
+        Codebook carClass = codebookService.findOneByNameAndCodeType(ad.getCarAd().getCarClass(), "class");
+        if(carClass == null){
+            ad.getCarAd().setCarClass("Other");
+        }
+        Codebook fuel = codebookService.findOneByNameAndCodeType(ad.getCarAd().getFuel(), "fuel");
+        if(fuel == null){
+            ad.getCarAd().setFuel("Other");
+        }
+        Codebook gearbox = codebookService.findOneByNameAndCodeType(ad.getCarAd().getGearbox(), "gearbox");
+        if(gearbox == null){
+            ad.getCarAd().setGearbox("Other");
+        }
+        return ad;
     }
 }

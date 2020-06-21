@@ -15,7 +15,7 @@ public class Image {
     private String imageUrl;
 
     @JsonBackReference(value = "image_mov")
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Car owner;
 
     public Image() {
@@ -25,6 +25,12 @@ public class Image {
         this.id = id;
         this.imageUrl = imageUrl;
         this.owner = owner;
+    }
+
+    public Image(rs.ac.uns.ftn.xws_tim2.Image i, Long id){
+        this.setImageUrl(i.getImageUrl());
+        this.setOwner(new Car());
+        this.getOwner().setId(id);
     }
 
     public Long getId() {

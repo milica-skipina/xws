@@ -7,11 +7,16 @@ import com.example.tim2.dto.CarDTO;
 import com.example.tim2.model.*;
 import com.example.tim2.repository.*;
 import com.example.tim2.security.TokenUtils;
+import com.example.tim2.soap.clients.AdvertisementClient;
+import com.example.tim2.soap.gen.DeleteAdvertisementResponse;
+import com.example.tim2.soap.gen.EditAdvertisementResponse;
+import com.example.tim2.soap.gen.NewAdvertisementResponse;
 import org.owasp.encoder.Encode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.datatype.DatatypeConfigurationException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -54,6 +59,8 @@ public class AdvertisementService {
 
     @Autowired
     private RequestService requestService;
+
+    @Autowired AdvertisementClient advertisementClient;
 
     public boolean carValidation(CarDTO car){
         boolean ok = true;
@@ -146,7 +153,7 @@ public class AdvertisementService {
         advertisement.setDeleted(true);
         int x = 0;
             for (Request r : advertisement.getCarAd().getRequest()) {
-                if(r.getState().equals("PANDING")){
+                if(r.getState().equals("PENDING")){
                     System.out.println("Udjeee");
                     x++;
                 }
@@ -154,6 +161,11 @@ public class AdvertisementService {
             if (x == 0) {
                 System.out.println(advertisement.getCarAd().getRequest().size());
                 advertisementRepository.save(advertisement);
+                try{
+                    DeleteAdvertisementResponse response = advertisementClient.deleteAdvertisement(advertisement.getEntrepreneur().getUser().getUsername(),advertisement.getMicroId());
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
                 return true;
             } else {
                 return false;
@@ -163,7 +175,7 @@ public class AdvertisementService {
 
 
 
-    public boolean addAd(AdvertisementDTO advertisement, Long id, Long idp){
+    public Advertisement addAd(AdvertisementDTO advertisement, Long id, Long idp){
         Car car = carRepository.findOneById(id);
         Pricelist p = pricelistRepository.findOneById(idp);
         Advertisement newAd = new Advertisement();
@@ -178,14 +190,14 @@ public class AdvertisementService {
             newAd.setCity(temp.getCity());
             newAd.setEntrepreneur(entrepreneurRepository.findOneByBin("123458363"));
             advertisementRepository.save(newAd);
-            return true;
+            return newAd;
         }
         else{
-            return false;
+            return null;
         }
     }
 
-    public AdvertisementDTO editAdvertisement(AdvertisementDTO a, Long aId, Long pId, HttpServletRequest request){
+    public AdvertisementDTO editAdvertisement(AdvertisementDTO a, Long aId, Long pId, HttpServletRequest request) throws DatatypeConfigurationException {
         String token = tokenUtils.getToken(request);
         String username = tokenUtils.getUsernameFromToken(token);
         RegularExpressions regularExpressions = new RegularExpressions();
@@ -230,7 +242,18 @@ public class AdvertisementService {
         ad.getCarAd().setMileage(a.getCarAd().getMileage());
         ad.getCarAd().setKidsSeats(a.getCarAd().getKidsSeats());
         ad.getCarAd().setInsurance(a.getCarAd().getInsurance());
-        return new AdvertisementDTO(advertisementRepository.save(ad));
+        Advertisement retValue = advertisementRepository.save(ad);
+        try{
+            EditAdvertisementResponse response = advertisementClient.editAdvertisement(retValue);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new AdvertisementDTO(retValue);
+    }
+
+    public Advertisement getByCar(Long id){
+        Advertisement ad = advertisementRepository.findOneByCarAdId(id);
+        return  ad;
     }
 
     public boolean canAccess(Long id, HttpServletRequest request){
@@ -245,7 +268,7 @@ public class AdvertisementService {
         }
     }
 
-    public Car addNewAd(AdvertisementDTO advertisement, Long id, HttpServletRequest request){
+    public Car addNewAd(AdvertisementDTO advertisement, Long id, String username) throws DatatypeConfigurationException {
             Car car = new Car();
             Codebook model = codebookService.findOneByNameAndCodeType(advertisement.getCarAd().getModel(), "model");
             car.setModel(model);
@@ -277,6 +300,17 @@ public class AdvertisementService {
             newAd.setDeleted(false);
             Pricelist p = pricelistRepository.findOneById(id);
             newAd.setPricelist(p);
+            try{
+                NewAdvertisementResponse response = advertisementClient.addAdvertisement(newAd, p.getMicroId());
+                newAd.setMicroId(response.getMicroId());
+                car.setMicroId(response.getMicroId());
+            }catch (Exception e){
+                e.getStackTrace();
+            }
+
+        if (advertisement.getCarAd().isFollowing()) {
+                car.setTrackingToken(tokenUtils.generateTrackingToken(advertisement.getCarAd().getId(), username));
+            }
             if (carValidation(advertisement.getCarAd()) && adValidation(newAd) && id != null) {
                 carRepository.save(car);
                 for (Image i : advertisement.getCarAd().getImages()) {
@@ -290,6 +324,7 @@ public class AdvertisementService {
     }
 
     public List<AdvertisementDTO> search(String start, String end, String city){
+        requestService.after24hOr12h();
         city = Encode.forHtml(city);
         Date startDate = new Date(Long.parseLong(start));
         Date endDate = new Date(Long.parseLong(end));
@@ -319,7 +354,7 @@ public class AdvertisementService {
         return foundAds;
     }
 
-    private double countPricePerAdv(Date startDate, Date endDate, Pricelist pricelist) {
+    public double countPricePerAdv(Date startDate, Date endDate, Pricelist pricelist) {
         double pricePerDay = pricelist.getPriceDay();
         double discount20 = pricelist.getDiscount20();
         double discount30 = pricelist.getDiscount30();

@@ -7,6 +7,7 @@ public class MiniCarDTO {
     private String model;
     private String fuel;
     private Double price;   // broj dana * cena na dan
+    private Long id;
 
     public MiniCarDTO() {
     }
@@ -15,13 +16,15 @@ public class MiniCarDTO {
         this.make = c.getMake().getName();
         this.model = c.getModel().getName();
         this.fuel = c.getFuel().getName();
+        this.id = c.getId();
     }
 
-    public MiniCarDTO(String make, String model, String fuel, Double price) {
+    public MiniCarDTO(String make, String model, String fuel, Double price, Long id) {
         this.make = make;
         this.model = model;
         this.fuel = fuel;
         this.price = price;
+        this.id = id;
     }
 
     public String getMake() {
@@ -54,5 +57,13 @@ public class MiniCarDTO {
 
     public void setPrice(Double price) {
         this.price = price;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

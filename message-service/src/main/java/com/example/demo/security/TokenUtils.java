@@ -1,6 +1,8 @@
 package com.example.demo.security;
 
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 import com.example.demo.common.TimeProvider;
@@ -17,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 @Component
 public class TokenUtils {
 
-    @Value("demo")
+    @Value("tim2")
     private String APP_NAME;
 
     @Value("somesecret")
@@ -52,16 +54,7 @@ public class TokenUtils {
     }
 
     private String generateAudience() {
-//		Moze se iskoristiti org.springframework.mobile.device.Device objekat za odredjivanje tipa uredjaja sa kojeg je zahtev stigao.
 
-//		String audience = AUDIENCE_UNKNOWN;
-//		if (device.isNormal()) {
-//			audience = AUDIENCE_WEB;
-//		} else if (device.isTablet()) {
-//			audience = AUDIENCE_TABLET;
-//		} else if (device.isMobile()) {
-//			audience = AUDIENCE_MOBILE;
-//		}
         return AUDIENCE_WEB;
     }
 
@@ -130,6 +123,30 @@ public class TokenUtils {
         return audience;
     }
 
+    public String getRoleFromToken(String token) {
+        String role;
+        try {
+            final Claims claims = this.getAllClaimsFromToken(token);
+            role = (String) claims.get("role");
+            role = getRoleFromParsingArray(role);
+        } catch (Exception e) {
+            role = null;
+        }
+        return role;
+    }
+
+    private String getRoleFromParsingArray(String roles) {
+        String[] rls = roles.split("\\|");
+        String role = "";
+        for (int i=0; i< rls.length; i++) {
+            if (rls[i].contains("ROLE_")) {
+                role = rls[i];
+                break;
+            }
+        }
+        return role;
+    }
+
     public Date getExpirationDateFromToken(String token) {
         Date expiration;
         try {
@@ -184,6 +201,19 @@ public class TokenUtils {
             claims = null;
         }
         return claims;
+    }
+
+    public ArrayList<String> getAllAuthorities(String token) {
+        System.out.println(token);
+        String role;
+        try {
+            final Claims claims = this.getAllClaimsFromToken(token);
+            role = (String) claims.get("role");
+        } catch (Exception e) {
+            return null;
+        }
+        String[] rls = role.split("\\|");
+        return new ArrayList<String>(Arrays.asList(rls));
     }
 
 }

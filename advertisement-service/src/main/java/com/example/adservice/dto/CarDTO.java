@@ -28,6 +28,7 @@ public class CarDTO {
     private Set<Image> images = new HashSet<Image>();
     private String entrepreneurId;      // ovo je username, ali nisam zbog fronta menjala
     private Double price;
+    private Long commentsNumber;
 
     public CarDTO() {
     }
@@ -58,6 +59,26 @@ public class CarDTO {
         this.images = images;
         this.entrepreneurId = entrepreneurId;
         this.price = price;
+    }
+
+    public CarDTO(rs.ac.uns.ftn.xws_tim2.Car c){
+        this.id = c.getId();
+        this.make = c.getMake();
+        this.model = c.getModel();
+        this.fuel = c.getFuel();
+        this.gearbox = c.getGearbox();
+        this.carClass = c.getCarClass();
+        this.insurance = c.isInsurance();
+        this.mileage = c.getMileage();
+        this.mileageLimit = c.getMileageLimit();
+        this.kidsSeats = c.getKidsSeats();
+        this.raiting = c.getRaiting();
+        this.state = c.getState();
+        this.following = c.isFollowing();
+        for(rs.ac.uns.ftn.xws_tim2.Image i:c.getImages()){
+            this.getImages().add(new Image(i, c.getId()));
+        }
+        this.entrepreneurId = c.getEntrepreneurUsername();
     }
 
     public String getMake() {
@@ -186,5 +207,13 @@ public class CarDTO {
 
     public void setEntrepreneurId(String entrepreneurId) {
         this.entrepreneurId = entrepreneurId;
+    }
+
+    public Long getCommentsNumber() {
+        return commentsNumber;
+    }
+
+    public void setCommentsNumber(Long commentsNumber) {
+        this.commentsNumber = commentsNumber;
     }
 }

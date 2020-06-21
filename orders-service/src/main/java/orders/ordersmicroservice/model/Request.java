@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.LocalDate;
+import org.owasp.encoder.Encode;
 import java.util.*;
 
 @Entity
@@ -16,12 +16,6 @@ public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-/*
-    @ManyToMany(cascade = CascadeType.ALL)
-    @JoinTable(name = "REQUEST_AND_ADVERTISEMENT", joinColumns = {
-            @JoinColumn(name = "request_id") }, inverseJoinColumns = { @JoinColumn(name = "adv_id") })
-    private Set<Advertisement> ads = new HashSet<Advertisement>();
-*/
 
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "REQUEST_AND_CAR", joinColumns = {
@@ -34,6 +28,9 @@ public class Request {
     // predjeni kilometri
     @Column(name = "mileage", nullable = false)
     private double mileage;
+
+    @Column(name = "dateCreated", nullable = false)
+    private Date dateCreated;
 
     // ko salje
     @Column(name = "customer_username", nullable = false)
@@ -64,13 +61,14 @@ public class Request {
     }
 
     public Request(String state, double mileage, Date startDate, Date endDate, String customerUsername,
-                   String agentUsername) {
+                   String agentUsername, Date dateCreated) {
         this.state = state;
         this.mileage = mileage;
         this.startDate = startDate;
         this.endDate = endDate;
         this.customerUsername = customerUsername;
         this.agentUsername = agentUsername;
+        this.dateCreated = dateCreated;
     }
 
     public Long getId() {
@@ -128,6 +126,51 @@ public class Request {
 
     public void setOrderStatus(OrderStatus orderStatus) {
         this.orderStatus = orderStatus;
+    }
+
+    public Request escapeParameters(Request r) {
+        r.setState(Encode.forHtml(r.getState()));
+        return r;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public String getCustomerUsername() {
+        return customerUsername;
+    }
+
+    public void setCustomerUsername(String customerUsername) {
+        this.customerUsername = customerUsername;
+    }
+
+    public String getAgentUsername() {
+        return agentUsername;
+    }
+
+    public void setAgentUsername(String agentUsername) {
+        this.agentUsername = agentUsername;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getAgentNamee() {
+        return agentNamee;
+    }
+
+    public void setAgentNamee(String agentNamee) {
+        this.agentNamee = agentNamee;
     }
 }
 

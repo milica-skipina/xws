@@ -65,7 +65,8 @@ class NewAd extends RoleAwareComponent {
       codebook: [],
       pricelists:[],
       showpricelist:[],
-      unlimitedMileage: false
+      unlimitedMileage: false,
+      following: false
     };
 
     this.uploadMultipleFiles = this.uploadMultipleFiles.bind(this);
@@ -144,6 +145,7 @@ class NewAd extends RoleAwareComponent {
   }
 
   uploadMultipleFiles(e) {
+    e.preventDefault();
     this.fileObj.push(e.target.files)
     this.setState({ dodaoSlike: true })
     for (let i = 0; i < this.fileObj[0].length; i++) {
@@ -184,6 +186,8 @@ class NewAd extends RoleAwareComponent {
     ok = this.gorivoValidation(this.state.gorivo) && ok;
     ok = this.klasaValidation(this.state.klasa) && ok;
     ok = this.sjedisteValidation(this.state.brSjedista) && ok;
+    ok = this.startDateValidation(this.state.startDate) && ok;
+    ok = this.endDateValidation(this.state.endDate) && ok;
     let mileage = -1;
     console.log(this.state.maxKilometraza);
     if (this.state.unlimitedMileage){
@@ -200,51 +204,8 @@ class NewAd extends RoleAwareComponent {
     ok = this.cityValidation(this.state.city) && ok;
     let token = localStorage.getItem("ulogovan")
     let AuthStr = 'Bearer '.concat(token);
-    console.log(this.state.drugiZahtjev)
-    if (this.state.drugiZahtjev && this.startDateValidation(this.state.startDate) && this.endDateValidation(this.state.endDate)) {
-
-      let data = {
-        'startDate': this.state.startDate,
-        'endDate': this.state.endDate,
-        'city': this.state.city,
-      }
-      axios({
-        method: 'post',
-        url: url + 'advertisement/addAd/' + this.state.trenutniId + '/' + this.state.cjenovnikId,
-        headers: { "Authorization": AuthStr } ,
-        data: data,
-      }).then((response) => {
-        console.log(response.status);
-        NotificationManager.success("Successfully added!", '', 3000);     
-
-      }, (error) => {
-        console.log(error);
-      });
-    }
-    else if (ok && this.state.dodaoSlike) {
-      if (this.novoAuto === true) {
-        let token = localStorage.getItem("ulogovan")
-        let AuthStr = 'Bearer '.concat(token);
-        let data = {
-          'startDate': this.state.startDate,
-          'endDate': this.state.endDate,
-          'city': this.startDateValidation.city,
-        }
-        axios({
-          method: 'post',
-          url: url + 'advertisement/addAd/' + this.state.trenutniId + '/' + this.state.cjenovnikId,
-          data: data,
-          headers: { "Authorization": AuthStr } ,
-        }).then((response) => {
-          console.log(response.status);
-          NotificationManager.success("Successfully added!", '', 3000);     
-          this.reset();
-          this.setState({ oglasiText: "" });
-        }, (error) => {
-          console.log(error);
-        });
-
-      } else {
+  if (ok && this.state.dodaoSlike) {
+  
         let data = {
           "carAd": {
             'make': this.state.marka,
@@ -260,7 +221,7 @@ class NewAd extends RoleAwareComponent {
             'kidsSeats': this.state.brSjedista,
             'rating': 0,
             'state': 'shared',
-            'following': false,
+            'following': this.state.following,
           },
           'city': this.state.city,
           'startDate': this.state.startDate,
@@ -278,9 +239,6 @@ class NewAd extends RoleAwareComponent {
           console.log(response);
           NotificationManager.success("Successfully added!", '', 3000);     
           let pom = response.data.id;
-          console.log(response.data.id);
-          console.log(this.state.dodaoSlike)
-          if (this.state.dodaoSlike !== false) {
             let data = []
             for (let i = 0; i < this.fileObj[0].length; i++) {
               data.push(this.fileArray[i]);
@@ -297,15 +255,12 @@ class NewAd extends RoleAwareComponent {
             }, (error) => {
               console.log(error);
             });
-          }
+          
 
         }, (error) => {
           console.log(error);
         });
       }
-
-
-    }
   }
 
   vratiFormu(e) {
@@ -369,19 +324,9 @@ class NewAd extends RoleAwareComponent {
       console.log(error);
       this.setState({ possible: true })
     });
-    axios({
-      method: 'get',
-      url: url + 'car',
-      headers: { "Authorization": AuthStr } ,
-    }).then((response) => {
-      if (response.status === 200)
-        this.setState({ cars: response.data, sakrij: true, trenutniId: response.data[0].id });
-    }, (error) => {
-      this.setState({ dugmeAuto: false })
-      console.log(error);
-    });
     this.lista = [];
     this.fileArray = [];
+    this.fileObj = []
     this.setState({
       file: [null],
       gorivo:this.state.codebook.filter(item=>item.codeType === 'fuel')[0].name,
@@ -651,6 +596,10 @@ class NewAd extends RoleAwareComponent {
     let godina;
     let mjesec;
     let dan;
+    if(ddatum === "" || ddatum === undefined){
+      this.setState({ startDateText: "Morate unijeti datum" });
+      return false;
+    }
     if (ddatum !== "" && ddatum !== undefined) {
       godina = ddatum[0] + ddatum[1] + ddatum[2] + ddatum[3]
 
@@ -697,6 +646,10 @@ class NewAd extends RoleAwareComponent {
     let godina;
     let mjesec;
     let dan;
+     if(ddatum === "" || ddatum === undefined){
+      this.setState({ startDateText: "Morate unijeti datum" });
+      return false;
+    }
     if (ddatum !== "" && ddatum !== undefined) {
       godina = ddatum[0] + ddatum[1] + ddatum[2] + ddatum[3]
 
@@ -766,33 +719,8 @@ class NewAd extends RoleAwareComponent {
             </CardHeader>
             <CardBody hidden={this.state.possible}>
               <Form action="" method="post" encType="multipart/form-data" className="form-horizontal">
-                <FormGroup row hidden={this.state.prikazAuto}>
-                  <Col md="3">
-                    <Label htmlFor="select">Izaberi automobil</Label>
-                  </Col>
-                  <Row xs="12" md="9">
-                    <Col >
-                      <Input type="select" name="select" id="select" onChange={(event) => this.autoValidation(event.target.value)}>
-                        {this.state.cars.map((car) => <option key={car.id} value={car.id} > {car.model}-{car.make}-{car.gearbox}-{car.mileage}km </option>)}
-                      </Input>
-                    </Col>
-                  </Row>
-                </FormGroup>
-                <FormGroup row hidden={this.state.prikazAuto}>
-                  <Row>
-                    <Col className="mb-3 mb-xl-0">
-                      <Button block color="primary" onClick={(e) => this.vratiFormu(e)}>Ponisti izabrani automobil</Button>
-                    </Col>
-                  </Row>
-                </FormGroup>
-                <FormGroup row hidden={this.state.dugmeAuto}>
-                  <Row>
-                    <Col className="mb-3 mb-xl-0">
-                      <Button block color="primary" onClick={(e) => this.vratiAuto(e)}>Nadji automobil</Button>
-                    </Col>
-                  </Row>
-                </FormGroup>
-                <Row hidden={this.state.sakrij}>
+          
+                <Row >
                   <Col>
                     <FormGroup row>
                       <Col md="3">
@@ -819,7 +747,7 @@ class NewAd extends RoleAwareComponent {
                     </FormGroup>
                   </Col>
                 </Row>
-                <Row hidden={this.state.sakrij}>
+                <Row >
                   <Col>
                     <FormGroup row>
                       <Col md="3">
@@ -846,7 +774,7 @@ class NewAd extends RoleAwareComponent {
                     </FormGroup>
                   </Col>
                 </Row>
-                <Row hidden={this.state.sakrij}>
+                <Row >
                   <Col>
                     <FormGroup row>
                       <Col md="3">
@@ -872,7 +800,7 @@ class NewAd extends RoleAwareComponent {
                     </FormGroup>
                   </Col>
                 </Row>
-                <Row hidden={this.state.sakrij}>
+                <Row>
                   <Col>
                     <FormGroup row>
                       <Col md="3">
@@ -961,19 +889,39 @@ class NewAd extends RoleAwareComponent {
                     </FormGroup>
                   </Col>
                 </Row>
-                <FormGroup row hidden={this.state.sakrij}>
-                  <Col md="3"><Label>Collision Damage Waiver</Label></Col>
+                
+                <Row md="24">
+                <Col>
+                    <FormGroup row>
+                    
+                  <Col md="9"><Label>Collision Damage Waiver</Label></Col>
                   <Col md="9">
                     <FormGroup check className="checkbox">
                       <Input className="form-check-input" type="checkbox" onChange={this.collisionValidation} checked={this.state.collision} name="collision" value="collision" />
                       <Col md="3">
-                        <Label check className="form-check-label" htmlFor="checkbox1">Da <Badge>NEW</Badge></Label>
+                        <Label check className="form-check-label" htmlFor="checkbox1">Yes </Label>
+                      </Col>
+                      </FormGroup>
+                  </Col>
+                  </FormGroup>
+                  </Col>
+                  <Col md="6">
+                  <FormGroup row>
+                  <Col md="6"><Label>Tracking device</Label></Col>
+                  <Col md="9">
+                    <FormGroup check className="checkbox">
+                      <Input className="form-check-input" type="checkbox" onChange={e => this.setState({following: !this.state.following})} checked={this.state.following} name="collision" value="following" />
+                      <Col md="3">
+                        <Label check className="form-check-label" htmlFor="checkbox1">Yes</Label>
                       </Col>
                     </FormGroup>
                   </Col>
-                </FormGroup>
+                  </FormGroup>
+                  </Col>
+                  </Row>
+                
 
-                <FormGroup hidden={this.state.sakrij}>
+                <FormGroup>
                   <Row md="3">
                     <strong> Fotografije </strong>
                   </Row>
@@ -986,7 +934,7 @@ class NewAd extends RoleAwareComponent {
                   </div>
 
                   <div className="form-group">
-                    <input type="file" className="form-control" onChange={this.uploadMultipleFiles} multiple />
+                    <input type="file" className="form-control" accept="image/png,image/jpeg" onChange={this.uploadMultipleFiles} multiple />
                   </div>
                   <FormText color="danger">{this.state.slikeText}</FormText>
 

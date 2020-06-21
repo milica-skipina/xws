@@ -2,6 +2,7 @@ package com.example.demo.config;
 
 import com.example.demo.security.TokenUtils;
 import com.example.demo.security.auth.RestAuthenticationEntryPoint;
+import com.example.demo.security.auth.TokenAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,25 +16,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-
-    // Implementacija PasswordEncoder-a koriscenjem BCrypt hashing funkcije.
-    // BCrypt po defalt-u radi 10 rundi hesiranja prosledjene vrednosti.
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-   // @Autowired
-    //private LoggingService jwtUserDetailsService;
-
-    // Neautorizovani pristup zastcenim resursima
-    @Autowired
-    private RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
     @Bean
     @Override
@@ -41,55 +30,40 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
-   /* // Definisemo nacin autentifikacije
     @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
-    }*/
+    private RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
     @Autowired
-    TokenUtils tokenUtils;
+    private TokenUtils tokenUtils;
 
-    // Definisemo prava pristupa odredjenim URL-ovima
+    @Bean
+    public TokenAuthenticationFilter authenticationTokenFilterBean() throws Exception {
+        TokenAuthenticationFilter authenticationTokenFilter = new TokenAuthenticationFilter(tokenUtils);
+        authenticationTokenFilter.setAuthenticationManager(authenticationManagerBean());
+        return authenticationTokenFilter;
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-                // komunikacija izmedju klijenta i servera je stateless
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-
-                // za neautorizovane zahteve posalji 401 gresku
-                .exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint).and()
-
-                // svim korisnicima dopusti da pristupe putanjama /auth/**, /h2-console/** i
-                // /api/foo
-                .authorizeRequests()
-                // svaki zahtev mora biti autorizovan
-                .anyRequest().authenticated().and()
-
-                .cors();
-                /*
-
-                // presretni svaki zahtev filterom
-                .addFilterBefore(new TokenAuthenticationFilter(tokenUtils, jwtUserDetailsService),
-                        BasicAuthenticationFilter.class);
-*/
-        http.csrf().disable();
         http.headers().frameOptions().disable();
 
+        http.headers().addHeaderWriter(new StaticHeadersWriter("X-Content-Security-Policy","script-src 'self'"));
+
+        http
+                .csrf()
+                .disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                .exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint).and()
+                .authorizeRequests()
+                .antMatchers( "/advertisement")
+                .permitAll()
+                .anyRequest().authenticated();
+
+        http.addFilterAfter(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
     }
 
-    // Generalna bezbednost aplikacije
     @Override
     public void configure(WebSecurity web) {
-        // TokenAuthenticationFilter ce ignorisati sve ispod navedene putanje
-        web.ignoring().antMatchers(HttpMethod.POST);
-
-        web.ignoring().antMatchers(HttpMethod.GET);
-
-        // web.ignoring().antMatchers(HttpMethod.GET, "/", "/webjars/**", "/*.html",
-        // "/favicon.ico", "/**/*.html",
-        // "/**/*.css", "/**/*.js");
+        web.ignoring().antMatchers(HttpMethod.POST , "/advertisement", "/car");
     }
-
-
 }

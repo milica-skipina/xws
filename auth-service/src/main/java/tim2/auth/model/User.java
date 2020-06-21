@@ -33,9 +33,6 @@ public class User implements UserDetails {
     @Column(name = "activated", nullable = true)
     private boolean activated;
 
-    /*@Column(name = "firstLogin", nullable = true) // default: false
-    private boolean firstLogin;*/
-
     @Column(name = "enabled", nullable = true)
     private boolean enabled; // authorization for accessing methods
 

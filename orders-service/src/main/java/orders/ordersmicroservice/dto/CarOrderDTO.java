@@ -17,12 +17,14 @@ public class CarOrderDTO {
     private String state;
     private String gearbox;
     private String entrepreneurUsername;    // username onoga ko je postavio oglas, moze to biti i kupac
+    private String entrepreneurName;
+    private String image;
 
     public CarOrderDTO() {
     }
 
     public CarOrderDTO(String make, String model, String fuel, String carClass, Boolean insurance,
-                       Double mileage, Double mileageLimit, Double raiting, String state) {
+                       Double mileage, Double mileageLimit, Double raiting, String state, String image) {
         this.make = make;
         this.model = model;
         this.fuel = fuel;
@@ -32,19 +34,23 @@ public class CarOrderDTO {
         this.mileageLimit = mileageLimit;
         this.raiting = raiting;
         this.state = state;
+        this.image = image;
     }
 
-    /*public CarOrderDTO(Car c) {
-        this.make = c.getMake().getName();
-        this.model = c.getModel().getName();
-        this.fuel = c.getFuel().getName();
-        this.carClass = c.getCarClass().getName();
-        this.insurance = c.getInsurance();
+    public CarOrderDTO(Car c) {
+        this.make = c.getMake();
+        this.model = c.getModel();
+        this.fuel = c.getFuel();
+        this.carClass = c.getCarClass();
+        this.insurance = c.isInsurance();
         this.mileage = c.getMileage();
         this.mileageLimit = c.getMileageLimit();
         this.raiting = c.getRaiting();
         this.state = c.getState();
-    }*/
+        this.gearbox = c.getGearbox();
+        this.entrepreneurUsername = c.getEntrepreneurUsername();
+        this.image = c.getImage();
+    }
 
     public String getMake() {
         return make;
@@ -118,5 +124,28 @@ public class CarOrderDTO {
         this.state = state;
     }
 
+    public String getGearbox() {
+        return gearbox;
+    }
+
+    public void setGearbox(String gearbox) {
+        this.gearbox = gearbox;
+    }
+
+    public String getEntrepreneurUsername() {
+        return entrepreneurUsername;
+    }
+
+    public void setEntrepreneurUsername(String entrepreneurUsername) {
+        this.entrepreneurUsername = entrepreneurUsername;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
 }
 

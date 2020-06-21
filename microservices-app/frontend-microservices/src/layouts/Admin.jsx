@@ -45,7 +45,7 @@ class Dashboard extends React.Component {
     super(props);
     this.state = {
       backgroundColor: "black",
-      activeColor: "info" ,
+      activeColor: "warning" ,
       username: "",
       password: "",
       formValid: true,   // enable/disable submit button depending on form validation
@@ -117,6 +117,7 @@ class Dashboard extends React.Component {
     localStorage.removeItem("role");
     localStorage.removeItem("start");
     localStorage.removeItem("end");
+    localStorage.removeItem("name");
     sessionStorage.removeItem('basket');
     this.props.history.push('/ads')
   }
@@ -179,8 +180,10 @@ class Dashboard extends React.Component {
         ContentType: 'application/json'
       }).then((response) => {
         if (response.status === 200) {
+          console.log(response.data);
           localStorage.setItem("ulogovan", response.data.accessToken);
           localStorage.setItem("role", response.data.role);
+          localStorage.setItem("name", response.data.name);
           console.log(response.data);
           let array = [] ;
           sessionStorage.setItem("basket", JSON.stringify(array));
@@ -235,6 +238,7 @@ class Dashboard extends React.Component {
             {routes.map((prop, key) => {
               return (
                 <Route
+                  authorize={prop.authorize}
                   path={prop.path}
                   component={prop.component}
                   key={key}

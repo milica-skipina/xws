@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
-import {RouterGuard} from 'react-router-guard';
 // import { renderRoutes } from 'react-router-config';
 import './App.scss';
 //import config from './config';

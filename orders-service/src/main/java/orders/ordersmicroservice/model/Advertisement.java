@@ -112,5 +112,7 @@ public class Advertisement {
     public void setCustomerId(Long customerId) {
         this.customerId = customerId;
     }
+
+
 }
 

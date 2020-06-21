@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import '../../../scss/vendors/custom.css';
-import { Button, Card, CardBody, CardFooter, Col, Container, Form, Input, InputGroup, FormText,
-  InputGroupAddon, InputGroupText, Row, FormGroup, Label } from 'reactstrap';
+import { Button, Card, CardBody, Col, Container, Form, Input, InputGroup, FormText,
+  InputGroupAddon, InputGroupText, Row, FormGroup } from 'reactstrap';
   import {NotificationContainer, NotificationManager} from 'react-notifications';
 import "../../../../node_modules/react-notifications/lib/notifications.css"
 import "../../../../node_modules/react-notifications/lib/Notifications.js"
@@ -152,12 +152,6 @@ sendRegistration = event => {
           
       }
   };
-
-
-
-
-
-
 
   render() {
     return (

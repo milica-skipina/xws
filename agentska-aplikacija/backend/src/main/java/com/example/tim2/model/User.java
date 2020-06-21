@@ -25,17 +25,14 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "username", nullable = false)
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
 
     @Column(name = "password", nullable = false)
     private String password;
-
-    @Column(name = "activated", nullable = true)
-    private boolean activated;
 
     @Column(name = "enabled", nullable = true)
     private boolean enabled; // authorization for accessing methods
@@ -68,7 +65,10 @@ public class User implements UserDetails {
     }
 
     public User() {
-
+        this.email = "unknown@gmail.com";
+        this.username = "unknown";
+        this.password = "unknown";
+        this.enabled = true;
     }
 
     public User(String email, String password) {
@@ -95,14 +95,6 @@ public class User implements UserDetails {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public boolean getActivated() {
-        return activated;
-    }
-
-    public void setActivated(boolean activated) {
-        this.activated = activated;
     }
 
     public String getEmail() {
