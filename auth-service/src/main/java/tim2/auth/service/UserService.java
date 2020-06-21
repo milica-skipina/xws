@@ -64,7 +64,7 @@ public class UserService {
                 if (!user.isActivated()) {
                     String jwt = tokenUtils.generateToken(user.getUsername(), user.getAuthorities(), "");
                     String message = jwt + " " + user.getEmail();
-                    //messageProducer.send(message);
+                    messageProducer.send(message);
                     return true;
                 }
                 return false;
