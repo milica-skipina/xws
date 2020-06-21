@@ -72,7 +72,7 @@ public class Car {
     private Set<Advertisement> carAdvertisement = new HashSet<Advertisement>();
 
     @JsonManagedReference(value = "image_mov")
-    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "owner", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Image>images = new HashSet<Image>();
 
     @JsonManagedReference(value = "carreport_mov")
@@ -108,7 +108,7 @@ public class Car {
         retValue.setState(getState());
         retValue.setMileageLimit(getMileageLimit());
         retValue.setEntrepreneurUsername("prodavac");
-        for(Image i : getImages()){
+        for(Image i : this.getImages()){
             retValue.getImages().add(i.getGenerated());
         }
         return retValue;

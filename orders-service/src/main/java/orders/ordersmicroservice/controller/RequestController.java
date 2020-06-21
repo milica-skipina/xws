@@ -42,7 +42,7 @@ public class RequestController {
         this.userIdentifier = userIdentifier;
     }
 
-    @PreAuthorize("hasAuthority('MODIFY_AD')")
+    //@PreAuthorize("hasAuthority('MODIFY_AD')")
     @RequestMapping(method = RequestMethod.GET, value = "/hasAd/{id}") // ad id
     public ResponseEntity<Boolean> adHasRequest(@PathVariable Long id)
     {
@@ -50,7 +50,7 @@ public class RequestController {
         return  new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAuthority('CREATE_REQUEST')")
+    //@PreAuthorize("hasAuthority('CREATE_REQUEST')")
     @RequestMapping(method = RequestMethod.POST, value = "/{id}") // car id
     public ResponseEntity<Boolean> availableForBasket(@PathVariable Long id, HttpServletRequest request)
     {
@@ -66,7 +66,7 @@ public class RequestController {
     }
 
 
-    @PreAuthorize("hasAuthority('CREATE_REQUEST')")
+   // @PreAuthorize("hasAuthority('CREATE_REQUEST')")
     @RequestMapping(method = RequestMethod.POST, produces = "application/json")
     public ResponseEntity<HttpStatus> createRequests(@RequestBody String[] reqs, HttpServletRequest request) {
         String jwt = tokenUtils.getToken(request);
@@ -86,7 +86,7 @@ public class RequestController {
         }
     }
 
-    @PreAuthorize("hasAuthority('READ_REQUEST')")
+    //@PreAuthorize("hasAuthority('READ_REQUEST')")
     @RequestMapping(method = RequestMethod.GET, produces = "application/json", value= "/{order}")
     public Response findRequests(HttpServletRequest request, @PathVariable boolean order) {
         String[] user = userIdentifier.extractFromJwt(request);
@@ -122,7 +122,7 @@ public class RequestController {
         }
     }
 
-    @PreAuthorize("hasAuthority('MODIFY_REQUEST')")
+    //@PreAuthorize("hasAuthority('MODIFY_REQUEST')")
     @RequestMapping(method = RequestMethod.PUT, produces = "application/json", value= "/{requestId}/{flag}")
     public Response modifyRequests(@PathVariable Long requestId, HttpServletRequest request,
                                    @PathVariable boolean flag) {
@@ -153,7 +153,7 @@ public class RequestController {
      * @param request
      * @return
      */
-    @PreAuthorize("hasAuthority('MODIFY_AD')")
+    //@PreAuthorize("hasAuthority('MODIFY_AD')")
     @RequestMapping(method = RequestMethod.POST, value = "/{carId}/{startDate}/{endDate}") // car id
     public ResponseEntity<Boolean> manualRenting(@PathVariable Long carId, @PathVariable String startDate,
                                                  @PathVariable String endDate, @RequestBody String[] customerData,
@@ -179,7 +179,7 @@ public class RequestController {
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_CUSTOMER')")
+    //@PreAuthorize("hasAuthority('ROLE_CUSTOMER')")
     @RequestMapping(method = RequestMethod.PUT, value = "/pay/{id}") // car id
     public ResponseEntity<Boolean> payForRenting(@PathVariable String id, HttpServletRequest request)
     {
@@ -196,7 +196,7 @@ public class RequestController {
         return  new ResponseEntity<>(true, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAuthority('WRITE_REVIEW')")
+    //@PreAuthorize("hasAuthority('WRITE_REVIEW')")
     @GetMapping(produces="application/json", value="/{id}/writeReview")
     public ResponseEntity<Boolean> canWriteReview(@PathVariable Long id, HttpServletRequest request){
         String token = tokenUtils.getToken(request);

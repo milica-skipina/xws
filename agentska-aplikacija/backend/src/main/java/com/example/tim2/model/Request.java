@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import org.owasp.encoder.Encode;
 
 import javax.persistence.*;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -56,6 +59,28 @@ public class Request {
         this.user = user;
         this.entrepreneur = entrepreneur;
         this.dateCreated = dateCreated;
+    }
+
+    public com.example.tim2.soap.gen.Order getGenerated(){
+        com.example.tim2.soap.gen.Order ret = new com.example.tim2.soap.gen.Order();
+        ret.setAgentUsername(this.entrepreneur.getUser().getUsername());
+        ret.setCustomerUsername(this.user.getUsername());
+        GregorianCalendar c = new GregorianCalendar();
+        c.setTime(getEndDate());
+        try {
+            ret.setEndDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
+            c.setTime(getStartDate());
+            ret.setStartDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
+            c.setTime(this.dateCreated);
+            ret.setDateCreated(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
+        } catch (DatatypeConfigurationException e) {
+            e.printStackTrace();
+        }
+        ret.setId(this.id);
+        ret.setMileage(this.mileage);
+        ret.setState(this.state);
+
+        return ret;
     }
 
     public Long getId() {

@@ -36,7 +36,7 @@ public class ReportController {
 
     private static final Logger logger = LoggerFactory.getLogger(ReportController.class);
 
-    @PreAuthorize("hasAuthority('CREATE_REPORT')")
+  //  @PreAuthorize("hasAuthority('CREATE_REPORT')")
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", value= "/{id}")
     public ResponseEntity<HttpStatus> addReport(@RequestBody ReportDTO report, HttpServletRequest request, @PathVariable Long id) {
         String token = tokenUtils.getToken(request);

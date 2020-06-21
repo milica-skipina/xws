@@ -6,6 +6,8 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import org.owasp.encoder.Encode;
+import rs.ac.uns.ftn.xws_tim2.Order;
+
 import java.util.*;
 
 @Entity

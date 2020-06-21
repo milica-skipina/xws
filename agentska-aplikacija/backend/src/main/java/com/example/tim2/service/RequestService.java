@@ -9,10 +9,11 @@ import com.example.tim2.model.Car;
 import com.example.tim2.model.Request;
 import com.example.tim2.model.User;
 import com.example.tim2.repository.AdvertisementRepository;
-
 import com.example.tim2.repository.CarRepository;
 import com.example.tim2.repository.EntrepreneurRepository;
 import com.example.tim2.repository.RequestRepository;
+import com.example.tim2.soap.clients.OrderClient;
+import com.example.tim2.soap.gen.AddOrderResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,15 +36,19 @@ public class RequestService {
 
     private AuthService authService;
 
+    private OrderClient orderClient;
+
     @Autowired
     public RequestService(AdvertisementRepository advertisementRepository, RequestRepository requestRepository,
-                          EntrepreneurRepository entrepreneurRepository, CarRepository carRepository) {
+                          EntrepreneurRepository entrepreneurRepository, CarRepository carRepository,
+                          OrderClient orderClient) {
         this.advertisementRepository = advertisementRepository;
         this.requestRepository = requestRepository;
         this.entrepreneurRepository = entrepreneurRepository;
         this.carRepository = carRepository;
         this.regularExpressions = new RegularExpressions();
         this.authService = authService;
+        this.orderClient = orderClient;
     }
 
     public boolean createRequests(String[] reqs, User u) {
@@ -181,6 +186,12 @@ public class RequestService {
         Request r = requestRepository.findOneById(requestId);
         if (r == null) {
             return false;
+        }
+        try{
+           AddOrderResponse response = orderClient.acceptOrder(r);
+           System.out.println("MIKRO ID: " + response.getMicroId());
+        }catch (Exception e){
+            e.printStackTrace();
         }
         if (flag) {
             List<Long> carIds = findAllByStateAndStartDateAndEndDate("RESERVED", r.getStartDate(), r.getEndDate());

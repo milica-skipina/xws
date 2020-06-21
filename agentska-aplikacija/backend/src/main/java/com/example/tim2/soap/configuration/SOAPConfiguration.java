@@ -77,6 +77,7 @@ public class SOAPConfiguration {
         client.setMarshaller(marshaller);
         client.setUnmarshaller(marshaller);
         client.setMessageSender(messageSender());
+
         return client;
     }
 
@@ -87,6 +88,7 @@ public class SOAPConfiguration {
         client.setMarshaller(marshaller);
         client.setUnmarshaller(marshaller);
         client.setMessageSender(messageSender());
+
         return client;
     }
 

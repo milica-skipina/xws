@@ -10,11 +10,13 @@ import orders.ordersmicroservice.dto.RequestDTO;
 import orders.ordersmicroservice.model.Advertisement;
 import orders.ordersmicroservice.model.Car;
 import orders.ordersmicroservice.model.Request;
+import orders.ordersmicroservice.repository.CarRepository;
 import orders.ordersmicroservice.repository.RequestRepository;
 import orders.ordersmicroservice.template.RestTemplateExample;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import rs.ac.uns.ftn.xws_tim2.Order;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -33,11 +35,14 @@ public class RequestService {
 
     private RequestRepository requestRepository;
 
+    private CarRepository carRepository;
+
     @Autowired
-    public RequestService(RequestRepository requestRepository, RestTemplateExample restTemplate) {
+    public RequestService(RequestRepository requestRepository, RestTemplateExample restTemplate, CarRepository carRepository) {
         this.requestRepository = requestRepository;
         this.restTemplateExample = restTemplate;
         this.regularExpressions = new RegularExpressions();
+        this.carRepository = carRepository;
     }
 
     public boolean adRequest(Long id){
@@ -263,8 +268,7 @@ public class RequestService {
             }
         }
         CarOrderDTO car = restTemplateExample.getCar(TLSConfiguration.URL + "advertisement/car/order/" + id, jwt);
-        Request manualRequest = new Request("PAID", -1, start, end, customerData[4], agentData[0], new Date());
-        manualRequest.setMileage(car.getMileage());
+        Request manualRequest = new Request("PAID", car.getMileage(), start, end, customerData[4], agentData[0], new Date());
         manualRequest.setAgentNamee(agentData[1]);
         manualRequest.setCustomerName(customerData[1] + " " + customerData[3]);
         Set<Car> cars = new HashSet<Car>(1);
@@ -371,5 +375,35 @@ public class RequestService {
             return false;
         else
             return true;
+    }
+
+    public List<Request> findAllByEndDateLessThanEqualOrStartDateGreaterThanEqualAndAgentUsernameAndState(Date endDate,
+                                                                                                             Date startDate,
+                                                                                                             String username,
+                                                                                                             String state) {
+        return requestRepository.findAllByEndDateLessThanEqualOrStartDateGreaterThanEqualAndAgentUsernameAndState
+                (endDate, startDate,  username, state);
+    }
+
+
+    public Request save(Request newRequest) {
+        return requestRepository.save(newRequest);
+    }
+
+    public Request requestWrapper(Order o) {
+        Request newRequest = new Request();
+        newRequest.setState(o.getState());
+        newRequest.setMileage(o.getMileage());
+        newRequest.setStartDate(o.getStartDate().toGregorianCalendar().getTime());
+        newRequest.setEndDate(o.getEndDate().toGregorianCalendar().getTime());
+        newRequest.setCustomerUsername(o.getCustomerUsername());
+        newRequest.setAgentUsername(o.getAgentUsername());
+        newRequest.setDateCreated(o.getDateCreated().toGregorianCalendar().getTime());
+        Set<Car> cars = new HashSet<>();
+        for (Long id : o.getCars()) {
+            cars.add(carRepository.findOneById(id));
+        }
+        save(newRequest);
+        return newRequest;
     }
 }

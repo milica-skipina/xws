@@ -22,11 +22,11 @@ import org.springframework.security.web.header.writers.StaticHeadersWriter;
 @EnableGlobalMethodSecurity(prePostEnabled=true)
 public class OrdersConfiguration extends WebSecurityConfigurerAdapter {
 
-    @Bean
+    /*@Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
-    }
+    }*/
 
     @Autowired
     private RestAuthenticationEntryPoint restAuthenticationEntryPoint;
@@ -34,12 +34,12 @@ public class OrdersConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private TokenUtils tokenUtils;
 
-    @Bean
+    /*@Bean
     public AuthenticationTokenFilter authenticationTokenFilterBean() throws Exception {
         AuthenticationTokenFilter authenticationTokenFilter = new AuthenticationTokenFilter(tokenUtils);
         authenticationTokenFilter.setAuthenticationManager(authenticationManagerBean());
         return authenticationTokenFilter;
-    }
+    }*/
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -53,11 +53,11 @@ public class OrdersConfiguration extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint).and()
                 .authorizeRequests()
-                .antMatchers( "/request/available")
+                .antMatchers( "/request/available", "/ws")
                 .permitAll()
                 .anyRequest().authenticated();
 
-        http.addFilterAfter(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+       // http.addFilterAfter(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override

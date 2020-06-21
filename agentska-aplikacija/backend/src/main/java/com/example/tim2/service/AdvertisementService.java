@@ -5,12 +5,14 @@ import com.example.tim2.dto.AdvertisementDTO;
 import com.example.tim2.dto.BasketDTO;
 import com.example.tim2.dto.CarDTO;
 import com.example.tim2.model.*;
+import com.example.tim2.model.Advertisement;
+import com.example.tim2.model.Car;
+import com.example.tim2.model.Image;
 import com.example.tim2.repository.*;
 import com.example.tim2.security.TokenUtils;
 import com.example.tim2.soap.clients.AdvertisementClient;
-import com.example.tim2.soap.gen.DeleteAdvertisementResponse;
-import com.example.tim2.soap.gen.EditAdvertisementResponse;
-import com.example.tim2.soap.gen.NewAdvertisementResponse;
+import com.example.tim2.soap.gen.*;
+import com.example.tim2.model.Pricelist;
 import org.owasp.encoder.Encode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -171,9 +173,6 @@ public class AdvertisementService {
                 return false;
             }
     }
-
-
-
 
     public Advertisement addAd(AdvertisementDTO advertisement, Long id, Long idp){
         Car car = carRepository.findOneById(id);
@@ -374,6 +373,25 @@ public class AdvertisementService {
 
     public Advertisement findOneById(Long id) {
         return advertisementRepository.findOneById(id);
+    }
+
+    public boolean sync(){
+        try {
+            AllPricelistsResponse response = advertisementClient.sendAllPricelists();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+
+        try {
+            AllAdvertisementsResponse response2 = advertisementClient.sendAllAdvertisements();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
 }

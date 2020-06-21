@@ -30,7 +30,7 @@ public class CarController {
     @Autowired
     private CarService carService;
 
-    @PreAuthorize("hasAuthority('READ_STATISTICS')")
+    //@PreAuthorize("hasAuthority('READ_STATISTICS')")
     @GetMapping(produces="application/json", value="/statistics")
     public ResponseEntity<List<CarOrderDTO>> getStatistics(HttpServletRequest request){
         String token = tokenUtils.getToken(request);

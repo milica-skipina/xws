@@ -6,8 +6,12 @@ import com.example.tim2.dto.BasketDTO;
 import com.example.tim2.model.Advertisement;
 import com.example.tim2.model.Car;
 import com.example.tim2.security.TokenUtils;
+
 import com.example.tim2.service.AdvertisementService;
 import com.example.tim2.service.CarService;
+import com.example.tim2.soap.gen.AllAdvertisementsResponse;
+import com.example.tim2.soap.gen.AllPricelistsResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -241,5 +245,16 @@ public class AdvertisementController {
         }
         logger.info("user " + username + " searched ads");
         return new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/sync", produces = "application/json")
+    public ResponseEntity<String> syncDatabase(){
+        boolean ok = advertisementService.sync();
+        if(ok){
+            return new ResponseEntity<>("Databases are synchronized", HttpStatus.OK);
+        }
+        else {
+            return new ResponseEntity<>("An error occurred while syncing. For more details, contact administrator. ", HttpStatus.EXPECTATION_FAILED);
+        }
     }
 }
