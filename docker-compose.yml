@@ -183,11 +183,12 @@ services:
       - postgres
       - eureka
 
-  email:
+  email-service:
     build: ./email-service
-    image: email
-    container_name: email
+    image: email-service
+    container_name: email-service
     restart: on-failure
+    tty: true
     networks:
       - microservices
     ports:
@@ -200,11 +201,10 @@ services:
       KEYSTORE_ALIAS: message
       TRUSTSTORE: /etc/keystore/message.truststore.p12
       TRUSTSTORE_PASSWORD: password
-    tty: true
+    depends_on:
+      - rabbitmq-broker
     volumes:
       - ./certs/message/keystore:/etc/keystore
-    depends_on: 
-      - rabbitmq-broker
 
   rabbitmq-broker:
     image: rabbitmq:management-alpine
@@ -213,17 +213,16 @@ services:
       - 5672:5672
       - 5671:5671
       - 15671:15671
-    networks:
-      - microservices 
     environment:
-      RABBITMQ_SSL_CACERTFILE: /etc/rabbitmq/tls-ca-chain.pem
-      RABBITMQ_SSL_CERTFILE: /etc/rabbitmq/rabbitmq.crt
+      RABBITMQ_SSL_CACERTFILE: /etc/keystore/tls-ca-chain.pem
+      RABBITMQ_SSL_CERTFILE: /etc/keystore/rabbitmq.crt
       RABBITMQ_SSL_FAIL_IF_NO_PEER_CERT: "true"
-      RABBITMQ_SSL_KEYFILE: /etc/rabbitmq/rabbitmq.key
+      RABBITMQ_SSL_KEYFILE: /etc/keystore/rabbitmq.key
       RABBITMQ_SSL_VERIFY: verify_peer
-    tty: true
+    networks:
+      - microservices
     volumes:
-      - ./certs/rabbitmq:/etc/rabbitmq
+      - ./certs/rabbitmq:/etc/keystore
       
 
 #AGENTSKA APLIKACIJA
