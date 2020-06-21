@@ -21,7 +21,7 @@ services:
       - ./certs/eureka/keystore:/etc/keystore
 
   zuul:
-    build: ./zuul
+    build: ./microservices-app
     image: zuul
     container_name: zuul
     restart: on-failure
@@ -138,9 +138,7 @@ services:
       REGISTRY_HOST: eureka
       REGISTRY_PORT: 8761
       RMQ_HOST: rabbitmq-broker
-      RMQ_PORT: 5672
-      RMQ_USERNAME: guest
-      RMQ_PASSWORD: guest
+      RMQ_PORT: 5671
       KEYSTORE: /etc/keystore/auth.keystore.p12
       KEYSTORE_PASSWORD: password
       KEYSTORE_ALIAS: auth
@@ -196,10 +194,15 @@ services:
       - 8086:8086
     environment:
       RMQ_HOST: rabbitmq-broker
-      RMQ_PORT: 5672
-      RMQ_USERNAME: guest
-      RMQ_PASSWORD: guest
+      RMQ_PORT: 5671     
+      KEYSTORE: /etc/keystore/message.keystore.p12
+      KEYSTORE_PASSWORD: password
+      KEYSTORE_ALIAS: message
+      TRUSTSTORE: /etc/keystore/message.truststore.p12
+      TRUSTSTORE_PASSWORD: password
     tty: true
+    volumes:
+      - ./certs/message/keystore:/etc/keystore
     depends_on: 
       - rabbitmq-broker
 
@@ -208,7 +211,8 @@ services:
     container_name: rabbitmq-broker
     ports:
       - 5672:5672
-      - 15672:15672
+      - 5671:5671
+      - 15671:15671
     networks:
       - microservices 
     environment:
