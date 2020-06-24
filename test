@@ -8,7 +8,8 @@ Any device that exposes an HTTP-based interface is potentially vulnerable to Pat
 Most web sites restrict user access to a specific portion of the file-system, typically called the "web document root" or "CGI root" directory. 
 These directories contain the files intended for user access and the executable necessary to drive web application functionality. 
 To access files or execute commands anywhere on the file-system, Path Traversal attacks will utilize the ability of special-characters sequences.
-
+resava se validacijom
+kada stavi + u city to prolazi, generalno prolaze specijalni karakteri, mozda proveravati grad samo na slova
 
 
 
