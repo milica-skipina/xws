@@ -10,7 +10,7 @@ These directories contain the files intended for user access and the executable 
 To access files or execute commands anywhere on the file-system, Path Traversal attacks will utilize the ability of special-characters sequences.
 resava se validacijom
 kada stavi + u city to prolazi, generalno prolaze specijalni karakteri, mozda proveravati grad samo na slova
-
+proveriti city u carAd
 
 
 medium > 
