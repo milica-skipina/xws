@@ -1,7 +1,7 @@
 medium > 
-# X-Frame-Options header is not included in the HTTP response to protect against 'ClickJacking' attacks.
+# X-Frame-Options header is not included in the HTTP response to protect against 'ClickJacking' attacks. SOLVED
 # http://localhost:8099/auth/login Access-Control-Allow-Origin: * Web browser data loading may be possible, due to a Cross Origin Resource Sharing (CORS) 
-misconfiguration on the web server
+misconfiguration on the web server SOLVED
 
 low > 
 # The cache-control and pragma HTTP header have not been set properly or are missing allowing the browser and proxies to cache content.
