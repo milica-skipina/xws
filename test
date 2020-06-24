@@ -1,3 +1,17 @@
+high >
+# Path Traversal - http://localhost:8099/advertisement/addNew/1
+parametri: kidsSeats, max_price, mileage, mileageLimit, min_price, rating, startDate
+zanimljivo endDate nije samo je startDate
+opis napada:
+The Path Traversal attack technique allows an attacker access to files, directories, and commands that potentially reside outside the web document root directory. An attacker may manipulate a URL in such a way that the web site will execute or reveal the contents of arbitrary files anywhere on the web server. 
+Any device that exposes an HTTP-based interface is potentially vulnerable to Path Traversal.
+Most web sites restrict user access to a specific portion of the file-system, typically called the "web document root" or "CGI root" directory. 
+These directories contain the files intended for user access and the executable necessary to drive web application functionality. 
+To access files or execute commands anywhere on the file-system, Path Traversal attacks will utilize the ability of special-characters sequences.
+
+
+
+
 medium > 
 # X-Frame-Options header is not included in the HTTP response to protect against 'ClickJacking' attacks. SOLVED
 # http://localhost:8099/auth/login Access-Control-Allow-Origin: * Web browser data loading may be possible, due to a Cross Origin Resource Sharing (CORS) 
