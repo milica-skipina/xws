@@ -17,6 +17,11 @@ medium >
 # http://localhost:8099/auth/login Access-Control-Allow-Origin: * Web browser data loading may be possible, due to a Cross Origin Resource Sharing (CORS) 
 misconfiguration on the web server SOLVED
 
+# XSS REFLEKTOVANI
+parametri: endDate, kidsSeats, mileage, mileageLimit, startDate
+izvrsen napad: <script>alert(1);</script>
+i ova polja treba eskejpovati na obe strane, preporuka je onaj encoder koji koristimo, ali mislim da ga koristimo samo za string polja, treba za sve
+
 # Buffer Overflow
 opis: Buffer overflow errors are characterized by the overwriting of memory spaces of the background web process, which should have never been modified intentionally or unintentionally. Overwriting values of the IP (Instruction Pointer), BP (Base Pointer) and other registers causes exceptions, 
 segmentation faults, and other process errors to occur. Usually these errors end execution of the application in an unexpected way. 
