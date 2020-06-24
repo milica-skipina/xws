@@ -1,5 +1,10 @@
-medium > X-Frame-Options header is not included in the HTTP response to protect against 'ClickJacking' attacks.
-low > The cache-control and pragma HTTP header have not been set properly or are missing allowing the browser and proxies to cache content.
-low > The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing 
+medium > 
+# X-Frame-Options header is not included in the HTTP response to protect against 'ClickJacking' attacks.
+# http://localhost:8099/auth/login Access-Control-Allow-Origin: * Web browser data loading may be possible, due to a Cross Origin Resource Sharing (CORS) 
+misconfiguration on the web server
+
+low > 
+# The cache-control and pragma HTTP header have not been set properly or are missing allowing the browser and proxies to cache content.
+# The Anti-MIME-Sniffing header X-Content-Type-Options was not set to 'nosniff'. This allows older versions of Internet Explorer and Chrome to perform MIME-sniffing 
 on the response body, potentially causing the response body to be interpreted and displayed as a content type other than the declared content type. 
 Current (early 2014) and legacy versions of Firefox will use the declared content type (if one is set), rather than performing MIME-sniffing.
