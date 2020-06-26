@@ -38,14 +38,13 @@ public class OrderEndpoint {
                 order.getCustomerUsername(), "PAID");
         if (checkReq.isEmpty()) {       // nema tog zahteva, pa ga treba dodati
             newRequest = requestService.requestWrapper(order);
-            response.setMicroId(newRequest.getId());
-            requestService.save(newRequest);
+            response.setOk(true);
         } else {
             for (Request r : checkReq ) {
                 for (Car car : r.getCars() ) {
                     for (Long idX : order.getCars() ) {
                         if (car.getId() == idX ) {
-                            // u response dodati flag false
+                            response.setOk(false);
                             System.out.println("Pronadjen auto " + idX);
                              break;
                         }
@@ -53,9 +52,10 @@ public class OrderEndpoint {
 
                 }
             }
+
         }
 
-        response.setMicroId(14L);   //znak da nije kreiran novi zahtev, therefore traba staviti false flag
+        response.setMicroId(newRequest.getId());
 
         return response;
     }

@@ -8,10 +8,10 @@ server:
   ssl:
     algorithm: ${TLS_VERSION:TLSv1.2}
     key-store: ${KEYSTORE:classpath:eureka.keystore.p12}
-    key-store-password: ${KEYSTORE_PASSWORD:password}
+    key-store-password: ${KEYSTORE_PASSWORD:soMe_StrOng12_PaSS}
     key-alias: ${KEYSTORE_ALIAS:eureka}
     trust-store: ${TRUSTSTORE:classpath:eureka.truststore.p12}
-    trust-store-password: ${TRUSTSTORE_PASSWORD:password}
+    trust-store-password: ${TRUSTSTORE_PASSWORD:soMe_StrOng12_PaSS}
     enabled: true
     client-auth: need
 

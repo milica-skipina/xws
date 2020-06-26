@@ -29,6 +29,7 @@ class Profile extends RoleAwareComponent {
             hideChangePass: true,
             oldPassword: "",
             password:"",
+            password2:"",
             passErrorText: "",
             bestRated: [],
             mostCrossed: [],
@@ -65,7 +66,7 @@ class Profile extends RoleAwareComponent {
         axios({
             method: 'get',
             url: url + 'user/current',
-            headers: { "Authorization": AuthStr } ,            
+            headers: { "Authorization": AuthStr } ,
         }).then((response) => {
             this.setState({ user: response.data })
         }, (error) => {
@@ -74,8 +75,31 @@ class Profile extends RoleAwareComponent {
     }
 
     changePass(){
-        alert("Implementiraj me!");
-        NotificationManager.success("You have successfully changed your password", '', 3000);
+      let token = localStorage.getItem("ulogovan")
+      let AuthStr = 'Bearer '.concat(token);
+      let data = {
+        oldPassword: this.state.oldPassword,
+        newPassword: this.state.password
+      };
+
+      console.log(data);
+
+      axios({
+        method:"put",
+        url: url + 'auth/changePassword',
+        headers: { "Authorization": AuthStr },
+        data : data
+      }).then((response) => {
+        if(response.status === 200){
+          NotificationManager.info("Password changed.");
+          this.setState({password:"",oldPassword: "",password2:""});
+        }else{
+          NotificationManager.info("Failed to change password.");
+        }
+
+      }, (error) => {
+        console.log(error);
+      });
     }
 
       validatePassword = () => {
@@ -100,7 +124,7 @@ class Profile extends RoleAwareComponent {
           continue;
         }
       }
-      
+
       if (!numCheck) {
         this.setState({passErrorText: "Password must contain at least one digit.", formErrorText: ""})
       } else if (!lowerCheck) {
@@ -111,23 +135,24 @@ class Profile extends RoleAwareComponent {
         this.setState({passErrorText: "", formValid: false, formErrorText: ""})
       }
 
-      if (this.state.username !== "") {   
-          let usrname = this.state.username.toLowerCase();
+      if (this.state.username !== "") {
+          let usrname = this.state.user.username.toLowerCase();
           let passchk = this.state.password.toLowerCase();
           if (passchk.includes(usrname)) {
             this.setState({passErrorText: "Password can not contain username.", formErrorText: ""})
           }
       }
-              
+
     }
   }
 
   checkPasswordMatching = (event) => {
+      this.setState({password2:event.target.value});
     if (this.state.password !== event.target.value)
       {
         this.setState({formValid: true, matchErrorText: "Password doesn't match."});    // disabling submit button
       } else {
-        this.setState({formValid: false, matchErrorText: "", password1: event.target.value});
+        this.setState({formValid: false, matchErrorText: "", password: event.target.value});
       }
   }
 
@@ -187,9 +212,9 @@ class Profile extends RoleAwareComponent {
       url: url + 'advertisement/sync',
       headers: { "Authorization": AuthStr },
   }).then((response) => {
-    NotificationManager.success(response.data, '', 3000);     
+    NotificationManager.success(response.data, '', 3000);
   }, (error) => {
-    NotificationManager.error(error.data, '', 3000);     
+    NotificationManager.error(error.data, '', 3000);
     console.log(error);
   });
   }
@@ -210,7 +235,7 @@ class Profile extends RoleAwareComponent {
                         <Label hidden={localStorage.getItem("role") === "ROLE_ADMIN"}>Address: {this.state.user.address}</Label>
                         <br></br>
                         <Label hidden={localStorage.getItem("role") === "ROLE_ADMIN"}>City: {this.state.user.city}</Label>
-                        <Button hidden={localStorage.getItem("role") !== "ROLE_SELLER"} style={{ width: "auto" }} size="sm" 
+                        <Button hidden={localStorage.getItem("role") !== "ROLE_SELLER"} style={{ width: "auto" }} size="sm"
                                 onClick={() => this.sync()} block color="success">
                             Sync
                         </Button>
@@ -234,7 +259,7 @@ class Profile extends RoleAwareComponent {
                         <InputGroup className="mb-4">
 
                             <Input type="password" placeholder="Repeat new password" autoComplete="new-password"
-                                onChange={this.checkPasswordMatching}
+                                   value={this.state.password2}  onChange={this.checkPasswordMatching}
                             />
                             <FormText color="danger">{this.state.matchErrorText}</FormText>
                         </InputGroup>
@@ -251,15 +276,15 @@ class Profile extends RoleAwareComponent {
             <Row hidden={localStorage.getItem("role") !== "ROLE_SELLER"}>
             <Col md="4" xl="4" xs="12">
                 <h4 style={{textAlign:"center"}}><i className="cui-speedometer icons font-2xl" style={{color:"red"}}></i> The most crossed kilometers cars</h4>
-                <Statistics cars={this.state.mostCrossed} typeCol="crossed"/>             
+                <Statistics cars={this.state.mostCrossed} typeCol="crossed"/>
             </Col>
             <Col md="4" xl="4" xs="12">
                 <h4 style={{textAlign:"center"}}><i className="fa fa-commenting-o" style={{color:"blue"}}></i> The most commented cars</h4>
-                <Statistics cars={this.state.mostCommented} typeCol="comments"/>             
+                <Statistics cars={this.state.mostCommented} typeCol="comments"/>
             </Col>
             <Col md="4" xl="4" xs="12">
                 <h4 style={{textAlign:"center"}}><i className="fa fa-star" style={{color:"gold"}}></i> The best-rated cars</h4>
-                <Statistics cars={this.state.bestRated} typeCol="rating"/>             
+                <Statistics cars={this.state.bestRated} typeCol="rating"/>
             </Col>
             </Row>
             </Card>

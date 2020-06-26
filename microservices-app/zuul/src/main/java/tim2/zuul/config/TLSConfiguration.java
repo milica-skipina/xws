@@ -10,6 +10,9 @@ import org.apache.http.ssl.SSLContexts;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
 import javax.net.ssl.SSLContext;
 import java.io.File;
@@ -77,7 +80,16 @@ public class TLSConfiguration {
     }
 
     @Bean
-    public CloseableHttpClient httpClient() {
+    @LoadBalanced
+    public RestTemplate restTemplate() {
+        return new RestTemplate(new HttpComponentsClientHttpRequestFactory(
+                httpClient(keystoreType, keystore, keystorePassword, alias,
+                        truststoreType, truststore, truststorePassword)));
+    }
+
+    @Bean
+    public HttpClient httpClient(String keystoreType, String keystore, String keystorePassword, String alias,
+                                 String truststoreType, String truststore, String truststorePassword) {
         try {
             KeyStore keyStore = KeyStore.getInstance(keystoreType);
             keyStore.load(new FileInputStream(new File(keystore)), keystorePassword.toCharArray());

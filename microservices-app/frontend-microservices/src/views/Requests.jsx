@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { RoleAwareComponent } from 'react-router-role-authorization';
+import {Redirect} from 'react-router-dom';
 import Checkbox from '@material-ui/core/Checkbox';
 import {NotificationContainer, NotificationManager} from 'react-notifications';
 //import "../../../node_modules/react-notifications/lib/notifications.css"
 //import "../../../node_modules/react-notifications/lib/Notifications.js"
-import {Redirect} from 'react-router-dom';
+
 import BootstrapTable from 'react-bootstrap-table-next';
 
 //import '../../scss/vendors/custom.css';
@@ -46,7 +47,6 @@ class Request extends RoleAwareComponent {
       today: "",
       
     };
-
     
     let arr = new Array();
     arr.push(localStorage.getItem('role'));

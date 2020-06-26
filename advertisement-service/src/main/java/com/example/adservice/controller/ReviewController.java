@@ -1,17 +1,24 @@
 package com.example.adservice.controller;
 
+import com.example.adservice.config.TLSConfiguration;
 import com.example.adservice.config.TokenUtils;
 import com.example.adservice.datavalidation.RegularExpressions;
 import com.example.adservice.dto.ReviewDTO;
 import com.example.adservice.service.ReviewService;
+import com.netflix.ribbon.proxy.annotation.Http;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/review")
@@ -22,6 +29,9 @@ public class ReviewController {
 
     @Autowired
     private TokenUtils tokenUtils;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     @PreAuthorize("hasAuthority('CREATE_REVIEW')")
     @PostMapping(consumes = "application/json")
@@ -60,8 +70,15 @@ public class ReviewController {
 
     @PreAuthorize("hasAuthority('MODIFY_REVIEW')")
     @PutMapping(value="/{id}")
-    public ResponseEntity<ReviewDTO> editReview(@PathVariable Long id, @RequestBody ReviewDTO reviewDTO){
+    public ResponseEntity<ReviewDTO> editReview(@PathVariable Long id, @RequestBody ReviewDTO reviewDTO, HttpServletRequest request){
+        String token = tokenUtils.getToken(request);
+        String username = tokenUtils.getUsernameFromToken(token);
         ReviewDTO ret = reviewService.editState(id, reviewDTO);
+        final String url = TLSConfiguration.URL + "authpoint/user/changeState/{username}";
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("username", username);
+        HttpEntity<String> sentTemp = new HttpEntity<String>(reviewDTO.getState());
+        HttpEntity<Boolean> result = restTemplate.exchange(url, HttpMethod.PUT, sentTemp, Boolean.class, params);
         if(ret == null){
             return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
         }

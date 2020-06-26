@@ -33,8 +33,14 @@ public class User implements UserDetails {
     @Column(name = "activated", nullable = true)
     private boolean activated;
 
+    @Column(name = "blocked", nullable = true)
+    private boolean blocked;
+
     @Column(name = "enabled", nullable = true)
     private boolean enabled; // authorization for accessing methods
+
+    @Column(name = "deleted", nullable = true)
+    private boolean deleted; // authorization for accessing methods
 
     @Column(name = "last_password_reset_date", nullable = true)
     private Timestamp lastPasswordResetDate;
@@ -54,6 +60,9 @@ public class User implements UserDetails {
     @JsonBackReference(value = "admin_movement")
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Admin admin;
+
+    @Column(name = "number_failed_login", nullable = true)
+    private int numberFailedLogin;
 
     public void setAuthorities(Set<Role> authorities) {
         this.authorities = authorities;
@@ -76,8 +85,6 @@ public class User implements UserDetails {
     public void setLastPasswordResetDate(Timestamp lastPasswordResetDate) {
         this.lastPasswordResetDate = lastPasswordResetDate;
     }
-
-
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
@@ -165,6 +172,14 @@ public class User implements UserDetails {
         return u;
     }
 
+    public int getNumberFailedLogin() {
+        return numberFailedLogin;
+    }
+
+    public void setNumberFailedLogin(int numberFailedLogin) {
+        this.numberFailedLogin = numberFailedLogin;
+    }
+
     public void setUsername(String username) {
         this.username = username;
     }
@@ -189,11 +204,17 @@ public class User implements UserDetails {
         this.authorities = roles;
     }
 
+    public List<String> getRoleNames(){
+        List<String> names = new ArrayList<>();
+        for(Role r : this.authorities){
+            names.add(r.getName());
+        }
+        return names;
+    }
+
     public boolean isActivated() {
         return activated;
     }
-
-
 
     public Agent getAgent() {
         return agent;
@@ -205,6 +226,22 @@ public class User implements UserDetails {
 
     public Admin getAdmin() {
         return admin;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
     }
 }
 

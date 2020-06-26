@@ -863,12 +863,10 @@ class Ad extends RoleAwareComponent {
                     <FormGroup row>
                     <Col md="9"><Label>Collision Damage Waiver</Label></Col>
                   <Col md="9">
-                    <FormGroup check className="checkbox">
-                      <Input className="form-check-input" type="checkbox" onChange={this.collisionValidation} checked={this.state.collision} name="collision" value="collision" />
+                      <Input style={{marginLeft:"5rem"}} type="checkbox" onChange={this.collisionValidation} checked={this.state.collision} name="collision" value="collision" />
                       <Col md="3">
                         <Label check className="form-check-label" htmlFor="checkbox1">Yes </Label>
                       </Col>
-                      </FormGroup>
                   </Col>
                   </FormGroup>
                   </Col>
@@ -876,12 +874,10 @@ class Ad extends RoleAwareComponent {
                   <FormGroup row>
                   <Col md="6"><Label>Tracking device</Label></Col>
                   <Col md="9">
-                    <FormGroup check className="checkbox">
-                      <Input className="form-check-input" type="checkbox" onChange={e => this.setState({following: !this.state.following})} checked={this.state.following} name="collision" value="following" />
+                      <Input style={{marginLeft:"5rem"}} type="checkbox" onChange={e => this.setState({following: !this.state.following})} checked={this.state.following} name="following" value="following" />
                       <Col md="3">
                         <Label check className="form-check-label" htmlFor="checkbox1">Yes</Label>
                       </Col>
-                    </FormGroup>
                   </Col>
                   </FormGroup>
                   </Col>

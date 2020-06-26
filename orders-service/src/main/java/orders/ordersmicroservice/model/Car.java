@@ -39,12 +39,6 @@ public class Car {
     @Column(name = "insurance", nullable = true)
     private boolean insurance;
 
-    /*@Column(name = "min_price", nullable = true)
-    private Double min_price;
-
-    @Column(name = "max_price", nullable = true)
-    private Double max_price;*/
-
     @Column(name = "mileage", nullable = false)
     private Double mileage;
 
@@ -61,7 +55,7 @@ public class Car {
     private String entrepreneurUsername;        // kad se oglas obrise, auto se moze ponovo iskoristiti za postavljanje novog olgasa
 
 
-    @ManyToMany(mappedBy = "cars")
+    @ManyToMany(mappedBy = "cars", fetch = FetchType.EAGER)
     private Set<Request> request = new HashSet<Request>();
 
     @JsonManagedReference(value = "advertisementcar_mov")
@@ -74,6 +68,9 @@ public class Car {
 
     @Column(name = "image_url", nullable = false, length=10485760)
     String image;
+
+    @Column(name = "microId", nullable = true)
+    Long microId;       // da bi se izjednacilo sa advertisementom
 
     public Car() {
     }

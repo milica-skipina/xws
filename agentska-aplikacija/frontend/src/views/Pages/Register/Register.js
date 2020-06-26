@@ -23,7 +23,7 @@ class Register extends Component {
       city: "", 
       email: "",      
       formValid: true  ,   // enable/disable submit button depending on form validation
-      
+      formUsernameText: "",
       formErrorText: "" ,
       passErrorText: "" ,  
       emailErrorText: "" ,      
@@ -48,6 +48,14 @@ class Register extends Component {
       return false;
     }
   }
+
+  validateUsername = () => {
+    if (this.state.username.length < 6) {
+      this.setState({formValid:true, formUsernameText: "Minimum length of username is 6."});
+    } else {
+      this.setState({formValid:false, formUsernameText: ""});
+    }
+  }
   
   validatePassword = () => {
     let upperCheck = false;
@@ -55,8 +63,8 @@ class Register extends Component {
     let numCheck = false;
     if (this.state.password === "") {
       this.setState({passErrorText: "This field is required.", formErrorText: ""})
-    }else if (this.state.password.length < 8 ) {
-      this.setState({passErrorText: "Minimum length of password is 8 characters.", formErrorText: ""})
+    }else if (this.state.password.length < 10 ) {
+      this.setState({passErrorText: "Minimum length of password is 10 characters.", formErrorText: ""})
     }else {
       let i;
       for (i = 0 ; i <  this.state.password.length; i++) {
@@ -112,11 +120,17 @@ class Register extends Component {
      }
   }
 
-cleanAll = () => this.setState({password: "", formValid: true  , name: "", surname: "", address: "" ,
+cleanAll = () => this.setState({password: "", formValid: true  , name: "", surname: "", address: "" , email: "",
                                 usernameErrorText: "", city: "", password1: "" , emailErrorText: "",
                                 notFilledError: false , formErrorText: "" , passErrorText: "", username: ""})
 
-sendRegistration = event => {
+  /*redirection = flag => {
+    if (flag === 404) {
+      this.props.history
+    }
+  } */ 
+
+  sendRegistration = event => {
         event.preventDefault();
         this.validateFields();
         
@@ -140,12 +154,15 @@ sendRegistration = event => {
             ContentType: 'application/json'            
           }).then((response) => {
             if (response.status === 200){
-                this.props.history('/oglasi');
-            }
-            NotificationManager.success('Vas zahtev za registraciju je uspesno poslat!', 'Uspjesno!', 3000);
-              
+              NotificationManager.success('Vas zahtev za registraciju je uspesno poslat!', 'Uspjesno!', 3000);
+              this.props.history.push('/oglasi');
+            } else if (response.status === 500) {
+              this.props.history.push('/500');
+            } else if (response.status === 404) {
+              this.props.history.push('/404');
+            }        
           }, (error) => {
-            console.log(error);
+            this.props.history.push('/404');
           });
 
           this.cleanAll();
@@ -170,9 +187,10 @@ sendRegistration = event => {
                           <i className="icon-user"></i>
                         </InputGroupText>
                       </InputGroupAddon>
-                      <Input type="text" placeholder="Username" autoComplete="username"
+                      <Input type="text" placeholder="Username" autoComplete="username" onBlur={this.validateUsername}
                             value={this.state.username} onChange={event => this.setState({username: event.target.value})} 
                             />
+                      <FormText color="danger">{this.state.formUsernameText}</FormText>
                     </InputGroup>
                     <InputGroup className="mb-3">
                       <InputGroupAddon addonType="prepend">

@@ -9,9 +9,10 @@ const Basket = lazy(() => import('./views/Pages/Basket'));
 const Requests = lazy(() => import('./views/Pages/Requests'));
 const Orders =lazy(() => import('./views/Pages/Orders.js'));
 const Comments = lazy(() => import('./views/Pages/Comments'));
-const Profile = lazy(() => import('./views/Pages/Profile'))
-const Messages = lazy(() => import('./views/Pages/Messages'))
-
+const Profile = lazy(() => import('./views/Pages/Profile'));
+const Messages = lazy(() => import('./views/Pages/Messages'));
+const Dashboard = lazy(() => import('./views/Pages/Dashboard'));
+const Validation  = lazy(() => import('./views/Pages/Validation'));
 
 // https://github.com/ReactTraining/react-router/tree/master/packages/react-router-config
 
@@ -27,6 +28,8 @@ export default  [
   { authorize: ["ROLE_SELLER"], path: '/orders', component: Orders },
   { authorize: ["ROLE_SELLER", "ROLE_ADMIN", "ROLE_CUSTOMER"], path: '/profile', component: Profile },
   { authorize: ["ROLE_SELLER", "ROLE_CUSTOMER"], path: '/messages', component: Messages },
+  { authorize: ["ROLE_ADMIN"], path: '/dashboard', component: Dashboard },
+  { authorize:["gfdsdfgh"], path: '/validation', component: Validation },
   //{ path: '/register', component: Register },
   //{ path: '/home', component: lazy(() => import('./containers/DefaultLayout')) },
 

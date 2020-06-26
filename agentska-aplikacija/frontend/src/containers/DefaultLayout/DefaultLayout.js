@@ -6,7 +6,7 @@ import "../../../node_modules/react-notifications/lib/notifications.css"
 import "../../../node_modules/react-notifications/lib/Notifications.js"
 import axios from 'axios';
 import {
-  Container, Modal, ModalBody, ModalFooter,
+  Container, Modal, ModalBody, ModalFooter, Label,
   Button, Form, Input, InputGroup, FormText,
   InputGroupAddon, InputGroupText, Row, ModalHeader
 } from 'reactstrap';
@@ -53,13 +53,19 @@ class DefaultLayout extends Component {
       password11Validation: "",
       password1Validation: "",
       modal: false,
-      primary: false
+      primary: false ,
+      hideInputMail: true,
+      emailErrorText: "" ,
+      formValidMail: true ,
+      email: ""
     };
 
     this.togglePrimary = this.togglePrimary.bind(this);
     this.validateLoginFields = this.validateLoginFields.bind(this);
     this.validateUsername = this.validateUsername.bind(this);
     this.navig = this.navig.bind(this);
+    this.validateEmail = this.validateEmail.bind(this)
+    this.AccountRecovery = this.AccountRecovery.bind(this)
   }
 
   login = e => {
@@ -71,6 +77,38 @@ class DefaultLayout extends Component {
     this.setState({
       primary: !this.state.primary,
     });
+  }
+
+  AccountRecovery = (event) => {
+    let data = []
+    data.push(this.state.email)
+    axios({
+      method: 'post',
+      url: url + 'user/forgotPassword',
+      data: data,
+      ContentType: 'application/json'
+    }).then((response) => {
+      if (response.status === 200) {        
+        NotificationManager.success("Recovery email is sent.", 'Success!', 3000); 
+        this.setState({hideInputMail: !this.state.hideInputMail});       
+      } else {
+        NotificationManager.error(response.data.accessToken, 'Email doesn\'t exist in our system!', 3000);
+      }
+
+    }, (error) => {
+      //NotificationManager.error(response.data.accessToken, 'Error!', 3000);
+
+    });
+  }
+
+  validateEmail = (event) => {
+    const regex = /\S+@\S+\.\S+/;
+     if ( !regex.test(event.target.value) )   //email not appropriate
+     {
+        this.setState({formValidMail: true, emailErrorText: "Expected input: local@domain."})
+     } else {
+      this.setState({formValidMail: false, emailErrorText: ""})
+     }
   }
 
   validateLoginFields = () => {
@@ -103,8 +141,7 @@ class DefaultLayout extends Component {
 
   sendLogin = event => {
     event.preventDefault();
-    console.log("ASDASASASD");
-
+    
     if (this.validateLoginFields()) {
       this.setState({formErrorText: "Both fields are required.", formValid: true})
     } else {
@@ -113,7 +150,7 @@ class DefaultLayout extends Component {
         "username": this.state.username,
         "password": this.state.password
       };
-      console.log("ASDASASASD");
+      
       axios({
         method: 'post',
         url: url + 'auth/login',
@@ -260,13 +297,29 @@ class DefaultLayout extends Component {
                        onChange={event => this.setState({password: event.target.value})}/>
                 <FormText color="danger">{this.state.passErrorText}</FormText>
               </InputGroup>
+              <Label color="info" hidden={this.state.hideInputMail}>Enter your email and we will send you recovery details:</Label>
+              <InputGroup className="mb-4" hidden={this.state.hideInputMail}>              
+                <InputGroupAddon addonType="prepend">
+                <InputGroupText>@</InputGroupText>
+                </InputGroupAddon>
+                <Input type="text" placeholder="email" value={this.state.email}
+                       onChange={event => this.setState({email: event.target.value})}
+                       onBlur={this.validateEmail}/>
+                <FormText color="danger">{this.state.emailErrorText}</FormText>
+              </InputGroup>
               <Row>
                 <FormText color="danger">{this.state.formErrorText}</FormText>
+              </Row>
+              <Row className="text-center">
+                <div class="text-center">
+                <Button color="link" onClick={event => this.setState({hideInputMail: !this.state.hideInputMail})}>Forgot password?</Button> 
+                </div>
               </Row>
             </Form>
           </ModalBody>
           <ModalFooter>
-            <Button color="primary" onClick={this.sendLogin} disabled={this.state.formValid}>Log in</Button>{' '}
+            {!this.state.hideInputMail && <Button color="primary" onClick={this.AccountRecovery} disabled={this.state.formValidMail}>Send email</Button>}{' '}
+                {this.state.hideInputMail && <Button color="primary" onClick={this.sendLogin} disabled={this.state.formValid}>Log in</Button>}{' '}
             <Button color="secondary" onClick={this.togglePrimary}>Cancel</Button>
           </ModalFooter>
         </Modal>

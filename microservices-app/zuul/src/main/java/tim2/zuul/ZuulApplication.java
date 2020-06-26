@@ -12,7 +12,6 @@ import org.springframework.web.filter.CorsFilter;
 
 @SpringBootApplication
 @EnableEurekaClient
-//@EnableFeignClients
 @EnableZuulProxy
 public class ZuulApplication {
 

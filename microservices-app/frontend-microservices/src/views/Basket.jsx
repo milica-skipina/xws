@@ -9,25 +9,8 @@ import {Redirect} from 'react-router-dom';
 import {
   Button, Modal, ModalBody, ModalFooter, ModalHeader,
   Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  Col,
-  Form,
-  FormGroup,
-  FormText,
-  Input,
-  Label,
-  Row,
-  Nav,
-  NavItem,
-  NavLink,
-  TabContent,
-  TabPane,
-  Table,
-  Pagination,
-  PaginationItem,
-  PaginationLink
+  CardBody,  
+  Table  
 } from 'reactstrap';
 
 //const url = 'http://localhost:8099/';

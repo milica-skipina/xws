@@ -1,18 +1,25 @@
 import React, { Component } from 'react';
 import { MDBCard, MDBCardTitle } from "mdbreact";
 import StarRatings from 'react-star-ratings';
+import {Redirect} from 'react-router-dom';
+import { RoleAwareComponent } from 'react-router-role-authorization';
 import {
     Button,
     Col,
     Row,
 } from 'reactstrap';
 
-class Statistics extends Component {
+class Statistics extends RoleAwareComponent {
 
     constructor(props) {
         super(props);
         this.state = {
         };
+
+        let arr = [];
+        arr.push(localStorage.getItem('role'));        
+        this.userRoles = arr;
+        this.allowedRoles = ['ROLE_SELLER'];
 
         this.getColor = this.getColor.bind(this);
         this.saznajVise = this.saznajVise.bind(this);
@@ -89,7 +96,7 @@ class Statistics extends Component {
             </section>
         </div>);
 
-        return ret;
+    return this.rolesMatched() ? ret : <Redirect to="/oglasi" />;
     }
 }
 

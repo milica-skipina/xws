@@ -14,6 +14,8 @@ import orders.ordersmicroservice.repository.CarRepository;
 import orders.ordersmicroservice.repository.RequestRepository;
 import orders.ordersmicroservice.template.RestTemplateExample;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import rs.ac.uns.ftn.xws_tim2.Order;
@@ -272,7 +274,12 @@ public class RequestService {
         manualRequest.setAgentNamee(agentData[1]);
         manualRequest.setCustomerName(customerData[1] + " " + customerData[3]);
         Set<Car> cars = new HashSet<Car>(1);
-        cars.add(new Car(car));
+        if (carRepository.findOneByMicroId(car.getId()) != null) {
+            cars.add(carRepository.findOneByMicroId(car.getId()));
+        } else {
+            cars.add(new Car(car));
+        }
+
         manualRequest.setCars(cars);
         manualRequest.escapeParameters(manualRequest);
         requestRepository.save(manualRequest);
@@ -378,9 +385,9 @@ public class RequestService {
     }
 
     public List<Request> findAllByEndDateLessThanEqualOrStartDateGreaterThanEqualAndAgentUsernameAndState(Date endDate,
-                                                                                                             Date startDate,
-                                                                                                             String username,
-                                                                                                             String state) {
+                                                                                                          Date startDate,
+                                                                                                          String username,
+                                                                                                          String state) {
         return requestRepository.findAllByEndDateLessThanEqualOrStartDateGreaterThanEqualAndAgentUsernameAndState
                 (endDate, startDate,  username, state);
     }
@@ -403,7 +410,15 @@ public class RequestService {
         for (Long id : o.getCars()) {
             cars.add(carRepository.findOneById(id));
         }
+        newRequest.setCars(cars);
         save(newRequest);
         return newRequest;
+    }
+
+    public <T> HttpEntity<T> createAuthHeader(String token, T bodyType) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", token);
+        HttpEntity<T> request = new HttpEntity<>(bodyType, headers);
+        return request;
     }
 }

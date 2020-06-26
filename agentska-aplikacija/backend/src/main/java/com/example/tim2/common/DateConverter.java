@@ -9,6 +9,7 @@ import java.util.Date;
 
 public class DateConverter {
     private static DateTimeFormatter dtf1 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");       // promeniti patern ili dodati novi
+    private static DateTimeFormatter dtf3 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SS");
     private static DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
     private static DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -26,7 +27,18 @@ public class DateConverter {
     }
 
     public static LocalDateTime dateToDateTime(String date) {
-        LocalDateTime ret = LocalDateTime.parse(date, dtf1);
+        LocalDateTime ret = null;
+        try {
+             ret = LocalDateTime.parse(date, dtf1);
+        }catch (Exception e) {
+            System.out.println("PRVI EXEPSN");
+            try {
+                ret = LocalDateTime.parse(date, dtf3);
+            }catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
         return ret;
     }
 

@@ -158,6 +158,7 @@ public class TokenUtils {
         return null;
     }
 
+
     public String getAuthHeaderFromHeader(HttpServletRequest request) {
         return request.getHeader(AUTH_HEADER);
     }

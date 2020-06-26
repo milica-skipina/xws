@@ -64,6 +64,10 @@ public class AuthenticationTokenFilter extends UsernamePasswordAuthenticationFil
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         String username;
         String authToken = tokenUtils.getToken((HttpServletRequest) request);
+        if (authToken == null) {    // ako je null, proveri da nije iz resta
+            authToken = ((HttpServletRequest) request).getHeader("Data");
+        }
+
         if (authToken != null) {
             // uzmi username iz tokena
             username = tokenUtils.getUsernameFromToken(authToken);
@@ -81,7 +85,6 @@ public class AuthenticationTokenFilter extends UsernamePasswordAuthenticationFil
                 }
             }
         }
-
         // prosledi request dalje u sledeci filter
         chain.doFilter(request, response);
     }

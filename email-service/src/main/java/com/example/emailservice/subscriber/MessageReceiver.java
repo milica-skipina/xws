@@ -5,6 +5,7 @@ import com.example.emailservice.config.ApplicationConfiguration;
 import com.example.emailservice.config.RabbitMQConfiguration;
 import com.example.emailservice.service.EmailService;
 import com.rabbitmq.client.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
@@ -20,8 +21,11 @@ public class MessageReceiver {
     private final ConnectionFactory factory;
     private EmailService emailService;
 
+
+    @Autowired
     public MessageReceiver(ApplicationConfiguration configuration,
                            ConnectionFactory factory, EmailService emailService){
+
         this.configuration = configuration;
         this.factory = factory;
         this.emailService = emailService;
@@ -43,13 +47,18 @@ public class MessageReceiver {
                 public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties,
                                            byte[] body) throws IOException {
                     String log = new String(body, StandardCharsets.UTF_8); //jwt + " " + email
-                    String[] arr =  log.split(" ");
                     System.out.println(log);
-                    try {
-                        emailService.sendHtmlMail(arr[1], "Verivication mail", "<html><body>Confirm account activation on link.</br><a href=\"https://localhost:8082/authpoint/user/verify/"+arr[0]+"\">Activation link</a><body/></html>");
-                    }catch (MessagingException e) {
-                        e.printStackTrace();
+                    if (log.contains(" ")) {
+                        String[] arr = log.split(" ");
+                        try {
+                            emailService.sendHtmlMail(arr[1], "Verification mail", "<html><body>Confirm account activation on link.</br><a href=\"https://localhost:3000/validation/" + arr[0] + "\">Activation link</a><body/></html>");
+                        } catch (Exception e) {
+
+                        }
                     }
+                    else
+                        emailService.sendRecoveryMail("", log);
+
                 }
             };
 

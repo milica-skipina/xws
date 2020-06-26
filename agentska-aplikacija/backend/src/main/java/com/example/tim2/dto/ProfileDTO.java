@@ -9,11 +9,15 @@ public class ProfileDTO {
     private String address;
     private String city;
     private String company;
+    private boolean canReserve;
+    private boolean canComment;
+    private int numberRefusedComments;
+    private int numberCanceledRequest;
 
     public ProfileDTO() {
     }
 
-    public ProfileDTO(String username, String name, String surname, String email, String address, String city, String company) {
+    public ProfileDTO(String username, String name, String surname, String email, String address, String city, String company, boolean a, boolean b, int c, int d) {
         this.username = username;
         this.name = name;
         this.surname = surname;
@@ -21,6 +25,10 @@ public class ProfileDTO {
         this.address = address;
         this.city = city;
         this.company = company;
+        this.canReserve = a;
+        this.canComment = b;
+        this.numberRefusedComments = c;
+        this.numberCanceledRequest = d;
     }
 
     public String getUsername() {
@@ -77,5 +85,37 @@ public class ProfileDTO {
 
     public void setCompany(String company) {
         this.company = company;
+    }
+
+    public boolean isCanReserve() {
+        return canReserve;
+    }
+
+    public void setCanReserve(boolean canReserve) {
+        this.canReserve = canReserve;
+    }
+
+    public boolean isCanComment() {
+        return canComment;
+    }
+
+    public void setCanComment(boolean canComment) {
+        this.canComment = canComment;
+    }
+
+    public int getNumberRefusedComments() {
+        return numberRefusedComments;
+    }
+
+    public void setNumberRefusedComments(int numberRefusedComments) {
+        this.numberRefusedComments = numberRefusedComments;
+    }
+
+    public int getNumberCanceledRequest() {
+        return numberCanceledRequest;
+    }
+
+    public void setNumberCanceledRequest(int numberCanceledRequest) {
+        this.numberCanceledRequest = numberCanceledRequest;
     }
 }

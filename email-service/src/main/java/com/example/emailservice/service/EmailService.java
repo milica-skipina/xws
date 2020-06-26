@@ -42,4 +42,19 @@ public class EmailService {
         helper.setFrom("isaprojektovanje@gmail.com");
         javaMailSender.send(mess);
     }
+
+    @Async
+    public void sendRecoveryMail(String email, String newPassword) {
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setTo("ixykovacevic97@gmail.com");
+        msg.setFrom(env.getProperty("spring.mail.username"));
+        msg.setSubject("Account recovery - rentacar");
+        msg.setText("You received this email due to your request for account recovery in rent-a-car system. \\n " +
+                "This password is valid 24h after the mail has been sent and it is for one-time use. Please change" +
+                "your password after first login.\\n" +
+                "Your one-time password: " + newPassword);
+
+        javaMailSender.send(msg);
+        System.out.println("Email sent.");
+    }
 }

@@ -1,5 +1,7 @@
 import React from "react";
 import axios from "axios";
+import { RoleAwareComponent } from 'react-router-role-authorization';
+import {Redirect} from 'react-router-dom';
 import {NotificationContainer, NotificationManager} from 'react-notifications';
 import {
     Button,
@@ -21,7 +23,7 @@ const columns = [
     { dataField: 'subject', text: 'subject' },
     { dataField: 'timeSent', text: 'timeSent' }];
 
-class Messages extends React.Component{
+class Messages extends RoleAwareComponent {
 
     constructor(props) {
         super(props);
@@ -34,6 +36,12 @@ class Messages extends React.Component{
             message: "",
             from: ""
         };
+
+    let arr = new Array();
+    arr.push(localStorage.getItem('role'));    
+    this.userRoles = arr;
+    this.allowedRoles = ['ROLE_SELLER', 'ROLE_CUSTOMER'];
+
     }
 
     loadMessages = () =>{
@@ -46,6 +54,10 @@ class Messages extends React.Component{
             headers: { "Authorization": AuthStr } ,
         }).then((response)=>{
             if (response.status === 200)  {
+                for(let m of response.data)
+                {
+                    m.active = false;
+                }
                 this.setState({messages:response.data});
             } else {
                 NotificationManager.info("Failed to load message.");
@@ -61,6 +73,9 @@ class Messages extends React.Component{
     }
 
     togglePrimary = () => {
+        if(this.state.primary === true)
+            this.clear();
+
         this.setState({
             primary: !this.state.primary,
         });
@@ -117,35 +132,40 @@ class Messages extends React.Component{
         this.setState({message:"",to:"",subject:"",from: ""});
     };
 
-/*
-*
-            * <BootstrapTable
-                    keyField='id'
-                    data={ this.state.messages }
-                    columns={ columns }
-                />
-*
-* */
+    showRow = (e,id) => {
+        console.log(id);
+        let mess = this.state.messages;
+        for(let m of mess)
+        {
+            if(m.id === id) {
+                if(m.active === false)
+                    m.active = true;
+                else
+                    m.active = false;
+            }
+        }
+        this.setState({messages:mess});
+    };
 
     render() {
         let messages = this.state.messages.map(message => (
             <React.Fragment  key={message.id}>
-                <tr className="clickable"  data-toggle="collapse" data-target={message.id} >
+                <tr  onClick={(e) => this.showRow(e,message.id)} >
                     <td>{message.senderUsername}</td>
                     <td>{message.subject}</td>
                     <td>{(new Date(message.timeSent)).toLocaleDateString()+ " "}{(new Date(message.timeSent)).toLocaleTimeString()}</td>
                     <td><button onClick={(e) => {this.reply(message.senderUsername,message.subject,message.receiverUsername)}} className="btn btn-primary">Reply</button></td>
                 </tr>
-                <tr >
-                    <td>{message.text}</td>
-                </tr>
+                { message.active === true && <tr>
+                    <td style={{border:"none"}} className="no-border">{message.text}</td>
+                </tr>}
             </React.Fragment>
         ));
 
 
 
-        return (<div className="animated fadeIn content"><Card>
-            <CardBody>
+        let ret = (<div className="animated fadeIn content"><Card>
+            <CardBody className="p-0">
                 <table className="table">
                     <tbody>
                     {messages}
@@ -192,6 +212,8 @@ class Messages extends React.Component{
             </Modal>
             <NotificationContainer/>
         </div>);
+
+    return this.rolesMatched() ? ret : <Redirect to="/ads" />;
     }
 
 }

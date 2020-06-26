@@ -74,7 +74,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers( "/auth/register", "/auth/login")
+                .antMatchers( "/auth/register", "/auth/login", "/auth/forgotPassword", "/auth/verifyAgent")
                 .permitAll()
                 .anyRequest().authenticated();
 
@@ -86,7 +86,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().antMatchers(HttpMethod.POST , "/auth/login", "/auth/register");
+        web.ignoring().antMatchers(HttpMethod.POST , "/auth/login", "/auth/register","/auth/forgotPassword");
         /*web.ignoring().antMatchers(HttpMethod.POST , "/auth/login", "/auth/register");
         web.ignoring().antMatchers(HttpMethod.GET , "/dash/verify/**","/user","/user/deactivate/**");
         web.ignoring().antMatchers(HttpMethod.DELETE , "/user/**");*/

@@ -61,8 +61,10 @@ public class ReviewController {
 
     @PreAuthorize("hasAuthority('MODIFY_REVIEW')")
     @PutMapping(value="/{id}")
-    public ResponseEntity<ReviewDTO> editReview(@PathVariable Long id, @RequestBody ReviewDTO reviewDTO){
-        ReviewDTO ret = reviewService.editState(id, reviewDTO);
+    public ResponseEntity<ReviewDTO> editReview(@PathVariable Long id, @RequestBody ReviewDTO reviewDTO, HttpServletRequest request){
+        String token = tokenUtils.getToken(request);
+        String username = tokenUtils.getUsernameFromToken(token);
+        ReviewDTO ret = reviewService.editState(id, reviewDTO, username);
         if(ret == null){
             return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
         }

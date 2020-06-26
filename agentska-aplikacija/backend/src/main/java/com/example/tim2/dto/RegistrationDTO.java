@@ -8,6 +8,10 @@ public class RegistrationDTO {
     private String email;
     private String username;
     private String password;
+    private boolean canReserve;
+    private boolean canComment;
+    private int numberRefusedComments;
+    private int numberCanceledRequest;
 
     public RegistrationDTO() {
 
@@ -67,5 +71,37 @@ public class RegistrationDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isCanReserve() {
+        return canReserve;
+    }
+
+    public void setCanReserve(boolean canReserve) {
+        this.canReserve = canReserve;
+    }
+
+    public boolean isCanComment() {
+        return canComment;
+    }
+
+    public void setCanComment(boolean canComment) {
+        this.canComment = canComment;
+    }
+
+    public int getNumberRefusedComments() {
+        return numberRefusedComments;
+    }
+
+    public void setNumberRefusedComments(int numberRefusedComments) {
+        this.numberRefusedComments = numberRefusedComments;
+    }
+
+    public int getNumberCanceledRequest() {
+        return numberCanceledRequest;
+    }
+
+    public void setNumberCanceledRequest(int numberCanceledRequest) {
+        this.numberCanceledRequest = numberCanceledRequest;
     }
 }

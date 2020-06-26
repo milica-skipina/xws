@@ -14,6 +14,7 @@ import {
 import RenderStatistics from './RenderStatistics';
 import { RoleAwareComponent } from 'react-router-role-authorization';
 import {Redirect} from 'react-router-dom';
+import {NotificationContainer, NotificationManager} from 'react-notifications';
 //const url = 'http://localhost:8099/';
 const url = (process.env.REACT_APP_DOMAIN) + ':' + (process.env.REACT_APP_PORT) + '/';
 
@@ -26,6 +27,7 @@ class Profile extends RoleAwareComponent {
             hideChangePass: true,
             oldPassword: "",
             password:"",
+            password2:"",
             passErrorText: "",
             bestRated: [],
             mostCrossed: [],
@@ -62,6 +64,7 @@ class Profile extends RoleAwareComponent {
             url: url + 'authpoint/user/current',
             headers: { "Authorization": AuthStr },
         }).then((response) => {
+            console.log(response.data);
             this.setState({ user: response.data })
         }, (error) => {
             console.log(error);
@@ -69,7 +72,31 @@ class Profile extends RoleAwareComponent {
     }
 
     changePass(){
-        alert("Implementiraj me!");
+        let token = localStorage.getItem("ulogovan")
+        let AuthStr = 'Bearer '.concat(token);
+        let data = {
+            oldPassword: this.state.oldPassword,
+            newPassword: this.state.password
+        };
+
+        console.log(data);
+
+        axios({
+            method:"put",
+            url: url + 'authpoint/auth/changePassword',
+            headers: { "Authorization": AuthStr },
+            data : data
+        }).then((response) => {
+            if(response.status === 200){
+                NotificationManager.info("Password changed.");
+                this.setState({password:"",oldPassword: "",password2:""});
+            }else{
+                NotificationManager.info("Failed to change password.");
+            }
+
+        }, (error) => {
+            console.log(error);
+        });
     }
 
       validatePassword = () => {
@@ -106,7 +133,7 @@ class Profile extends RoleAwareComponent {
       }
 
       if (this.state.username !== "") {   
-          let usrname = this.state.username.toLowerCase();
+          let usrname = this.state.user.username.toLowerCase();
           let passchk = this.state.password.toLowerCase();
           if (passchk.includes(usrname)) {
             this.setState({passErrorText: "Password can not contain username.", formErrorText: ""})
@@ -117,11 +144,12 @@ class Profile extends RoleAwareComponent {
   }
 
   checkPasswordMatching = (event) => {
+    this.setState({password2:event.target.value});
     if (this.state.password !== event.target.value)
       {
         this.setState({formValid: true, matchErrorText: "Password doesn't match."});    // disabling submit button
       } else {
-        this.setState({formValid: false, matchErrorText: "", password1: event.target.value});
+        this.setState({formValid: false, matchErrorText: "", password: event.target.value});
       }
   }
 
@@ -207,7 +235,7 @@ class Profile extends RoleAwareComponent {
                         <InputGroup className="mb-4">
 
                             <Input type="password" placeholder="Repeat new password" autoComplete="new-password"
-                                onChange={this.checkPasswordMatching}
+                               value={this.state.password2} onChange={this.checkPasswordMatching}
                             />
                             <FormText color="danger">{this.state.matchErrorText}</FormText>
                         </InputGroup>
@@ -233,6 +261,7 @@ class Profile extends RoleAwareComponent {
                 <RenderStatistics cars={this.state.bestRated} typeCol="rating"/>             
             </Col>
             </Row>
+            <NotificationContainer/>
         </div>);
 
       return this.rolesMatched() ? ret : <Redirect to="/ads" />;

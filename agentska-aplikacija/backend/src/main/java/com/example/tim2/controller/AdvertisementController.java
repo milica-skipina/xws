@@ -6,12 +6,8 @@ import com.example.tim2.dto.BasketDTO;
 import com.example.tim2.model.Advertisement;
 import com.example.tim2.model.Car;
 import com.example.tim2.security.TokenUtils;
-
 import com.example.tim2.service.AdvertisementService;
 import com.example.tim2.service.CarService;
-import com.example.tim2.soap.gen.AllAdvertisementsResponse;
-import com.example.tim2.soap.gen.AllPricelistsResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -241,6 +237,13 @@ public class AdvertisementController {
         String username = tokenUtils.getUsernameFromToken(token);
         List<AdvertisementDTO> ret = advertisementService.search(startDate, endDate, city);
         if(ret == null){
+            if(username.equals("")){
+                logger.info("unauthorized user " + " searched ads with invalid data");
+            }
+            else{
+                logger.info("user " + username + " searched ads with invalid data");
+            }
+            logger.info("user " + username + " searched ads with invalid data");
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         }
         logger.info("user " + username + " searched ads");

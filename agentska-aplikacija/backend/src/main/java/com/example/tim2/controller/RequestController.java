@@ -100,10 +100,12 @@ public class RequestController {
     public Response modifyRequests(@PathVariable Long requestId, HttpServletRequest request,
                                    @PathVariable boolean flag) {
         User user = userIdentifier.verifyUser(request);
+        String token = tokenUtils.getToken(request);
+        String username = tokenUtils.getUsernameFromToken(token);
         if (user != null) {
-            boolean success = requestService.modifyRequest(requestId, flag);
+            boolean success = requestService.modifyRequest(requestId, flag, username);
             if(!success && flag){       // flag true - accept request
-                return Response.status(Response.Status.NOT_MODIFIED).entity("Request is not reserved.").build();
+                return Response.status(Response.Status.NOT_MODIFIED).entity("Car has already been booked for these days.").build();
             } else if (!success && !flag){       // flag false - cancel request
                 return Response.status(Response.Status.NOT_MODIFIED).entity("Request is not canceled.").build();
             }
@@ -129,11 +131,12 @@ public class RequestController {
     }
 
     @PreAuthorize("hasAuthority('CREATE_REQUEST')")
-    @RequestMapping(method = RequestMethod.GET, value = "/{id}") // car id
-    public ResponseEntity<Boolean> availableForBasket(@PathVariable Long id, HttpServletRequest request)
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}/{start}/{end}") // car id
+    public ResponseEntity<Boolean> availableForBasket(@PathVariable Long id, HttpServletRequest request,
+                                                      @PathVariable String start, @PathVariable String end)
     {
         User user = userIdentifier.verifyUser(request);
-        boolean ret = requestService.isInBasket(id, user.getUsername());       // customer username
+        boolean ret = requestService.isInBasket(id, user.getUsername(), start, end);       // customer username
         return  new ResponseEntity<>(ret, HttpStatus.OK);
     }
 

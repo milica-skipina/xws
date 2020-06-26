@@ -1,6 +1,8 @@
 import React from "react";
 import axios from "axios";
 import {NotificationContainer, NotificationManager} from 'react-notifications';
+import {Redirect} from 'react-router-dom';
+import { RoleAwareComponent } from 'react-router-role-authorization';
 import {
   Button,
   Card,
@@ -21,7 +23,7 @@ const columns = [
   { dataField: 'subject', text: 'subject' },
   { dataField: 'timeSent', text: 'timeSent' }];
 
-class Messages extends React.Component{
+class Messages extends RoleAwareComponent {
 
   constructor(props) {
     super(props);
@@ -169,7 +171,7 @@ class Messages extends React.Component{
       </React.Fragment>
     ));
 
-    return (<div className="animated fadeIn content"><Card>
+    let ret = (<div className="animated fadeIn content"><Card>
       <CardHeader>
         <i className="fa fa-align-justify"></i> Messages
       </CardHeader>
@@ -212,6 +214,8 @@ class Messages extends React.Component{
       </Modal>
       <NotificationContainer/>
     </div>);
+
+  return this.rolesMatched() ? ret : <Redirect to="/oglasi" />;
   }
 
 }

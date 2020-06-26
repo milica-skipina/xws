@@ -18,7 +18,7 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "REQUEST_AND_CAR", joinColumns = {
             @JoinColumn(name = "request_id") }, inverseJoinColumns = { @JoinColumn(name = "car_id") })
     private Set<Car> cars = new HashSet<Car>();
@@ -79,7 +79,9 @@ public class Request {
         ret.setId(this.id);
         ret.setMileage(this.mileage);
         ret.setState(this.state);
-
+        for (Car car : this.cars) {
+            ret.getCars().add(car.getMicroId());
+        }
         return ret;
     }
 

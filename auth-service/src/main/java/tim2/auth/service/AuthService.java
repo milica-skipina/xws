@@ -1,11 +1,17 @@
 package tim2.auth.service;
 
+import org.apache.syncope.core.spring.security.SecureRandomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import tim2.auth.dto.PasswordChangeDTO;
 import tim2.auth.dto.RegistrationDTO;
 import tim2.auth.model.Agent;
 import tim2.auth.model.EndUser;
@@ -14,9 +20,15 @@ import tim2.auth.model.User;
 import tim2.auth.repository.AgentRepository;
 import tim2.auth.repository.EndUserRepository;
 import tim2.auth.repository.UserRepository;
+import tim2.auth.security.TokenUtils;
 import tim2.auth.validation.RegexExpressions;
 
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Service
 public class AuthService implements UserDetailsService {
@@ -24,25 +36,31 @@ public class AuthService implements UserDetailsService {
 
     private AuthorityService authorityService;
 
-
     private PasswordEncoder passwordEncoder;
-
 
     private UserRepository userRepository;
 
+    private AuthenticationManager authenticationManager;
 
     private EndUserRepository endUserRepository;
 
     private AgentRepository agentRepository;
 
+    private TokenUtils tokenUtils;
+
+    private MessageProducer messageProducer;
+
     @Autowired
     public AuthService(AuthorityService authorityService, PasswordEncoder passwordEncoder, UserRepository userRepository,
-                       EndUserRepository endUserRepository, AgentRepository agentRepository) {
+                       EndUserRepository endUserRepository, AgentRepository agentRepository, MessageProducer messageProducer,
+                       AuthenticationManager authenticationManager,TokenUtils tokenUtils) {
         this.authorityService = authorityService;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.endUserRepository = endUserRepository;
         this.agentRepository = agentRepository;
+        this.authenticationManager = authenticationManager;
+        this.messageProducer = messageProducer;
     }
 
     public User loginUser(String username, String password) {
@@ -50,7 +68,18 @@ public class AuthService implements UserDetailsService {
             return null;
         }
         User user = (User) loadUserByUsername(username);
-
+        EndUser customer = endUserRepository.findByUserId(user.getId());
+        if (customer != null && customer.isFirstLogin()) {
+            long diff = Math.abs(user.getLastPasswordResetDate().getTime() - new Timestamp(System.currentTimeMillis()).getTime());
+            long hrs = TimeUnit.MILLISECONDS.toHours(diff);
+            if (hrs > 24) {     // lozinka mu vise nije validna
+                return null;
+            }
+            customer.setFirstLogin(false);
+            user.setLastPasswordResetDate(new Timestamp(System.currentTimeMillis()));
+            userRepository.save(user);
+            endUserRepository.save(customer);
+        }
         return user;
     }
 
@@ -73,6 +102,10 @@ public class AuthService implements UserDetailsService {
                 EndUser customer = new EndUser(reg.getName(), reg.getSurname(), reg.getAddress(), reg.getCity());
                 user.setRoles(auth);
                 customer.setUser(user.escapeParameters(user));
+                customer.setCanComment(true);
+                customer.setCanReserve(true);
+                customer.setNumberCanceledRequest(0);
+                customer.setNumberRefusedComments(0);
                 endUserRepository.save(EndUser.escapeParameters(customer));
             } else {
                 Agent agent = new Agent(reg.getCompanyName(), reg.getAddress(), reg.getCity(), reg.getRegistryNumber());
@@ -86,14 +119,25 @@ public class AuthService implements UserDetailsService {
         }
     }
 
+    public boolean changePassword(PasswordChangeDTO passwordChangeDTO) {
+        Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
+        String name = currentUser.getName();
 
-    public boolean forgotPassword(Long id) {
-        // to be implemented
-        return true;
-    }
+        if (authenticationManager == null || passwordChangeDTO.getNewPassword().equals("") || passwordChangeDTO.getOldPassword().equals("") || passwordChangeDTO.getOldPassword() == null || passwordChangeDTO.getNewPassword() == null) {
+            return false;
+        }
 
-    public boolean changePassword(Long id) {
-        // to be implemented
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(name, passwordChangeDTO.getOldPassword()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        User user = (User) loadUserByUsername(name);
+        user.setPassword(passwordEncoder.encode(passwordChangeDTO.getNewPassword()));
+        userRepository.save(user);
+
         return true;
     }
 
@@ -125,8 +169,49 @@ public class AuthService implements UserDetailsService {
         user.setRoles(auth);
         user.setActivated(true);
         customer.setFirstLogin(true);
+        customer.setCanComment(true);
+        customer.setCanReserve(true);
+        customer.setNumberCanceledRequest(0);
+        customer.setNumberRefusedComments(0);
         customer.setUser(user.escapeParameters(user));
+
         endUserRepository.save(customer.escapeParameters(customer));
         return true;
+    }
+
+    public boolean accountRecovery(String email) {
+        if (!RegexExpressions.isValidEmail(email)) {
+            return false;
+        }
+        User user = userRepository.findOneByEmail(email);
+        if (user == null) {
+            return false;
+        }
+        EndUser customer = endUserRepository.findByUserId(user.getId());
+        customer.setFirstLogin(true);
+        String password = generateRandomSpecialCharacters() ;     
+        user.setPassword(passwordEncoder.encode(password));
+        user.setLastPasswordResetDate(new Timestamp(System.currentTimeMillis()));
+        // TREBA GA DODATI U RED ZA RABITA, TREBA POSLATI MEJL
+        try {
+            messageProducer.send(password);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        }
+        userRepository.save(user);
+       // endUserRepository.save(customer);
+        return true;
+    }
+
+    public String generateRandomSpecialCharacters() {
+        Random rand = new Random();
+        int min = 33;
+        int max = 45;
+        int length = rand.nextInt(max - min) + min;
+        String password = SecureRandomUtils.generateRandomPassword(length);
+        password = password.concat("_");
+        return password;
     }
 }

@@ -12,14 +12,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import tim2.auth.authentication.JwtAuthenticationRequest;
 import tim2.auth.common.UserIdentifier;
+import tim2.auth.dto.PasswordChangeDTO;
 import tim2.auth.dto.RegistrationDTO;
 import tim2.auth.model.Role;
 import tim2.auth.model.User;
 import tim2.auth.model.UserTokenState;
+import tim2.auth.repository.UserRepository;
 import tim2.auth.security.TokenUtils;
 import tim2.auth.service.AuthService;
 import tim2.auth.service.MessageProducer;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.websocket.server.PathParam;
 import java.io.IOException;
@@ -41,6 +44,9 @@ public class AuthController {
 
     private MessageProducer messageProducer;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
@@ -54,23 +60,51 @@ public class AuthController {
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", value = "/login")
-    public ResponseEntity<UserTokenState> loginUser(@RequestBody JwtAuthenticationRequest authenticationRequest,
+    public ResponseEntity<UserTokenState> loginUser(@RequestBody JwtAuthenticationRequest authenticationRequest, HttpServletRequest request,
                                                     HttpServletResponse response) throws AuthenticationException, IOException, TimeoutException {
         User loggedUser = authService.loginUser(authenticationRequest.getUsername(), authenticationRequest.getPassword());
         if (loggedUser != null) {
-            final Authentication authentication = authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(),
-                            authenticationRequest.getPassword()));
+            if(!loggedUser.isDeleted()) {
+                if(!loggedUser.isBlocked()) {
+                    if(loggedUser.isActivated()) {
+                        try {
+                            final Authentication authentication = authenticationManager
+                                    .authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUsername(),
+                                            authenticationRequest.getPassword()));
 
-            // Ubaci username + password u kontext
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            User user = (User) authentication.getPrincipal();
-            String name = userIdentifier.findByUserId(user.getId());
-            String jwt = tokenUtils.generateToken(user.getUsername(), user.getAuthorities(), name);
-            int expiresIn = tokenUtils.getExpiredIn();
-            String role = ((Role) user.getRoles().toArray()[0]).getName();
-            logger.info("SUCCESS | user with username: " + authenticationRequest.getUsername() + " logged in" );
-            return ResponseEntity.ok(new UserTokenState(jwt, expiresIn, role, name ));
+                            // Ubaci username + password u kontext
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+                            User user = (User) authentication.getPrincipal();
+                            String name = userIdentifier.findByUserId(user.getId());
+                            String jwt = tokenUtils.generateToken(user.getUsername(), user.getAuthorities(), name);
+                            int expiresIn = tokenUtils.getExpiredIn();
+                            String role = ((Role) user.getRoles().toArray()[0]).getName();
+                            logger.info("SUCCESS | user with username: " + authenticationRequest.getUsername() + " logged in " + "IP: " + request.getRemoteAddr() + " HOST: " + request.getRemoteHost() + " PORT: " + request.getRemotePort());
+                            return ResponseEntity.ok(new UserTokenState(jwt, expiresIn, role, name));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            String message = "Bad credentials.";
+                            loggedUser.setNumberFailedLogin(loggedUser.getNumberFailedLogin() + 1);
+                            userRepository.save(loggedUser);
+                            logger.error(" |FAILED| user with username: " + authenticationRequest.getUsername() + " tried to log in " + "IP: " + request.getRemoteAddr() + " HOST: " + request.getRemoteHost() + " PORT: " + request.getRemotePort() + " number of failed logins: " + loggedUser.getNumberFailedLogin());
+                            return new ResponseEntity<UserTokenState>(new UserTokenState(message, 0, "", ""), HttpStatus.NOT_FOUND);
+                        }
+                    }else{
+                        String message = "Account is not activated.";
+                        logger.error(" |FAILED| user with username: " + authenticationRequest.getUsername() + " tried to log in " + "IP: " + request.getRemoteAddr() + " HOST: " + request.getRemoteHost() + " PORT: " + request.getRemotePort() + " Account not activated");
+                        return new ResponseEntity<UserTokenState>(new UserTokenState(message, 0, "", ""), HttpStatus.FORBIDDEN);
+
+                    }
+                }else{
+                    String message = "User is blocked by administrator.";
+                    logger.error(" |FAILED| user with username: " + authenticationRequest.getUsername() + " tried to log in " + "IP: " + request.getRemoteAddr() + " HOST: " + request.getRemoteHost() + " PORT: " + request.getRemotePort() + " User is blocked" );
+                    return new ResponseEntity<UserTokenState>(new UserTokenState(message, 0, "", ""), HttpStatus.FORBIDDEN);
+                }
+            }else{
+                String message = "User account is deleted by administrator.";
+                logger.error(" |FAILED| user with username: " + authenticationRequest.getUsername() + " tried to log in " + "IP: " + request.getRemoteAddr() + " HOST: " + request.getRemoteHost() + " PORT: " + request.getRemotePort() + " User account is deleted");
+                return new ResponseEntity<UserTokenState>(new UserTokenState(message, 0, "", ""), HttpStatus.FORBIDDEN);
+            }
         } else {
             String message = "Username and/or password is invalid.";
             logger.error(" |FAILED| user with username: " + authenticationRequest.getUsername() + " tried to log in" );
@@ -88,20 +122,18 @@ public class AuthController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ENDUSER') or hasRole('AGENT') or hasRole('ADMIN')")
-    @RequestMapping(method = RequestMethod.PUT, value = "/reset/{id}")
-    public ResponseEntity<HttpStatus> forgotPassword(@PathParam("id") Long id) throws Exception {
-        boolean success = authService.forgotPassword(id);
-        if (!success) {
-            return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
-        }
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PostMapping(value = "/forgotPassword")
+    public ResponseEntity<HttpStatus> forgotPassword(@RequestBody String[] email ) {
+        if(authService.accountRecovery(email[0]))
+            return new ResponseEntity<>(HttpStatus.OK);
+        else
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PreAuthorize("hasRole('ENDUSER') or hasRole('SELLER')")
-    @RequestMapping(method = RequestMethod.PUT, value = "/change/{id}")
-    public ResponseEntity<HttpStatus> changePassword(@PathParam("id") Long id) throws Exception {
-        boolean success = authService.changePassword(id);
+    @PreAuthorize("hasRole('ROLE_CUSTOMER') or hasRole('ROLE_SELLER') or hasRole('ROLE_ADMIN')")
+    @RequestMapping(method = RequestMethod.PUT, value = "/changePassword")
+    public ResponseEntity<HttpStatus> changePassword(@RequestBody PasswordChangeDTO passwordChangeDTO) throws Exception {
+        boolean success = authService.changePassword(passwordChangeDTO);
         if (!success) {
             return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
         }
@@ -117,5 +149,20 @@ public class AuthController {
         }
         logger.info(" |NEW MANUAL REGISTRATION| " );
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/verifyAgent", produces = "application/json")
+    public ResponseEntity<String> verifyAgent(HttpServletRequest request) {
+        String token = tokenUtils.getToken(request);
+        String username = tokenUtils.getUsernameFromToken(token);
+
+        User user = userRepository.findOneByUsername(username);
+        if (user != null) {
+            String name = userIdentifier.findByUserId(user.getId());
+            String jwt = tokenUtils.generateToken(user.getUsername(), user.getAuthorities(), name);
+            return new ResponseEntity<>(jwt, HttpStatus.OK);
+        }
+        //logger.info(" |NEW MANUAL REGISTRATION| " );
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

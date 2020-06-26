@@ -20,26 +20,26 @@ import org.springframework.security.web.header.writers.StaticHeadersWriter;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled=true)
 public class AdvertisementConfiguration extends WebSecurityConfigurerAdapter {
-/*
+
     @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
-*/
+
     @Autowired
     private RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
     @Autowired
     private TokenUtils tokenUtils;
-/*
+
     @Bean
     public AuthenticationTokenFilter authenticationTokenFilterBean() throws Exception {
         AuthenticationTokenFilter authenticationTokenFilter = new AuthenticationTokenFilter(tokenUtils);
         authenticationTokenFilter.setAuthenticationManager(authenticationManagerBean());
         return authenticationTokenFilter;
     }
-*/
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.headers().frameOptions().disable();
@@ -53,18 +53,16 @@ public class AdvertisementConfiguration extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint).and()
 
                 .authorizeRequests()
-
-                .antMatchers( "/ws").permitAll()
-                .antMatchers("/**").permitAll()
+                .antMatchers( "/ws").hasAnyAuthority("SEND_SOAP")
                 .antMatchers( "/advertisement/canAccess/*", "/advertisement", "/advertisement/search/**")
-                .permitAll();
-          //      .anyRequest().authenticated();
+                .permitAll()
+                .anyRequest().authenticated();
 
-      //  http.addFilterAfter(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
     }
 
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().antMatchers(HttpMethod.GET , "/advertisement", "/car", "/**");
+        web.ignoring().antMatchers(HttpMethod.GET , "/advertisement", "/car");
     }
 }

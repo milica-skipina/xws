@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { RoleAwareComponent } from 'react-router-role-authorization';
+import {Redirect} from 'react-router-dom';
 import {NotificationContainer, NotificationManager} from 'react-notifications';
 import "../../../node_modules/react-notifications/lib/notifications.css"
 import "../../../node_modules/react-notifications/lib/Notifications.js"
@@ -1037,7 +1038,7 @@ class NewAd extends RoleAwareComponent {
       </Row>
       <NotificationContainer/>
     </div>);
-    return this.rolesMatched() ? ret : <span>ivana</span>;
+    return this.rolesMatched() ? ret : <Redirect to="/oglasi" />;
   }
 }
 

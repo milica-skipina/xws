@@ -148,7 +148,7 @@ public class RegularExpressions {
     }
 
     public boolean isValidPassword(String pass){
-        String passRegex = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!_@$%^&*-]).{8,}$";
+        String passRegex = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!_@$%^&*-]).{10,}$";
         Pattern pattern = Pattern.compile(passRegex);
         Matcher matcher = pattern.matcher(pass);
         if(matcher.find()){

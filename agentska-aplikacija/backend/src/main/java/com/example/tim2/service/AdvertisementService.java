@@ -11,8 +11,11 @@ import com.example.tim2.model.Image;
 import com.example.tim2.repository.*;
 import com.example.tim2.security.TokenUtils;
 import com.example.tim2.soap.clients.AdvertisementClient;
-import com.example.tim2.soap.gen.*;
-import com.example.tim2.model.Pricelist;
+import com.example.tim2.soap.gen.AllAdvertisementsResponse;
+import com.example.tim2.soap.gen.AllPricelistsResponse;
+import com.example.tim2.soap.gen.NewAdvertisementResponse;
+import com.example.tim2.soap.gen.DeleteAdvertisementResponse;
+import com.example.tim2.soap.gen.EditAdvertisementResponse;
 import org.owasp.encoder.Encode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -62,7 +65,8 @@ public class AdvertisementService {
     @Autowired
     private RequestService requestService;
 
-    @Autowired AdvertisementClient advertisementClient;
+    @Autowired
+    AdvertisementClient advertisementClient;
 
     public boolean carValidation(CarDTO car){
         boolean ok = true;
@@ -78,10 +82,13 @@ public class AdvertisementService {
             ok = false;
         }
         RegularExpressions regularExpressions = new RegularExpressions();
-        if(!regularExpressions.isValidMileage(car.getMileage())){
+        if(!regularExpressions.isValidMileage(car.getMileage()) || !regularExpressions.isValidSomeName(car.getModel()) ||
+           !regularExpressions.isValidSomeName(car.getMake()) || !regularExpressions.isValidInput(car.getCarClass()) ||
+                !regularExpressions.isValidInput(car.getGearbox()) || !regularExpressions.isValidInput(car.getState())
+                || !regularExpressions.isValidInput(car.getFuel()) ){
             return false;
         }
-        if(!regularExpressions.idValidKidsSeats(car.getKidsSeats())){
+        if(!regularExpressions.idValidKidsSeats(car.getKidsSeats()) || !regularExpressions.isValidMileage(car.getMileageLimit())){
             return false;
         }
         return ok;
@@ -89,6 +96,9 @@ public class AdvertisementService {
 
     public AdvertisementDTO forHtmlAd(AdvertisementDTO a){
         a.setCity(Encode.forHtml(a.getCity()));
+        Long id = Long.parseLong(Encode.forHtml(a.getId().toString()));
+        a.setId(id);
+
         return  a;
     }
 
@@ -103,15 +113,15 @@ public class AdvertisementService {
         return retValue;
     }
 
-    public boolean adValidation(Advertisement ad){
+    public boolean adValidation(AdvertisementDTO ad){
         boolean ok = true;
         if(ad.getEndDate().compareTo(ad.getStartDate()) <=0 || ad.getCity() == null || ad.getCity().equals("")){
             ok = false;
         }
         RegularExpressions regularExpressions = new RegularExpressions();
-       // if(!regularExpressions.isValidInput(ad.getCity())){
-       //     return false;
-       // }
+       if(  !regularExpressions.isValidInput(ad.getCity()) || (ad.getId() != null && !regularExpressions.idIdValid(ad.getId()))){
+           return false;
+       }
        return ok;
     }
 
@@ -140,7 +150,8 @@ public class AdvertisementService {
     }
 
     public AdvertisementDTO getOneAd(Long id){
-        if(id!=null){
+        RegularExpressions regularExpressions = new RegularExpressions();
+        if(id!=null && regularExpressions.idIdValid(id)){
             Advertisement ad = advertisementRepository.findOneById(id);
             return new AdvertisementDTO(ad);
         }
@@ -151,6 +162,10 @@ public class AdvertisementService {
 
 
     public boolean deleteAd(Long id) {
+        RegularExpressions regularExpressions = new RegularExpressions();
+        if (!regularExpressions.idIdValid(id)) {
+            return false;
+        }
         Advertisement advertisement = advertisementRepository.findOneById(id);
         advertisement.setDeleted(true);
         int x = 0;
@@ -175,16 +190,21 @@ public class AdvertisementService {
     }
 
     public Advertisement addAd(AdvertisementDTO advertisement, Long id, Long idp){
+        RegularExpressions regularExpressions = new RegularExpressions();
+        if (!regularExpressions.idIdValid(id) || !regularExpressions.idIdValid(idp)) {
+            return null;
+        }
         Car car = carRepository.findOneById(id);
-        Pricelist p = pricelistRepository.findOneById(idp);
-        Advertisement newAd = new Advertisement();
-        newAd.setCaAdr(car);
-        newAd.setStartDate(advertisement.getStartDate());
-        newAd.setEndDate(advertisement.getEndDate());
-        newAd.setPricelist(p);
-        newAd.setDeleted(false);
-        newAd.setCity(advertisement.getCity());
-        if(adValidation(newAd) && validateAdDates(newAd.getStartDate(), newAd.getEndDate(),car, null)){
+        if(adValidation(advertisement) && validateAdDates(advertisement.getStartDate(), advertisement.getEndDate(),car, null)){
+
+            Pricelist p = pricelistRepository.findOneById(idp);
+            Advertisement newAd = new Advertisement();
+            newAd.setCaAdr(car);
+            newAd.setStartDate(advertisement.getStartDate());
+            newAd.setEndDate(advertisement.getEndDate());
+            newAd.setPricelist(p);
+            newAd.setDeleted(false);
+            newAd.setCity(advertisement.getCity());
             AdvertisementDTO temp = forHtmlAd(advertisement);
             newAd.setCity(temp.getCity());
             newAd.setEntrepreneur(entrepreneurRepository.findOneByBin("123458363"));
@@ -268,52 +288,52 @@ public class AdvertisementService {
     }
 
     public Car addNewAd(AdvertisementDTO advertisement, Long id, String username) throws DatatypeConfigurationException {
-            Car car = new Car();
-            Codebook model = codebookService.findOneByNameAndCodeType(advertisement.getCarAd().getModel(), "model");
-            car.setModel(model);
-            Codebook brand = codebookService.findOneByNameAndCodeType(advertisement.getCarAd().getMake(), "brand");
-            car.setMake(brand);
-            Codebook carClass = codebookService.findOneByNameAndCodeType(advertisement.getCarAd().getCarClass(), "class");
-            car.setCarClass(carClass);
-            car.setFollowing(advertisement.getCarAd().isFollowing());
-            Codebook fuel = codebookService.findOneByNameAndCodeType(advertisement.getCarAd().getFuel(), "fuel");
-            car.setFuel(fuel);
-            Codebook gearbox = codebookService.findOneByNameAndCodeType(advertisement.getCarAd().getGearbox(), "gearbox");
-            car.setGearbox(gearbox);
-            car.setImages(advertisement.getCarAd().getImages());
-            car.setInsurance(advertisement.getCarAd().getInsurance());
-            car.setKidsSeats(advertisement.getCarAd().getKidsSeats());
-            car.setState(advertisement.getCarAd().getState());
-            car.setEntrepreneur(entrepreneurRepository.findOneByBin("123458363"));
-            car.setMileage(advertisement.getCarAd().getMileage());
-            car.setMileageLimit(advertisement.getCarAd().getMileageLimit());
-            car.setState(Encode.forHtml(car.getState()));
-            car.setRaiting(advertisement.getCarAd().getRating());
-            car.setImages(advertisement.getCarAd().getImages());
-            Advertisement newAd = new Advertisement();
-            newAd.setCaAdr(car);
-            newAd.setStartDate(advertisement.getStartDate());
-            newAd.setEndDate(advertisement.getEndDate());
-            newAd.setEntrepreneur(entrepreneurRepository.findOneByBin("123458363"));
-            newAd.setCity(advertisement.getCity());
-            newAd.setDeleted(false);
-            Pricelist p = pricelistRepository.findOneById(id);
-            newAd.setPricelist(p);
-            try{
-                NewAdvertisementResponse response = advertisementClient.addAdvertisement(newAd, p.getMicroId());
-                newAd.setMicroId(response.getMicroId());
-                car.setMicroId(response.getMicroId());
-            }catch (Exception e){
-                e.getStackTrace();
-            }
 
+        Car car = new Car();
         if (advertisement.getCarAd().isFollowing()) {
                 car.setTrackingToken(tokenUtils.generateTrackingToken(advertisement.getCarAd().getId(), username));
             }
-            if (carValidation(advertisement.getCarAd()) && adValidation(newAd) && id != null) {
+            if (carValidation(advertisement.getCarAd()) && adValidation(advertisement) && id != null) {
+                Codebook model = codebookService.findOneByNameAndCodeType(advertisement.getCarAd().getModel(), "model");
+                car.setModel(model);
+                Codebook brand = codebookService.findOneByNameAndCodeType(advertisement.getCarAd().getMake(), "brand");
+                car.setMake(brand);
+                Codebook carClass = codebookService.findOneByNameAndCodeType(advertisement.getCarAd().getCarClass(), "class");
+                car.setCarClass(carClass);
+                car.setFollowing(advertisement.getCarAd().isFollowing());
+                Codebook fuel = codebookService.findOneByNameAndCodeType(advertisement.getCarAd().getFuel(), "fuel");
+                car.setFuel(fuel);
+                Codebook gearbox = codebookService.findOneByNameAndCodeType(advertisement.getCarAd().getGearbox(), "gearbox");
+                car.setGearbox(gearbox);
+                car.setImages(advertisement.getCarAd().getImages());
+                car.setInsurance(advertisement.getCarAd().getInsurance());
+                car.setKidsSeats(advertisement.getCarAd().getKidsSeats());
+                car.setState(advertisement.getCarAd().getState());
+                car.setEntrepreneur(entrepreneurRepository.findOneByBin("123458363"));
+                car.setMileage(advertisement.getCarAd().getMileage());
+                car.setMileageLimit(advertisement.getCarAd().getMileageLimit());
+                car.setState(Encode.forHtml(car.getState()));
+                car.setRaiting(advertisement.getCarAd().getRating());
+                car.setImages(advertisement.getCarAd().getImages());
+                Advertisement newAd = new Advertisement();
+                newAd.setCaAdr(car);
+                newAd.setStartDate(advertisement.getStartDate());
+                newAd.setEndDate(advertisement.getEndDate());
+                newAd.setEntrepreneur(entrepreneurRepository.findOneByBin("123458363"));
+                newAd.setCity(advertisement.getCity());
+                newAd.setDeleted(false);
+                Pricelist p = pricelistRepository.findOneById(id);
+                newAd.setPricelist(p);
                 carRepository.save(car);
                 for (Image i : advertisement.getCarAd().getImages()) {
                     imageRepository.save(i);
+                }
+                try{
+                    NewAdvertisementResponse response = advertisementClient.addAdvertisement(newAd, p.getMicroId());
+                    newAd.setMicroId(response.getMicroId());
+                    car.setMicroId(response.getMicroId());
+                }catch (Exception e){
+                    e.getStackTrace();
                 }
                 advertisementRepository.save(newAd);
                 return car;
@@ -323,6 +343,10 @@ public class AdvertisementService {
     }
 
     public List<AdvertisementDTO> search(String start, String end, String city){
+        RegularExpressions regularExpressions = new RegularExpressions();
+        if (!regularExpressions.isValidInput(city)) {
+            return null;
+        }
         requestService.after24hOr12h();
         city = Encode.forHtml(city);
         Date startDate = new Date(Long.parseLong(start));
@@ -341,6 +365,9 @@ public class AdvertisementService {
     }
 
     public List<BasketDTO> getAllInBasket(Long[] identifiers) {
+        if (!validateIds(identifiers)) {
+            return null;
+        }
         ArrayList<BasketDTO> foundAds = new ArrayList<>(10);
         BasketDTO adv = new BasketDTO();
         Advertisement ad = new Advertisement();
@@ -351,6 +378,16 @@ public class AdvertisementService {
             foundAds.add(adv);
         }
         return foundAds;
+    }
+
+    public boolean validateIds(Long[] identifiers) {
+        RegularExpressions regularExpressions = new RegularExpressions();
+        for (int i =0; i < identifiers.length; i++) {
+            if (!regularExpressions.idIdValid(identifiers[i])) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public double countPricePerAdv(Date startDate, Date endDate, Pricelist pricelist) {

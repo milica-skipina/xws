@@ -4,10 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpServletRequest;
 import tim2.auth.dto.ProfileDTO;
 import tim2.auth.dto.UserDTO;
@@ -32,9 +30,25 @@ public class UserController {
     @Autowired
     private TokenUtils tokenUtils;
 
+//    @PreAuthorize("hasAuthority('CREATE_REVIEW')")
+    @PutMapping(value = "/changeState/{username}", consumes = "application/json")
+    public ResponseEntity<Boolean> changeState(@PathVariable String username, @RequestBody String change){
+            userService.changeS(username, change);
+            return new ResponseEntity<>(true, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('CREATE_REQUEST')")
+    @RequestMapping(method = RequestMethod.GET, value = "/canReserve/{username}") // ad id
+    public ResponseEntity<Boolean> canReserve(@PathVariable String username)
+    {
+        boolean ret = userService.canR(username);
+        return  new ResponseEntity<>(ret, HttpStatus.OK);
+    }
+
     // TO DO
-    @RequestMapping(method = RequestMethod.GET, value = "/verify/{token}")
-    public ResponseEntity<HttpStatus> verify(@PathVariable String token) {
+    @RequestMapping(method = RequestMethod.GET, value = "/verify")
+    public ResponseEntity<HttpStatus> verify(HttpServletRequest request) {
+        String token = tokenUtils.getToken(request);
         if(userService.verify(token))
             return new ResponseEntity<>(HttpStatus.OK);
         else
@@ -71,6 +85,18 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
+    @PreAuthorize("hasAuthority('MODIFY_USER')")
+    @RequestMapping(method = RequestMethod.GET,value = "/activate/{id}")
+    public ResponseEntity<HttpStatus> activateUser(@PathVariable Long id){
+        User user = userService.activateAccount(id);
+        if(user != null) {
+            logger.info("|SUCCESSS| ACTIVATE USER| username: " + user.getUsername());
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        else
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
     // TO DO MOZDA TREBA IZMENITI AUTHORITY
     @PreAuthorize("hasAuthority('READ_PROFILE')")
     @RequestMapping(method = RequestMethod.GET, value="/current")
@@ -92,6 +118,16 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(customers, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('BLOCK_END_USER')")
+    @RequestMapping(method = RequestMethod.PUT, value="/{changedPermission}/{username}")
+    public ResponseEntity<HttpStatus> block(@PathVariable String changedPermission, @PathVariable String username,HttpServletRequest request) {
+        String token = tokenUtils.getToken(request);
+        String loggedUsername = tokenUtils.getUsernameFromToken(token);
+        userService.blockEndUser(changedPermission, username);
+        logger.info("user " + loggedUsername + " blocked user: " + username);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

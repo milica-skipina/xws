@@ -2,7 +2,9 @@ package com.example.tim2.service;
 
 import com.example.tim2.dto.ReviewDTO;
 import com.example.tim2.model.Car;
+import com.example.tim2.model.EndUser;
 import com.example.tim2.model.Review;
+import com.example.tim2.repository.EndUserRepository;
 import com.example.tim2.repository.ReviewRepository;
 import org.owasp.encoder.Encode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +22,17 @@ public class ReviewService {
     @Autowired
     private CarService carService;
 
+    @Autowired
+    private EndUserRepository endUserRepository;
+
     public ReviewDTO addReview(ReviewDTO reviewDTO, String username){
         Car car = carService.findOneById(reviewDTO.getCarId());
         if(car == null){
             return  null;
+        }
+        EndUser endUser = endUserRepository.findByUserUsername(username);
+        if(!endUser.isCanComment()){
+            return null;
         }
         reviewDTO.setText(Encode.forHtml(reviewDTO.getText()));
         Review review = new Review(reviewDTO.getEvaluation(), car, reviewDTO.getText(), username);
@@ -52,10 +61,15 @@ public class ReviewService {
         return ret;
     }
 
-    public ReviewDTO editState(Long id, ReviewDTO reviewDTO){
+    public ReviewDTO editState(Long id, ReviewDTO reviewDTO, String username){
         Review review = reviewRepository.findOneById(id);
+        EndUser endUser = endUserRepository.findByUserUsername(review.getUsername());
         review.setState(reviewDTO.getState());
         review = reviewRepository.save(review);
+        if(review.getState().equals("REJECTED")){
+            endUser.setNumberRefusedComments(endUser.getNumberRefusedComments()+1);
+            endUserRepository.save(endUser);
+        }
         if(review == null){
             return  null;
         }

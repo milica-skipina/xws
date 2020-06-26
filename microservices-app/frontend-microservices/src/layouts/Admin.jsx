@@ -31,6 +31,7 @@ import {
   Button, Card, CardBody, CardFooter, Col, Form, Input, InputGroup, FormText,
   InputGroupAddon, InputGroupText, Row, FormGroup, Label, ModalHeader
 } from 'reactstrap';
+import icons from 'variables/icons';
 import routes from "routes.js";
 import SideBarroutes from "sidebar_routes.js";
 import sellernavigation from "seller_routes.js";
@@ -59,7 +60,11 @@ class Dashboard extends React.Component {
       password11Validation: "",
       password1Validation: "",
       modal: false,
-      primary: false
+      primary: false,
+      hideInputMail: true,
+      emailErrorText: "" ,
+      formValidMail: true ,
+      email: ""
     };
     this.mainPanel = React.createRef();
     this.togglePrimary = this.togglePrimary.bind(this);
@@ -68,6 +73,8 @@ class Dashboard extends React.Component {
     this.validateUsername = this.validateUsername.bind(this);
     this.signOut = this.signOut.bind(this);
     this.navig = this.navig.bind(this);
+    this.validateEmail = this.validateEmail.bind(this)
+    this.AccountRecovery = this.AccountRecovery.bind(this)
   }
   componentDidMount() {
     if (navigator.platform.indexOf("Win") > -1) {
@@ -86,6 +93,37 @@ class Dashboard extends React.Component {
       this.mainPanel.current.scrollTop = 0;
       document.scrollingElement.scrollTop = 0;
     }
+  }
+
+  validateEmail = (event) => {
+    const regex = /\S+@\S+\.\S+/;
+     if ( !regex.test(event.target.value) )   //email not appropriate
+     {
+        this.setState({formValidMail: true, emailErrorText: "Expected input: local@domain."})
+     } else {
+      this.setState({formValidMail: false, emailErrorText: ""})
+     }
+  }
+
+  AccountRecovery = (event) => {
+    let data = []
+    data.push(this.state.email)
+    axios({
+      method: 'post',
+      url: url + 'authpoint/auth/forgotPassword',
+      data: data,
+      ContentType: 'application/json'
+    }).then((response) => {
+      if (response.status === 200) {        
+        //NotificationManager.success("Recovery email is sent.", 'Success!', 3000);        
+      } else {
+        //NotificationManager.error(response.data.accessToken, 'Email doesn\'t exist in our system!', 3000);
+      }
+
+    }, (error) => {
+      //NotificationManager.error(response.data.accessToken, 'Error!', 3000);
+
+    });
   }
 
   togglePrimary() {
@@ -255,10 +293,10 @@ class Dashboard extends React.Component {
           <ModalBody>
             <Form>
 
-              <InputGroup className="mb-3">
+              <InputGroup className="mb-3 ">
                 <InputGroupAddon addonType="prepend">
                   <InputGroupText>
-                    <i className="icon-user"></i>
+                    <i className="nc-icon nc-single-02"></i>
                   </InputGroupText>
                 </InputGroupAddon>
                 <Input type="text" placeholder="Username" autoComplete="username" value={this.state.username}
@@ -266,24 +304,43 @@ class Dashboard extends React.Component {
                        onBlur={this.validateUsername}/>
                 <FormText color="danger">{this.state.usernameErrorText}</FormText>
               </InputGroup>
-              <InputGroup className="mb-4">
+              <InputGroup className="mb-4 ">
                 <InputGroupAddon addonType="prepend">
                   <InputGroupText>
-                    <i className="icon-lock"></i>
+                    <i className="nc-icon nc-key-25"></i>
                   </InputGroupText>
                 </InputGroupAddon>
                 <Input type="password" placeholder="Password" value={this.state.password}
                        onChange={event => this.setState({password: event.target.value})}/>
                 <FormText color="danger">{this.state.passErrorText}</FormText>
+              </InputGroup>              
+              <Row>
+                <FormText color="danger">{this.state.formErrorText}</FormText>
+              </Row>
+              <Label color="info" hidden={this.state.hideInputMail}>Enter your email and we will send you recovery details:</Label>
+              <InputGroup className="mb-4" hidden={this.state.hideInputMail}>              
+                <InputGroupAddon addonType="prepend">
+                <InputGroupText>@</InputGroupText>
+                </InputGroupAddon>
+                <Input type="text" placeholder="email" value={this.state.email}
+                       onChange={event => this.setState({email: event.target.value})}
+                       onBlur={this.validateEmail}/>
+                <FormText color="danger">{this.state.emailErrorText}</FormText>
               </InputGroup>
               <Row>
                 <FormText color="danger">{this.state.formErrorText}</FormText>
               </Row>
+              <Row className="text-center">
+                <div class="text-center">
+                <Button color="link" size="sm" onClick={event => this.setState({hideInputMail: !this.state.hideInputMail})}>Forgot password? </Button> 
+                </div>
+              </Row>
             </Form>
           </ModalBody>
           <ModalFooter>
-            <Button color="primary" onClick={this.sendLogin} disabled={this.state.formValid}>Log in</Button>{' '}
-            <Button color="secondary" onClick={this.togglePrimary}>Cancel</Button>
+          {!this.state.hideInputMail && <Button color="primary" onClick={this.AccountRecovery} disabled={this.state.formValidMail}>Send email</Button>}{' '}
+                {this.state.hideInputMail && <Button color="primary" onClick={this.sendLogin} disabled={this.state.formValid}>Log in</Button>}{' '}
+            <Button color="danger" onClick={this.togglePrimary}>Cancel</Button>
           </ModalFooter>
         </Modal>
       </div>

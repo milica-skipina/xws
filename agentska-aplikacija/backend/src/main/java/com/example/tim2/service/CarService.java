@@ -36,6 +36,10 @@ public class CarService {
     @Autowired
     private AdvertisementClient advertisementClient;
 
+    @Autowired
+    private EndUserRepository endUserRepository;
+
+
     public List<CarDTO> getAllCars(){
         List<Car> cars = carRepository.findAll();
         List<CarDTO>retValue = new ArrayList<>();
@@ -142,6 +146,10 @@ public class CarService {
     public Boolean canWriteReview(String username, Long id){
         Long reviews = reviewRepository.countAllByUsernameAndCarId(username, id);
         User user = userRepository.findOneByUsername(username);
+        EndUser endUser = endUserRepository.findByUserUsername(username);
+        if(!endUser.isCanComment()){
+            return false;
+        }
         Date endDate = new Date();
         Long requestsNum = 0L;
         List<Request> requests = requestRepository.findAllByUserIdAndEndDateLessThanEqualAndState(user.getId(), endDate, "PAID");

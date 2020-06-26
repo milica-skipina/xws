@@ -1,11 +1,14 @@
 package tim2.auth.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import tim2.auth.dto.ProfileDTO;
 import tim2.auth.dto.UserDTO;
 import tim2.auth.model.Admin;
 import tim2.auth.model.Agent;
 import tim2.auth.model.EndUser;
+import tim2.auth.model.Role;
 import tim2.auth.model.User;
 import tim2.auth.repository.AdminRepository;
 import tim2.auth.repository.AgentRepository;
@@ -15,6 +18,7 @@ import tim2.auth.security.TokenUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
@@ -33,6 +37,7 @@ public class UserService {
 
     private EndUserRepository endUserRepository;
 
+    @Autowired
     public UserService(TokenUtils tokenUtils, MessageProducer messageProducer, UserRepository userRepository,
                        AgentRepository agentRepository, AdminRepository adminRepository, EndUserRepository endUserRepository) {
         this.tokenUtils = tokenUtils;
@@ -41,15 +46,19 @@ public class UserService {
         this.agentRepository = agentRepository;
         this.endUserRepository = endUserRepository;
         this.adminRepository = adminRepository;
-        this.agentRepository = agentRepository;
     }
 
     public List<UserDTO> getAll() {
-        List<User> users = userRepository.findAll();
+        List<User> users = new ArrayList<>();
+        try {
+            users = userRepository.findAll();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         List<UserDTO> dtos = new ArrayList<UserDTO>();
 
         for (User u : users) {
-            if (!u.getRoles().contains("ROLE_ADMIN"))
+            if (!u.getRoleNames().contains("ROLE_ADMIN") && !u.isDeleted())
                 dtos.add(new UserDTO(u));
         }
 
@@ -73,12 +82,19 @@ public class UserService {
         }
 
     public boolean verify(String token) {
-        User user = userRepository.findByEmail(tokenUtils.getUsernameFromToken(token));
-        if (user != null) {
-            if (!user.isActivated()) {
-                user.setActivated(true);
-                userRepository.save(user);
-                return true;
+        if(token != null || !token.isEmpty()) {
+            String username = tokenUtils.getUsernameFromToken(token);
+            if(username != null || !username.isEmpty()) {
+                User user = userRepository.findByUsername(username);
+                if (user != null) {
+                    if (!user.isActivated()) {
+                        user.setActivated(true);
+                        userRepository.save(user);
+                        return true;
+                    }
+                    return false;
+                }
+                return false;
             }
             return false;
         }
@@ -88,11 +104,8 @@ public class UserService {
     public User deleteUser(Long id) {
         User user = userRepository.findOneById(id);
         if (user != null) {
-            user.setRoles(null);
-            user.setAgent(null);
-            user.setEnduser(null);
-            user.setAdmin(null);
-            userRepository.delete(user);
+            user.setDeleted(true);
+            userRepository.save(user);
             return user;
         }
         return null;
@@ -101,7 +114,17 @@ public class UserService {
     public User deactivateAccount(Long id){
         User user = userRepository.findOneById(id);
         if (user != null) {
-            user.setActivated(false);
+            user.setBlocked(true);
+            userRepository.save(user);
+            return user;
+        }
+        return null;
+    }
+
+    public User activateAccount(Long id){
+        User user = userRepository.findOneById(id);
+        if (user != null) {
+            user.setBlocked(false);
             userRepository.save(user);
             return user;
         }
@@ -134,6 +157,10 @@ public class UserService {
             profile.setSurname(endUser.getSurname());
             profile.setAddress(endUser.getAddress());
             profile.setCity(endUser.getCity());
+            profile.setCanComment(endUser.isCanComment());
+            profile.setCanReserve(endUser.isCanReserve());
+            profile.setNumberCanceledRequest(endUser.getNumberCanceledRequest());
+            profile.setNumberRefusedComments(endUser.getNumberRefusedComments());
             return profile;
         }
         return null;
@@ -149,4 +176,41 @@ public class UserService {
         }
         return customerUsernames;
     }
+
+    public boolean changeS(String username, String change){
+        EndUser endUser = endUserRepository.findByUserUsername(username);
+        if(change.equals("REJECTED")){
+            endUser.setNumberRefusedComments(endUser.getNumberRefusedComments()+1);
+            endUserRepository.save(endUser);
+        }
+        return true;
+    }
+
+    public boolean canR(String username){
+        EndUser endUser = endUserRepository.findByUserUsername(username);
+        return endUser.isCanReserve();
+    }
+
+    public boolean blockEndUser(String changedPermission, String username){
+        EndUser endUser = endUserRepository.findByUserUsername(username);
+        if(changedPermission.equals("alloweComment")){
+            endUser.setCanComment(true);
+            endUser.setNumberRefusedComments(0);
+        }
+        else if(changedPermission.equals("alloweReserve")){
+            endUser.setCanReserve(true);
+            endUser.setNumberCanceledRequest(0);
+        }
+        else if(changedPermission.equals("blockComment")){
+            endUser.setCanComment(false);
+            endUser.setNumberRefusedComments(0);
+        }
+        else if(changedPermission.equals("blockReserve")){
+            endUser.setCanReserve(false);
+            endUser.setNumberCanceledRequest(0);
+        }
+        endUserRepository.save(endUser);
+        return true;
+    }
+
 }

@@ -9,6 +9,8 @@ import java.util.Set;
 @Entity
 public class Entrepreneur {
 
+    public static final String MICRO_USERNAME = "prodavac";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

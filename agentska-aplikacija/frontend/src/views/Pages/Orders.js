@@ -13,7 +13,7 @@ import { Card, CardBody, CardHeader, Col, Row, Table, Pagination, PaginationItem
 import {NotificationContainer, NotificationManager} from 'react-notifications';
 import { RoleAwareComponent } from 'react-router-role-authorization';
 import axios from 'axios';
-
+import {Redirect} from 'react-router-dom';
 import "../../../node_modules/react-notifications/lib/notifications.css"
 import "../../../node_modules/react-notifications/lib/Notifications.js"
 
@@ -200,7 +200,7 @@ class Orders extends RoleAwareComponent {
     const pageNumbers = Array.from(Array(Math.ceil(len/certPerPage)).keys())
 
 
-    return (
+    let ret = (
       <div className="animated fadeIn">
         <Row>
           <Col xl={11}>
@@ -286,6 +286,8 @@ class Orders extends RoleAwareComponent {
         <NotificationContainer/>
       </div>
     )
+
+    return this.rolesMatched() ? ret : <Redirect to="/oglasi" />;
   }
 }
 

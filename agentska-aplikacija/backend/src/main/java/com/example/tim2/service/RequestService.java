@@ -4,14 +4,8 @@ import com.example.tim2.common.DateConverter;
 import com.example.tim2.datavalidation.RegularExpressions;
 import com.example.tim2.dto.MiniCarDTO;
 import com.example.tim2.dto.RequestDTO;
-import com.example.tim2.model.Advertisement;
-import com.example.tim2.model.Car;
-import com.example.tim2.model.Request;
-import com.example.tim2.model.User;
-import com.example.tim2.repository.AdvertisementRepository;
-import com.example.tim2.repository.CarRepository;
-import com.example.tim2.repository.EntrepreneurRepository;
-import com.example.tim2.repository.RequestRepository;
+import com.example.tim2.model.*;
+import com.example.tim2.repository.*;
 import com.example.tim2.soap.clients.OrderClient;
 import com.example.tim2.soap.gen.AddOrderResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,17 +32,21 @@ public class RequestService {
 
     private OrderClient orderClient;
 
+    private EndUserRepository endUserRepository;
+
+
     @Autowired
     public RequestService(AdvertisementRepository advertisementRepository, RequestRepository requestRepository,
                           EntrepreneurRepository entrepreneurRepository, CarRepository carRepository,
-                          OrderClient orderClient) {
+                          EndUserRepository endUserRepository, AuthService authService) {
         this.advertisementRepository = advertisementRepository;
         this.requestRepository = requestRepository;
         this.entrepreneurRepository = entrepreneurRepository;
         this.carRepository = carRepository;
         this.regularExpressions = new RegularExpressions();
         this.authService = authService;
-        this.orderClient = orderClient;
+        //this.orderClient = orderClient;
+        this.endUserRepository = endUserRepository;
     }
 
     public boolean createRequests(String[] reqs, User u) {
@@ -170,6 +168,8 @@ public class RequestService {
         ArrayList<RequestDTO> ret = new ArrayList<>(10);
         for (Request r: requests) {
             RequestDTO dto = new RequestDTO(r);
+            EndUser customer = endUserRepository.findByUserUsername(r.getUser().getUsername());
+            dto.setUserName(customer.getName() + " " + customer.getSurname());
             for (Car c : r.getCars()) {
                 dto.getCars().add(new MiniCarDTO(c));
             }
@@ -179,21 +179,22 @@ public class RequestService {
     }
 
 
-    public boolean modifyRequest(Long requestId, boolean flag) {
+    public boolean modifyRequest(Long requestId, boolean flag, String username) {
         if (!regularExpressions.idIdValid(requestId)) {
             return false;
         }
         Request r = requestRepository.findOneById(requestId);
+        /*AddOrderResponse response = new AddOrderResponse();
         if (r == null) {
             return false;
         }
         try{
-           AddOrderResponse response = orderClient.acceptOrder(r);
-           System.out.println("MIKRO ID: " + response.getMicroId());
+           response = orderClient.acceptOrder(r);
+           //System.out.println("MIKRO ID: " + response.getMicroId());
         }catch (Exception e){
             e.printStackTrace();
-        }
-        if (flag) {
+        }*/
+        if (flag /*&& response.isOk()*/) {
             List<Long> carIds = findAllByStateAndStartDateAndEndDate("RESERVED", r.getStartDate(), r.getEndDate());
             List<Long> paidCarIds = findAllByStateAndStartDateAndEndDate("PAID", r.getStartDate(),r.getEndDate());
             carIds.addAll(paidCarIds);
@@ -206,7 +207,12 @@ public class RequestService {
             }
             r.setDateCreated(new Date());       //kasnije se koristi za proveru placanja
             r.setState("RESERVED");
-        } else {
+        } /*else if (!response.isOk()) {
+            return false;
+        } */else {
+            //EndUser endUser = endUserRepository.findByUserUsername(username);
+            //endUser.setNumberCanceledRequest(endUser.getNumberCanceledRequest() + 1);
+            //endUserRepository.save(endUser);
             r.setState("CANCELED");
         }
         r.escapeParameters(r);
@@ -225,18 +231,10 @@ public class RequestService {
      */
     public boolean manualRenting(Long id, String startDate, String endDate, Long entrepreneurId, String[] data) {
         User customer = new User();
+        AddOrderResponse response = new AddOrderResponse();
         if (!regularExpressions.idIdValid(id) && !regularExpressions.idIdValid(entrepreneurId)
                 && !regularExpressions.isValidInput(data[4])) {
             return false;
-        } else if (data[0].equals("true")) {        // treba registrovati novog
-            if (!regularExpressions.isValidInput(data[1]) && !regularExpressions.isValidInput(data[3])
-             && !regularExpressions.isValidEmail(data[2]) && (data[4].length() < 6)) {
-                return false;
-            } else {
-                customer = authService.manualRegistration(data);
-            }
-        } else if (data[0].equals("false")) {
-            customer = authService.findOneByUsername(data[4]);
         }
         after24hOr12h();
         Date start = DateConverter.stringToDate(startDate);
@@ -252,7 +250,27 @@ public class RequestService {
         Set<Car> cars = new HashSet<Car>(1);
         cars.add(car);
         Request req = new Request(cars, "PAID", car.getMileage(), start, end, customer,
-                      entrepreneurRepository.findOneByUserId(entrepreneurId), new Date() );
+                entrepreneurRepository.findOneByUserId(entrepreneurId), new Date() );
+        try{
+            response = orderClient.acceptOrder(req);
+            System.out.println("MIKRO ID: " + response.getMicroId());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        if (!response.isOk()) {
+            return false;
+        }
+        if (data[0].equals("true")) {        // treba registrovati novog
+            if (!regularExpressions.isValidInput(data[1]) && !regularExpressions.isValidInput(data[3])
+             && !regularExpressions.isValidEmail(data[2]) && (data[4].length() < 6)) {
+                return false;
+            } else {
+                customer = authService.manualRegistration(data);
+            }
+        } else if (data[0].equals("false")) {
+            customer = authService.findOneByUsername(data[4]);
+        }
+
         requestRepository.save(req);
         cancelRequestsByManual(start, end, car);
         return true;
@@ -271,14 +289,22 @@ public class RequestService {
         }
     }
 
-    public boolean isInBasket(Long id, String customerUsername) {
+    public boolean isInBasket(Long id, String customerUsername, String startDate, String endDate) {
+        Date start = new Date(Long.parseLong(startDate));
+        Date end = new Date(Long.parseLong(endDate));
         if (!regularExpressions.idIdValid(id) && !regularExpressions.isValidSomeName(customerUsername)) {
             return false;
         }
+        EndUser endUser = endUserRepository.findByUserUsername(customerUsername);
+        if(!endUser.isCanReserve()){
+            return true;
+        }
+
         ArrayList<Request> requests = (ArrayList<Request>) requestRepository.findAllByUserUsername(customerUsername);
+//                findAllByStartDateGreaterThanEqualOrEndDateLessThanEqualAndUserUsername(customerUsername, start, end);
         for (Request r : requests) {
             for (Car c: r.getCars()) {
-                if (c.getId() == id) {
+                if (!r.getState().equals("CANCELED") && c.getId() == id) {
                     return true;
                 }
             }

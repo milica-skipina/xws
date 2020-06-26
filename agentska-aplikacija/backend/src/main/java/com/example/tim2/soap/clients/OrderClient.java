@@ -6,6 +6,7 @@ import com.example.tim2.soap.gen.AddOrderResponse;
 import com.example.tim2.soap.gen.Order;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 
+
 public class OrderClient extends WebServiceGatewaySupport {
 
     public AddOrderResponse acceptOrder(Request req) {

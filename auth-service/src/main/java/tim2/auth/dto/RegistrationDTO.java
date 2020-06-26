@@ -15,6 +15,10 @@ public class RegistrationDTO {
     private boolean isCustomer;     // posto mogu da se reg i agenti
     private String companyName;
     private Long registryNumber;
+    private boolean canReserve;
+    private boolean canComment;
+    private int numberRefusedComments;
+    private int numberCanceledRequest;
 
     public RegistrationDTO() {
 
@@ -98,6 +102,38 @@ public class RegistrationDTO {
 
     public void setRegistryNumber(Long registryNumber) {
         this.registryNumber = registryNumber;
+    }
+
+    public boolean isCanReserve() {
+        return canReserve;
+    }
+
+    public void setCanReserve(boolean canReserve) {
+        this.canReserve = canReserve;
+    }
+
+    public boolean isCanComment() {
+        return canComment;
+    }
+
+    public void setCanComment(boolean canComment) {
+        this.canComment = canComment;
+    }
+
+    public int getNumberRefusedComments() {
+        return numberRefusedComments;
+    }
+
+    public void setNumberRefusedComments(int numberRefusedComments) {
+        this.numberRefusedComments = numberRefusedComments;
+    }
+
+    public int getNumberCanceledRequest() {
+        return numberCanceledRequest;
+    }
+
+    public void setNumberCanceledRequest(int numberCanceledRequest) {
+        this.numberCanceledRequest = numberCanceledRequest;
     }
 }
 

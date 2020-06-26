@@ -19,6 +19,7 @@ public class CarOrderDTO {
     private String entrepreneurUsername;    // username onoga ko je postavio oglas, moze to biti i kupac
     private String entrepreneurName;
     private String image;
+    private Long id;        // ovo je microId, iz advertisementa
 
     public CarOrderDTO() {
     }

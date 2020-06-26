@@ -1,11 +1,14 @@
 package com.example.tim2.soap.configuration;
 
+import com.example.tim2.security.TokenUtils;
 import com.example.tim2.soap.clients.AdvertisementClient;
 import com.example.tim2.soap.clients.OrderClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
+import org.springframework.ws.client.support.interceptor.ClientInterceptor;
 import org.springframework.ws.transport.http.HttpsUrlConnectionMessageSender;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -21,6 +24,9 @@ import java.security.cert.CertificateException;
 
 @Configuration
 public class SOAPConfiguration {
+
+    @Autowired
+    TokenUtils tokenUtils;
 
     private String keystoreType = "PKCS12";
     /**
@@ -73,6 +79,8 @@ public class SOAPConfiguration {
     @Bean
     public AdvertisementClient advertisementClient(Jaxb2Marshaller marshaller) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
         AdvertisementClient client = new AdvertisementClient();
+        ClientInterceptor[] interceptors = new ClientInterceptor[]{new SecurityInterceptor(tokenUtils)};
+        client.setInterceptors(interceptors);
         client.setDefaultUri("https://localhost:8082/advertisement/ws");
         client.setMarshaller(marshaller);
         client.setUnmarshaller(marshaller);
@@ -84,6 +92,8 @@ public class SOAPConfiguration {
     @Bean
     public OrderClient orderClient(Jaxb2Marshaller marshaller) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
         OrderClient client = new OrderClient();
+        ClientInterceptor[] interceptors = new ClientInterceptor[]{new SecurityInterceptor(tokenUtils)};
+        client.setInterceptors(interceptors);
         client.setDefaultUri("https://localhost:8082/orders/ws");
         client.setMarshaller(marshaller);
         client.setUnmarshaller(marshaller);
@@ -112,7 +122,7 @@ public class SOAPConfiguration {
 
         // otherwise: java.security.cert.CertificateException: No name matching localhost found
         messageSender.setHostnameVerifier((hostname, sslSession) -> {
-            if (hostname.equals("localhost")) {
+            if (hostname.equals("localhost") || hostname.equals("zuul")) {
                 return true;
             }
             return false;

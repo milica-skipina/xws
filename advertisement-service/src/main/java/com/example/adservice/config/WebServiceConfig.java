@@ -25,17 +25,17 @@ public class WebServiceConfig extends WsConfigurerAdapter {
     }
 
     @Bean(name = "advertisements")
-    public DefaultWsdl11Definition defaultWsdl11Definition(XsdSchema countriesSchema) {
+    public DefaultWsdl11Definition defaultWsdl11Definition(XsdSchema advertisementSchema) {
         DefaultWsdl11Definition wsdl11Definition = new DefaultWsdl11Definition();
         wsdl11Definition.setPortTypeName("AdvertisementPort");
         wsdl11Definition.setLocationUri("/ws");
         wsdl11Definition.setTargetNamespace("http://www.ftn.uns.ac.rs/xws_tim2");
-        wsdl11Definition.setSchema(countriesSchema);
+        wsdl11Definition.setSchema(advertisementSchema);
         return wsdl11Definition;
     }
 
     @Bean
-    public XsdSchema countriesSchema() {
+    public XsdSchema advertisementSchema() {
         return new SimpleXsdSchema(new ClassPathResource("advertisements.xsd"));
     }
 }

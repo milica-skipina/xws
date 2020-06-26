@@ -25,6 +25,9 @@ INSERT INTO privilege(name) VALUES ('MODIFY_USER');
 INSERT INTO privilege(name) VALUES ('READ_USER');
 INSERT INTO privilege(name) VALUES ('DELETE_USER');
 INSERT INTO privilege(name) VALUES ('CREATE_MESSAGE');
+INSERT INTO privilege(name) VALUES ('BLOCK_END_USER');
+
+
 
 INSERT INTO authority(name) VALUES ('ROLE_CUSTOMER');
 INSERT INTO authority(name) VALUES ('ROLE_ADMIN');
@@ -74,21 +77,23 @@ INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 20);
 INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 21);
 INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 22);
 INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 26);
+INSERT INTO roles_privileges (role_id, privilege_id) VALUES (2, 27);
 
-INSERT INTO korisnik (username, password, email, enabled) VALUES ('prodavac', '$2a$10$btfhHvv9/VumsTS2ZNnKOudQWzAqNURShHLU1Z3fIsFnpym1dxd.G', 'prodavac@gmail.com', true);
+
+INSERT INTO korisnik (username, password, email, enabled,deleted, number_failed_login,blocked) VALUES ('prodavac', '$2a$10$PkDHt3T9ussutTLpXWGXCOWRjIC5MVtT6dUkz25m7mvrl1u.1Ta4y', 'prodavac@gmail.com', true,false, 0,false);
 INSERT INTO entrepreneur(address, bin, company_name, name, surname, user_id) VALUES ('Stepe Stepanovica','123458363', 'RentACar', null, null, 1);
 INSERT INTO user_authority (user_id, authority_id) VALUES (1, 3);
 
-INSERT INTO korisnik (username, password, email, enabled) VALUES ('kupac', '$2a$10$btfhHvv9/VumsTS2ZNnKOudQWzAqNURShHLU1Z3fIsFnpym1dxd.G', 'kupac@gmail.com', true);
-INSERT INTO customer(address, city, name, surname, user_id, activated, first_login) VALUES ('Stepe Stepanovica','Novi Sad', 'Marko', 'Markovic', 2, true, false);
+INSERT INTO korisnik (username, password, email, enabled,deleted, number_failed_login,blocked) VALUES ('kupac', '$2a$10$PkDHt3T9ussutTLpXWGXCOWRjIC5MVtT6dUkz25m7mvrl1u.1Ta4y', 'kupac@gmail.com', true,false, 0,false);
+INSERT INTO customer(address, city, name, surname, user_id, activated, first_login,can_comment,can_reserve,number_canceled_request,number_refused_comments) VALUES ('Stepe Stepanovica','Novi Sad', 'Marko', 'Markovic', 2, true, false,true,true,0,0);
 INSERT INTO user_authority (user_id, authority_id) VALUES (2, 1);
 
-INSERT INTO korisnik (username, password, email, enabled) VALUES ('admin', '$2a$10$btfhHvv9/VumsTS2ZNnKOudQWzAqNURShHLU1Z3fIsFnpym1dxd.G', 'admin@gmail.com', true);
+INSERT INTO korisnik (username, password, email, enabled,deleted, number_failed_login,blocked) VALUES ('admin', '$2a$10$PkDHt3T9ussutTLpXWGXCOWRjIC5MVtT6dUkz25m7mvrl1u.1Ta4y', 'admin@gmail.com', true,false, 0,false);
 INSERT INTO admin(user_id) VALUES (3);
 INSERT INTO user_authority (user_id, authority_id) VALUES (3, 2);
 
-INSERT INTO korisnik (username, password, email, enabled) VALUES ('kupac1', '$2a$10$btfhHvv9/VumsTS2ZNnKOudQWzAqNURShHLU1Z3fIsFnpym1dxd.G', 'kupac1@gmail.com', true);
-INSERT INTO customer(address, city, name, surname, user_id, activated, first_login) VALUES ('Vojvodjanska','Novi Sad', 'Dara', 'Bubamara', 4, true, false);
+INSERT INTO korisnik (username, password, email, enabled,deleted, number_failed_login,blocked) VALUES ('kupac1', '$2a$10$PkDHt3T9ussutTLpXWGXCOWRjIC5MVtT6dUkz25m7mvrl1u.1Ta4y', 'kupac1@gmail.com', true,false, 0,false);
+INSERT INTO customer(address, city, name, surname, user_id, activated, first_login,can_comment,can_reserve,number_canceled_request,number_refused_comments) VALUES ('Vojvodjanska','Novi Sad', 'Dara', 'Bubamara', 4, false, false, true,true,0,0);
 INSERT INTO user_authority (user_id, authority_id) VALUES (4, 1);
 
 

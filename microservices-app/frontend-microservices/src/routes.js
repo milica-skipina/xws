@@ -31,6 +31,7 @@ import CommentRequests from "views/CommentRequests";
 import Profile from "views/Profile";
 import Orders from "views/Orders.jsx";
 import Messages from "views/Messages";
+import Validation from "views/Validation";
 
 var routes = [
 
@@ -122,7 +123,7 @@ var routes = [
 
   },
   {
-    authorize: ["fsg"] ,
+    authorize: ["ROLE_ADMIN"] ,
     path: '/comments',
     name: "Comments",
     component: CommentRequests,
@@ -134,10 +135,16 @@ var routes = [
     component: Orders,    
 },
   {
-    authorize: ['fgs'] ,
+    authorize: ['ROLE_CUSTOMER', 'ROLE_SELLER'] ,
     path: "/messages",
     name: "Messages",
     component: Messages,
+  },
+  {
+    authorize: ['fgs'] ,
+    path: "/validation",
+    name: "Validation",
+    component: Validation,
   },
 ];
 export default routes;

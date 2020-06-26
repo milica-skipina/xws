@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-
+import { RoleAwareComponent } from 'react-router-role-authorization';
+import {Redirect} from 'react-router-dom';
 import { MDBCard, MDBCardTitle } from "mdbreact";
 import StarRatings from 'react-star-ratings';
 import {
@@ -8,12 +9,17 @@ import {
     Row,
 } from 'reactstrap';
 
-class RenderStatistics extends Component {
+class RenderStatistics extends RoleAwareComponent {
 
     constructor(props) {
         super(props);
         this.state = {
         };
+
+        let arr = new Array();
+        arr.push(localStorage.getItem('role'));        
+        this.userRoles = arr;
+        this.allowedRoles = ['ROLE_SELLER'];
 
         this.getColor = this.getColor.bind(this);
         this.saznajVise = this.saznajVise.bind(this);
@@ -103,7 +109,7 @@ class RenderStatistics extends Component {
             </section>
         </div>);
 
-        return ret;
+        return this.rolesMatched() ? ret : <Redirect to="/ads" />;
     }
 }
 

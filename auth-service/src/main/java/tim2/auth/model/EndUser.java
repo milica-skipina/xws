@@ -31,6 +31,18 @@ public class EndUser {
     @Column(name = "firstLogin", nullable = true)
     private boolean firstLogin;
 
+    @Column(name = "canReserve", nullable = true)
+    private boolean canReserve;
+
+    @Column(name = "canComment", nullable = true)
+    private boolean canComment;
+
+    @Column(name = "numberRefusedComments", nullable = true)
+    private int numberRefusedComments;
+
+    @Column(name = "numberCanceledRequest", nullable = true)
+    private int numberCanceledRequest;
+
     @JsonManagedReference(value = "enduser_movement")
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private User user;
@@ -43,6 +55,17 @@ public class EndUser {
         this.name = name;
         this.surname = surname;
         this.city = city;
+    }
+
+    public EndUser(String name, String surname, String address, String city, boolean a, boolean b, int c, int d) {
+        this.name = name;
+        this.surname = surname;
+        this.address = address;
+        this.city = city;
+        canComment = a;
+        canReserve = b;
+        numberRefusedComments = c;
+        numberCanceledRequest = d;
     }
 
     public EndUser(String name, String surname) {
@@ -105,4 +128,46 @@ public class EndUser {
         u.setCity(Encode.forHtml(u.getCity()));
         return u;
     }
+
+    public boolean isFirstLogin() {
+        return firstLogin;
+    }
+
+    public void setFirstLogin(boolean firstLogin) {
+        this.firstLogin = firstLogin;
+    }
+
+
+    public void setCanReserve(boolean canReserve) {
+        this.canReserve = canReserve;
+    }
+
+    public boolean isCanReserve() {
+        return canReserve;
+    }
+
+    public boolean isCanComment() {
+        return canComment;
+    }
+
+    public void setCanComment(boolean canComment) {
+        this.canComment = canComment;
+    }
+
+    public int getNumberRefusedComments() {
+        return numberRefusedComments;
+    }
+
+    public void setNumberRefusedComments(int numberRefusedComments) {
+        this.numberRefusedComments = numberRefusedComments;
+    }
+
+    public int getNumberCanceledRequest() {
+        return numberCanceledRequest;
+    }
+
+    public void setNumberCanceledRequest(int numberCanceledRequest) {
+        this.numberCanceledRequest = numberCanceledRequest;
+    }
+
 }

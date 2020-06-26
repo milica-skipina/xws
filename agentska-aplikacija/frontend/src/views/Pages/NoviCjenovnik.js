@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import {Redirect} from 'react-router-dom';
 import { RoleAwareComponent } from 'react-router-role-authorization';
 import {NotificationContainer, NotificationManager} from 'react-notifications';
 import "../../../node_modules/react-notifications/lib/notifications.css"
@@ -63,7 +64,7 @@ class NoviCjenovnik extends RoleAwareComponent {
     arr.push(localStorage.getItem('role'));
     console.log("KONS",arr);
     this.userRoles = arr;
-    this.allowedRoles = ['ROLE_SELLER'];
+    this.allowedRoles = ['ROLE_SELLER', 'ROLE_ADMIN'];
 
   }
 
@@ -628,7 +629,7 @@ deletePricelist(id,e){
 
     </div>);
 
-    return this.rolesMatched() ? ret : <span>Ne mozete pristupiti ovoj stranici</span>;
+    return this.rolesMatched() ? ret : <Redirect to="/oglasi" />;
   }
 }
 

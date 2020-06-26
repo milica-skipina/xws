@@ -1,6 +1,65 @@
 <xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:tns="http://www.ftn.uns.ac.rs/xws_tim2" targetNamespace="http://www.ftn.uns.ac.rs/xws_tim2"  elementFormDefault="qualified">
 
+  <xs:element name="addOrderRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="username" type="xs:string" nillable="false"/>
+        <xs:element name="order" type="tns:order" nillable="false"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="addOrderResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="microId" type="xs:long"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="modifyOrderRequest">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="username" type="xs:string"/>
+        <xs:element name="id" type="xs:long"/>
+        <xs:element name="flag" type="xs:boolean"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="modifyOrderResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="ok" type="xs:boolean"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="order">
+    <xs:sequence>
+      <xs:element name="id" type="xs:long" minOccurs="0"/>
+      <xs:element name="cars" type="xs:long" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="orderStatus" type="tns:orderStatus" nillable="false"/>
+      <xs:element name="state" type="xs:string" nillable="false"/>
+      <xs:element name="mileage" type="xs:double" nillable="false"/>
+      <xs:element name="dateCreated" type="xs:dateTime" nillable="false"/>
+      <xs:element name="customerUsername" type="xs:string" nillable="false"/>
+      <xs:element name="agentUsername" type="xs:string" nillable="false"/>
+      <xs:element name="startDate" type="xs:dateTime" nillable="false"/>
+      <xs:element name="endDate" type="xs:dateTime" nillable="false"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="orderStatus">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="PAID"/>
+      <xs:enumeration value="CANCELED"/>
+      <xs:enumeration value="PENDING"/>
+      <xs:enumeration value="RESERVED"/>
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:element name="addImagesRequest">
     <xs:complexType>
       <xs:sequence>

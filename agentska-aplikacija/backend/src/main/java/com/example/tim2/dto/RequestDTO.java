@@ -1,8 +1,6 @@
 package com.example.tim2.dto;
 
 import com.example.tim2.model.Request;
-import com.example.tim2.repository.EndUserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -18,9 +16,6 @@ public class RequestDTO {
     private Set<MiniCarDTO> cars;
     private String userUsername;
     private String agentUsername;
-
-    @Autowired
-    private EndUserRepository endUserRepository;
 
     public RequestDTO(Long id, String state, Date startDate, Date endDate, String userName, String agentName, Set<MiniCarDTO> cars,String userUsername,String agentUsername) {
         this.id = id;
@@ -39,15 +34,15 @@ public class RequestDTO {
         this.state = r.getState();
         this.startDate = r.getStartDate();
         this.endDate = r.getEndDate();
-        //EndUser customer = endUserRepository.findByUserUsername(r.getUser().getUsername());
-        //this.userName = customer.getName() + " " + customer.getSurname();
         this.agentName = r.getSender().getCompanyName();
         this.cars = new HashSet<>();
         this.agentUsername = r.getEntrepreneur().getUser().getUsername();
         this.userUsername = r.getUser().getUsername();
     }
 
+
     public RequestDTO() {
+
     }
 
     public Long getId() {

@@ -35,6 +35,7 @@ public class AuthenticationTokenFilter extends UsernamePasswordAuthenticationFil
 
         String token = ((HttpServletRequest) request).getHeader("Data");
         if (token == null) {
+            chain.doFilter(request, response);
             return ;
         }
         //String token = tokenUtils.getToken((HttpServletRequest) request);

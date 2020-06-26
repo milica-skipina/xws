@@ -54,6 +54,13 @@ public class Codebook {
         this.deleted = false;
     }
 
+    public Codebook(rs.ac.uns.ftn.xws_tim2.Codebook c){
+        this.code = c.getCode();
+        this.name = c.getName();
+        this.codeType = c.getCodeType();
+        this.deleted = c.isDeleted();
+    }
+
     public Long getId() {
         return id;
     }

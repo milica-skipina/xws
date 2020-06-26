@@ -35,7 +35,7 @@ public class AuthenticationTokenFilter extends UsernamePasswordAuthenticationFil
 
         String token = ((HttpServletRequest) request).getHeader("Data");
         if (token == null /*|| token.equals("")*/) {
-            System.out.println("JEBEM TI SUPU, TOKEN JE NULL");
+            chain.doFilter(request, response);  		// If not valid, go to the next filter.
             return ;
         }
         ArrayList<String> authorities = tokenUtils.getAllAuthorities(token);

@@ -661,10 +661,19 @@ if (godina < year) {
   addToBasket = id => {
     let token = localStorage.getItem("ulogovan")
     let AuthStr = 'Bearer '.concat(token);
+    let start = new Date(this.state.startDate);
+    let startTime = this.state.startTime.split(':');
+    start.setHours(startTime[0], startTime[1], 0, 0);
+    start = start.getTime();
+    let end = new Date(this.state.endDate);
+    let endTime = this.state.endTime.split(':');
+    end.setHours(endTime[0], endTime[1], 0, 0);
+    end = end.getTime();
+    
     let dodaj = true;
       axios({
         method: 'get',
-        url: url + 'request/' + id,    // provera da li je taj oglas vec rezervisan
+        url: url + 'request/' + id + '/' + start + '/' + end,    // provera da li je taj oglas vec rezervisan za te datume
         headers: { "Authorization": AuthStr } ,       
       }).then((response) => {
         if (response.data) {    // ima ga u zahtevu
@@ -921,7 +930,7 @@ if (godina < year) {
                     <MDBBtn hidden = {!this.state.isAgent} style={{ marginLeft: "1rem" }} color="success" size="md" onClick={(e) => this.openModal(oglas)}>
                       Reserve
                     </MDBBtn>
-                    <MDBBtn style={{ marginLeft: "1rem" }} color="warning" size="md" onClick={(e) => this.addToBasket(oglas.id)} hidden={this.state.hideBasket}>
+                    <MDBBtn style={{ marginLeft: "1rem" }} color="warning" size="md" onClick={(e) => this.addToBasket(oglas.carAd.id)} hidden={this.state.hideBasket}>
                       Add to basket
                     </MDBBtn>
                   </div>

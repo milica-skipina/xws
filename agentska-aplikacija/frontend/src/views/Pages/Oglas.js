@@ -22,7 +22,7 @@ import "../../../node_modules/react-notifications/lib/Notifications.js"
 const url = (process.env.REACT_APP_DOMAIN) + ':' + (process.env.REACT_APP_PORT) + '/';
 const pricelistPerPage = 7;
 
-class Oglas extends RoleAwareComponent {
+class Oglas extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -59,12 +59,7 @@ class Oglas extends RoleAwareComponent {
       },
     };
 
-    let arr = [];
-    arr.push(localStorage.getItem('role'));
-    console.log("KONS",arr);
-    this.userRoles = arr;
-    this.allowedRoles = ['ROLE_SELLER', 'ROLE_CUSTOMER', ];
-
+    
     this.next = this.next.bind(this);
     this.previous = this.previous.bind(this);
     this.goToIndex = this.goToIndex.bind(this);

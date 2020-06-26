@@ -37,6 +37,12 @@ public class User implements UserDetails {
     @Column(name = "enabled", nullable = true)
     private boolean enabled; // authorization for accessing methods
 
+    @Column(name = "deleted", nullable = true)
+    private boolean deleted; // authorization for accessing methods
+
+    @Column(name = "blocked", nullable = true)
+    private boolean blocked; // authorization for accessing methods
+
     @Column(name = "last_password_reset_date", nullable = true)
     private Timestamp lastPasswordResetDate;
 
@@ -45,7 +51,7 @@ public class User implements UserDetails {
     private Set<Role> authorities;    // role korisnika
 
     @JsonBackReference(value = "agent_movement")
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Entrepreneur agent;
 
     @JsonBackReference(value = "enduser_movement")
@@ -59,6 +65,9 @@ public class User implements UserDetails {
     @JsonManagedReference(value = "request_mov")
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Request> requests;
+
+    @Column(name = "number_failed_login", nullable = true)
+    private int numberFailedLogin;
 
     public void setRoles(Set<Role> authorities) {
         this.authorities = authorities;
@@ -182,5 +191,43 @@ public class User implements UserDetails {
         return this.authorities;
     }
 
+    public boolean isDeleted() {
+        return deleted;
+    }
 
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public EndUser getEnduser() {
+        return enduser;
+    }
+
+    public void setAuthorities(Set<Role> authorities) {
+        this.authorities = authorities;
+    }
+
+    public Entrepreneur getAgent() {
+        return agent;
+    }
+
+    public Admin getAdmin() {
+        return admin;
+    }
+
+    public int getNumberFailedLogin() {
+        return numberFailedLogin;
+    }
+
+    public void setNumberFailedLogin(int numberFailedLogin) {
+        this.numberFailedLogin = numberFailedLogin;
+    }
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
+    }
 }

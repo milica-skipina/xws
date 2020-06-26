@@ -12,4 +12,7 @@ public interface EndUserRepository extends JpaRepository<EndUser, Long> {
     EndUser findOneById(Long id);
 
     List<EndUser> findAll();
+
+    EndUser findByUserUsername(String username);
+
 }

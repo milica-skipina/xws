@@ -1,11 +1,13 @@
 package com.example.tim2.soap.clients;
 
+import com.example.tim2.model.Entrepreneur;
 import com.example.tim2.repository.AdvertisementRepository;
 import com.example.tim2.repository.PricelistRepository;
 import com.example.tim2.soap.gen.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -16,6 +18,8 @@ import java.util.List;
 public class AdvertisementClient extends WebServiceGatewaySupport {
 
     private static final Logger log = LoggerFactory.getLogger(AdvertisementClient.class);
+
+    private String microUsername = Entrepreneur.MICRO_USERNAME;
 
     @Autowired
     private PricelistRepository pricelistRepository;
@@ -51,7 +55,7 @@ public class AdvertisementClient extends WebServiceGatewaySupport {
             request.getImages().add(i);
         }
         request.setCarId(id);
-        request.setUsername("prodavac");
+        request.setUsername(microUsername);
         AddImagesResponse response = (AddImagesResponse) getWebServiceTemplate()
                 .marshalSendAndReceive(request);
         return response;
@@ -113,7 +117,7 @@ public class AdvertisementClient extends WebServiceGatewaySupport {
     public AllPricelistsResponse sendAllPricelists(){
         List<com.example.tim2.model.Pricelist> pricelists = pricelistRepository.findAllByMicroIdIsNull();
         AllPricelistsRequest request = new AllPricelistsRequest();
-        request.setUsername("prodavac");
+        request.setUsername(microUsername);
         for(com.example.tim2.model.Pricelist p : pricelists){
             request.getPricelists().add(p.getGenerated());
         }
@@ -130,7 +134,7 @@ public class AdvertisementClient extends WebServiceGatewaySupport {
     public AllAdvertisementsResponse sendAllAdvertisements() throws DatatypeConfigurationException {
         List<com.example.tim2.model.Advertisement> advertisements =advertisementRepository.findAllByMicroIdIsNull();
         AllAdvertisementsRequest request = new AllAdvertisementsRequest();
-        request.setUsername("prodavac");
+        request.setUsername(microUsername);
         for(com.example.tim2.model.Advertisement a : advertisements){
             Advertisement generated = a.getGenerated();
             generated.setPricelist(a.getPricelist().getMicroId());

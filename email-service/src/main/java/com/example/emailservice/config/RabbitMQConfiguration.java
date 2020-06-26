@@ -33,11 +33,7 @@ public class RabbitMQConfiguration {
     @Value("${server.ssl.key-store}")
     private String keystore;
 
-    /**
-     * Application keystore type.
-     */
-    @Value("${server.ssl.trust-store-type}")
-    private String keystoreType;
+    private String keystoreType = "PKCS12";
 
     /**
      * Application keystore password.
@@ -60,8 +56,8 @@ public class RabbitMQConfiguration {
     /**
      * Application truststore type.
      */
-    @Value("${server.ssl.trust-store-type}")
-    private String truststoreType;
+    //@Value("${server.ssl.trust-store-type}")
+    private String truststoreType = "PKCS12";;
 
     /**
      * Application truststore password.

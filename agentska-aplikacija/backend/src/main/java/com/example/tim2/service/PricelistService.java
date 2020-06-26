@@ -1,10 +1,10 @@
 package com.example.tim2.service;
 
+import com.example.tim2.datavalidation.RegularExpressions;
 import com.example.tim2.dto.AdvertisementDTO;
 import com.example.tim2.dto.PricelistDTO;
 import com.example.tim2.model.Pricelist;
 import com.example.tim2.repository.PricelistRepository;
-import com.example.tim2.datavalidation.RegularExpressions;
 import com.example.tim2.soap.clients.AdvertisementClient;
 import com.example.tim2.soap.gen.DeletePricelistResponse;
 import com.example.tim2.soap.gen.EditPricelistResponse;

@@ -1,7 +1,7 @@
 package tim2.auth.rabbitmq;
 
-import org.springframework.amqp.core.Queue;
 import com.rabbitmq.client.ConnectionFactory;
+import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,8 +16,8 @@ import java.security.KeyStore;
 @Configuration
 public class RabbitMQConfiguration {
 
-    public static final String QUEUE_NAME = "emailRequests";
     public static final String KEYSTORE_PROVIDER = "SunX509";
+    public static final String QUEUE_NAME = "emailRequests";
 
     /**
      * TLS version.
@@ -31,11 +31,7 @@ public class RabbitMQConfiguration {
     @Value("${server.ssl.key-store}")
     private String keystore;
 
-    /**
-     * Application keystore type.
-     */
-    @Value("${server.ssl.key-store-type}")
-    private String keystoreType;
+    private String keystoreType = "PKCS12";
 
     /**
      * Application keystore password.
@@ -58,8 +54,8 @@ public class RabbitMQConfiguration {
     /**
      * Application truststore type.
      */
-    @Value("${server.ssl.trust-store-type}")
-    private String truststoreType;
+    //@Value("${server.ssl.trust-store-type}")
+    private String truststoreType = "PKCS12";;
 
     /**
      * Application truststore password.
@@ -72,6 +68,7 @@ public class RabbitMQConfiguration {
 
     @Value("${RMQ_PORT:5671}")
     private String port;
+
 
     @Bean
     public Queue queue() {

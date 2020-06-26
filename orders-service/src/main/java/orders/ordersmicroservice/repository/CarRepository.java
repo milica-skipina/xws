@@ -10,4 +10,6 @@ public interface CarRepository extends JpaRepository<Car, Long> {
     Car findOneById(Long id);
 
     List<Car> findAllByEntrepreneurUsername(String username);
+
+    Car findOneByMicroId(Long id);
 }
