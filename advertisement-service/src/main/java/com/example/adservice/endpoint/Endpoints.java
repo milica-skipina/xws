@@ -2,28 +2,21 @@ package com.example.adservice.endpoint;
 import com.example.adservice.dto.AdvertisementDTO;
 import com.example.adservice.dto.PricelistDTO;
 import com.example.adservice.model.Car;
-import com.example.adservice.model.Codebook;
 import com.example.adservice.model.Pricelist;
-import com.example.adservice.repository.AdvertisementRepository;
-
 import com.example.adservice.repository.CodebookRepository;
 import com.example.adservice.repository.PricelistRepository;
 import com.example.adservice.service.AdvertisementService;
 import com.example.adservice.service.CarService;
 import com.example.adservice.service.CodebookService;
 import com.example.adservice.service.PricelistService;
-import com.netflix.discovery.converters.Auto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
-import org.springframework.beans.factory.annotation.Autowired;
 import rs.ac.uns.ftn.xws_tim2.*;
 
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 @Endpoint
@@ -50,7 +43,7 @@ public class Endpoints {
     private CodebookService codebookService;
 
     @Autowired
-    public Endpoints(CodebookRepository codebookRepository, PricelistRepository pricelistRepositoryice) {
+    public Endpoints(CodebookRepository codebookRepository, PricelistRepository pricelistRepository) {
         this.codebookRepository = codebookRepository;
         this.pricelistRepository = pricelistRepository;
     }

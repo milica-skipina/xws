@@ -1,5 +1,6 @@
 package orders.ordersmicroservice.template;
 
+import orders.ordersmicroservice.config.TLSConfiguration;
 import orders.ordersmicroservice.config.TokenUtils;
 import orders.ordersmicroservice.dto.BasketDTO;
 import orders.ordersmicroservice.dto.CarOrderDTO;
@@ -11,10 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class RestTemplateExample {
@@ -57,5 +55,14 @@ public class RestTemplateExample {
         headers.set("Authorization", token);
         HttpEntity<T> request = new HttpEntity<>(bodyType, headers);
         return request;
+    }
+
+    public void changeNumber(String username, String jwt){
+        final String url = TLSConfiguration.URL + "authpoint/user/changeRefusedNumber/{username}";
+        HttpEntity header = createAuthHeader(jwt, null);
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("username", username);
+        HttpEntity<Integer>sentTemp = new HttpEntity<Integer>(1);
+        HttpEntity<Boolean> result = restTemplate.exchange(url, HttpMethod.PUT, sentTemp, Boolean.class, params);
     }
 }

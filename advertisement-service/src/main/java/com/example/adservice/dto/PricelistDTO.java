@@ -4,26 +4,15 @@ import com.example.adservice.model.Pricelist;
 
 import javax.xml.bind.annotation.*;
 
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "pricelist")
-@XmlType(namespace = "xws_tim2", propOrder = { "id", "priceDay", "collisionDW", "discount20", "discount30", "exceedMileage", "deleted" })
 public class PricelistDTO {
 
-    @XmlElement(required = true)
     private Long id;
-    @XmlElement(name = "priceDay", required = true)
     private Double priceDay;
-    @XmlElement(name = "collisionDW", required = true)
     private Double collisionDW;
-    @XmlElement(name = "discount20", required = true)
     private Double discount20;
-    @XmlElement(name = "discount30", required = true)
     private Double discount30;
-    @XmlElement(name = "exceedMileage", required = true)
     private Double exceedMileage;
-    @XmlElement(name = "deleted", required = true)
     private boolean deleted;
-
     private String username;
 
     public PricelistDTO(){

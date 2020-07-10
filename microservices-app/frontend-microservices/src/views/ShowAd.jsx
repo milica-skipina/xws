@@ -14,9 +14,10 @@ import StarRatings from 'react-star-ratings';
 import { NotificationContainer, NotificationManager } from 'react-notifications';
 import "../../node_modules/react-notifications/lib/notifications.css"
 import "../../node_modules/react-notifications/lib/Notifications.js"
-
+import { withRouter } from "react-router-dom";
 const url = (process.env.REACT_APP_DOMAIN) + ':' + (process.env.REACT_APP_PORT) + '/';
 const pricelistPerPage = 3;
+
 
 class ShowAd extends Component {
   constructor(props) {
@@ -51,6 +52,15 @@ class ShowAd extends Component {
           images: []
         }
       },
+
+      // ZA MAPU
+      address:  "Trg Dositeja Obradovica 6",
+        city:  "Novi Sad",
+        state: "Serbia",
+        lat: 45.2464362, 
+        lng: 19.8517172,
+        showingInfoWindow: false,
+        activeMarker: {},
     };
 
     let arr = [];
@@ -72,7 +82,12 @@ class ShowAd extends Component {
     this.postReview = this.postReview.bind(this);
     this.getReviews = this.getReviews.bind(this);
     this.getCanComment = this.getCanComment.bind(this);
+    this.redirectToTracking = this.redirectToTracking.bind(this);
   }
+
+  
+  
+
 
   getPricelist = () => {
     let token = localStorage.getItem("ulogovan")
@@ -639,7 +654,9 @@ class ShowAd extends Component {
                       {localStorage.getItem('role') === "ROLE_SELLER" && <Col sm="3" xl="3" md="3" hidden={this.state.canEdit} className="mb-3 mb-xl-0">
                         <Button block color="primary" onClick={(e) => this.delete(e)}>Delete</Button>
                       </Col>}
+                      
                     </Row>
+                    
                   </div>
                 </CardBody>
               </Card>

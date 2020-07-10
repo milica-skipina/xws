@@ -49,7 +49,7 @@ public class AuthFilter extends ZuulFilter {
 
         String path = request.getRequestURI().substring(request.getContextPath().length());
        if(path.contains("/ws")) {
-           String url = "https://authpoint/auth/verifyAgent";
+           String url = "http://authpoint/auth/verifyAgent";
            HttpHeaders httpHeaders = new HttpHeaders();
            httpHeaders.set("Authorization", "Bearer " + newJwt);
            HttpEntity header = new HttpEntity(httpHeaders);

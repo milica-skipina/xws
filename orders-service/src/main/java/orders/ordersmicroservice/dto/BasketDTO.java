@@ -1,10 +1,15 @@
 package orders.ordersmicroservice.dto;
 
+import lombok.Getter;
+import lombok.Setter;
 import orders.ordersmicroservice.model.Advertisement;
+import orders.ordersmicroservice.model.WishlistItem;
 
 import java.util.Date;
 
+@Getter @Setter
 public class BasketDTO {
+    private Long wishlistId;
     private Long advertisementId;
     private Date startDate;
     private Date endDate;
@@ -16,21 +21,22 @@ public class BasketDTO {
     private String entrepreneur;        //name
     private String customer;            //name
     private CarOrderDTO car;
+    private boolean isBundle;
 
     public BasketDTO() {
     }
 
-    /*public BasketDTO(Advertisement ad) {
+    public BasketDTO(WishlistItem ad) {
         this.startDate = ad.getStartDate();
         this.endDate = ad.getEndDate();
-        this.city = ad.getCity();
-        this.make = ad.getCarAd().getMake().getName();      // naziv proizvodjaca ?
-        this.model = ad.getCarAd().getModel().getName();
-        this.rating = ad.getCarAd().getRaiting();
-        this.entrepreneur = ad.getEntrepreneurName();
-        this.advertisementId = ad.getId();
-        this.car = new CarOrderDTO(ad.getCarAd());
-    }*/
+        this.city = ad.getAdvertisement().getCity();
+        this.make = ad.getAdvertisement().getCarAd().getMake();      // naziv proizvodjaca ?
+        this.model = ad.getAdvertisement().getCarAd().getModel();
+        this.rating = ad.getAdvertisement().getCarAd().getRaiting();
+        this.entrepreneur = ad.getAgentName();
+        this.advertisementId = ad.getAdvertisement().getId();
+        this.wishlistId = ad.getId();
+    }
 
 
     public Date getStartDate() {

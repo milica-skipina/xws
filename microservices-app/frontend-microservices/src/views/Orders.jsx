@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Card,
+  Card, Popover, PopoverBody,
   CardBody,
   CardHeader,
   Col,
@@ -36,17 +36,40 @@ const certPerPage = 5;
    
 function CertRow(props) {
   const order = props.certificate;  
+  const btnKey = "key" + order.id.toString() + "key" + order.id.toString() ;
+  const cars = props.displayCars(order.id.toString())
   
   return (
+    <>
     <tr key={order.id.toString()}>
-      <td>{order.agentId}</td>
-      <td>{order.startDate}</td>
-      <td>{order.endDate}</td>
-      <td><Badge className="mr-1" href="#" color="info">{order.state}</Badge></td>      
-      <td><Button color="danger" onClick={() => props.displayCars(order.id.toString())}>CARS</Button></td>      
-      {order.state === "RESERVED" && <td><Button color="danger" onClick={() => props.payForCar(order.id.toString())}>PAY</Button></td> }
-      {order.state === "RESERVED" && <td><Button color="danger" onClick={() => props.openModal(order)}>SEND MESSAGE</Button></td> }
+    <td>{order.agentUsername}</td>
+      <td>{props.changeDate(order.startDate)}</td>
+      <td>{props.changeDate(order.endDate)}</td>
+      <td><Badge className="mr-1" href="#" color="info">{order.state}</Badge></td>
+      <td><Button id={btnKey} color="info" type="button" size="sm" onClick={() => props.togglePopover(order.id)} >CARS</Button>      
+      </td> 
+      {order.state === "RESERVED" && <td><Button color="danger" size="sm" onClick={() => props.cancelReservation(order.id)}>Cancel reservation</Button></td> }    
+      {order.state === "RESERVED" && <td><Button color="danger" size="sm" onClick={() => props.payForCar(order.id.toString())}>PAY</Button></td> }
+      {order.state === "RESERVED" && <td><Button color="danger" size="sm" onClick={() => props.openModal(order)}>SEND MESSAGE</Button></td> }
     </tr>
+
+    <Popover placement="right" isOpen={props.popoverOpen[order.id]} target={btnKey} >        
+    <PopoverBody>          
+    <Table responsive >                
+        <tbody>
+        {(cars.map((car, index) =>
+          <tr key={index} className="crow">
+            <td className="crow">{car.make}</td>
+            <td className="crow">{car.model}</td>
+            <td className="crow">{car.fuel}</td>                
+            <td className="crow"><Button color="primary" size="sm" onClick={() => props.showDetails(car.id.toString())}> {}
+          Details</Button></td>
+          </tr>
+        ))}
+      </tbody>
+        </Table>
+    </PopoverBody>
+    </Popover></>
   )
 }
 
@@ -60,7 +83,9 @@ class Orders extends RoleAwareComponent {
       primary: false,
       subject: "",
       to: "",
-      message: ""
+      message: "",
+      popoversOpen: [],
+      ordersRequests: []
     };
 
     let arr = [];
@@ -72,11 +97,48 @@ class Orders extends RoleAwareComponent {
     this.displayCars = this.displayCars.bind(this);
     this.displayAllOrders = this.displayAllOrders.bind(this);
     this.transformResponse = this.transformResponse.bind(this);
+    this.togglePopover = this.togglePopover.bind(this);
+    this.showDetails = this.showDetails.bind(this);
+    this.getDateString = this.getDateString.bind(this);
+    this.initializePopovers = this.initializePopovers.bind(this);
+    this.covertToRequests = this.covertToRequests.bind(this)
   }
 
   componentDidMount()
   {
     this.displayAllOrders();
+  }
+
+  showDetails = (id) => {
+    this.props.history.push('showAd/' + id);
+  }
+
+  initializePopovers = (size) => {
+    let tempArray = []
+    for (let i=0; i < size; i++) {
+      tempArray.push(false)
+    }
+    this.setState({popoversOpen: tempArray})
+  }
+
+  cancelReservation = id => {
+    let data = sessionStorage.getItem('basket');
+    let token = localStorage.getItem("ulogovan")
+    let AuthStr = 'Bearer '.concat(token);    
+    
+    axios({
+        method: 'put',
+        url: url + 'orders/request/' + id + '/' + false,
+        headers: { "Authorization": AuthStr } ,            
+      }).then((response) => {
+        if (response.data.status === 200)
+          this.displayAllOrders();
+        else {
+          NotificationManager.error(response.data.entity, '', 3000);   
+        }
+      }, (error) => {
+        console.log(error);
+      });
   }
 
   sendMessage = () => {
@@ -136,9 +198,9 @@ class Orders extends RoleAwareComponent {
       url: url  + 'orders/request/true',
       headers: { "Authorization": AuthStr } ,   
     }).then((response)=>{ 
-      if (response.data.status == 200)  {
-        let transform = JSON.parse(response.data.entity);
-        this.transformResponse(transform);
+      if (response.status == 200)  {
+        this.initializePopovers(response.data.length)
+        this.covertToRequests(response.data)
       } else {
         NotificationManager.info("No orders requested!", '', 3000);   
       } 
@@ -148,8 +210,38 @@ class Orders extends RoleAwareComponent {
     });
   }
 
-  displayCars = id => {
+  covertToRequests = input => {
+    let tempo = []
+    for (let i=0; i< input.length; i++) {
+        for (let j=0; j < input[i].requests.length; j++) {
+          tempo.push(input[i].requests[j])
+        }
+    }
+    this.setState({ordersRequests: tempo, orders: input})
+    this.setState({showCertificates: this.state.ordersRequests.slice(0, certPerPage)})
 
+  }
+
+  togglePopover = (index) => {    
+    let tempArray = []
+    for (let i=0; i < this.state.popoversOpen.length; i++) {
+      if (i == index) {
+        tempArray.push(!this.state.popoversOpen[i])
+      } else
+      tempArray.push(false)
+    }
+    this.setState({popoversOpen: tempArray})
+  }
+
+  displayCars = (id) => {
+    let cars = [];
+    for (let i=0; i< this.state.ordersRequests.length ; i++) {
+        if (id == this.state.ordersRequests[i].id) {
+          cars = this.state.ordersRequests[i].cars;
+          break;
+        }
+    }
+    return cars;
   }
 
   payForCar = id => {
@@ -224,7 +316,10 @@ class Orders extends RoleAwareComponent {
                       <th scope="col">Start date</th>
                       <th scope="col">End date</th>                      
                       <th scope="col">Status</th>
-                      <th scope="col">Cars</th>                      
+                      <th scope="col">Cars</th>
+                      <th scope="col">Reservation</th>
+                      <th scope="col">Payment</th>
+                      <th scope="col">Contact</th>                      
                     </tr>
                   </thead>
                   <tbody>
@@ -234,6 +329,11 @@ class Orders extends RoleAwareComponent {
                                payForCar = {this.payForCar}
                                displayCars = {this.displayCars}
                                openModal = {this.togglePrimary}
+                               cancelReservation = {this.cancelReservation}
+                               popoverOpen = {this.state.popoversOpen}
+                               togglePopover = {this.togglePopover}
+                               showDetails = {this.showDetails}
+                               changeDate = {this.getDateString}
                                />
                     )}              
                   </tbody>

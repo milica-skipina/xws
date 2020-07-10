@@ -84,7 +84,10 @@ public class AuthService implements UserDetailsService {
     }
 
     public User registerUser(RegistrationDTO reg) {
-        if (!validateInput(reg)) {
+        if (reg.isCustomer() && !validateInput(reg)) {
+            return null;
+        }
+        if (!reg.isCustomer() && !validateSeller(reg)) {
             return null;
         }
         User user = (User) loadUserByUsername(reg.getUsername());
@@ -117,6 +120,12 @@ public class AuthService implements UserDetailsService {
 
             return user;
         }
+    }
+
+    private boolean validateSeller(RegistrationDTO dto) {
+        return RegexExpressions.isValidInput(dto.getCity()) && RegexExpressions.isValidSomeName(dto.getCompanyName())
+                 && RegexExpressions.isValidPassword(dto.getPassword()) && RegexExpressions.isValidEmail(dto.getEmail())
+                && RegexExpressions.isValidSomeName(dto.getUsername()) && RegexExpressions.isValidSomeName(dto.getAddress());
     }
 
     public boolean changePassword(PasswordChangeDTO passwordChangeDTO) {
@@ -193,13 +202,8 @@ public class AuthService implements UserDetailsService {
         user.setPassword(passwordEncoder.encode(password));
         user.setLastPasswordResetDate(new Timestamp(System.currentTimeMillis()));
         // TREBA GA DODATI U RED ZA RABITA, TREBA POSLATI MEJL
-        try {
-            messageProducer.send(password);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        }
+        messageProducer.send(password);
+
         userRepository.save(user);
        // endUserRepository.save(customer);
         return true;

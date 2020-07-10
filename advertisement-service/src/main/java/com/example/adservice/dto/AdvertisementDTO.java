@@ -3,7 +3,6 @@ package com.example.adservice.dto;
 import com.example.adservice.model.Advertisement;
 import com.example.adservice.model.Pricelist;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 public class AdvertisementDTO {
@@ -17,7 +16,7 @@ public class AdvertisementDTO {
     private boolean request;
     private String name;
     private String username;
-
+    private String trackingDevice;
 
     public AdvertisementDTO() {
         this.carAd = new CarDTO();
@@ -25,12 +24,15 @@ public class AdvertisementDTO {
     }
 
     public AdvertisementDTO(Advertisement a){
-        this(a.getId(),new CarDTO(a.getCarAd()),a.getStartDate(),a.getEndDate(),  a.getPricelist(), a.getCity(), a.isDeleted(), a.isRequest(), a.getEntrepreneurName(), a.getEntrepreneurUsername());
+        this(a.getId(),new CarDTO(a.getCarAd()),a.getStartDate(),a.getEndDate(),  a.getPricelist(), a.getCity(),
+                a.isDeleted(), a.isRequest(), a.getEntrepreneurName(), a.getEntrepreneurUsername(),
+                a.getCarAd().getTrackingToken());
         if(a.getCarAd()!=null){
             this.carAd = new CarDTO(a.getCarAd());
         }
     }
-    public AdvertisementDTO(Long id, CarDTO carAd, Date startDate, Date endDate, Pricelist pricelist, String city, boolean deleted, boolean request, String name, String username) {
+    public AdvertisementDTO(Long id, CarDTO carAd, Date startDate, Date endDate, Pricelist pricelist, String city,
+                            boolean deleted, boolean request, String name, String username, String trackingToken) {
         this.id = id;
         this.carAd = carAd;
         this.startDate = startDate;
@@ -41,6 +43,7 @@ public class AdvertisementDTO {
         this.request = request;
         this.name = name;
         this.username = username;
+        this.trackingDevice = trackingToken;
     }
 
     public AdvertisementDTO(rs.ac.uns.ftn.xws_tim2.Advertisement ad){
@@ -132,5 +135,13 @@ public class AdvertisementDTO {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getTrackingDevice() {
+        return trackingDevice;
+    }
+
+    public void setTrackingDevice(String trackingDevice) {
+        this.trackingDevice = trackingDevice;
     }
 }

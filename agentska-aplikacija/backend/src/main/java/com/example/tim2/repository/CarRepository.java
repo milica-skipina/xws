@@ -13,5 +13,5 @@ public interface CarRepository extends JpaRepository<Car, Long> {
 
     Car findOneById(Long id);
 
-
+    Car findOneByMicroId(Long adId);
 }

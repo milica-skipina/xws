@@ -1,13 +1,13 @@
 package com.example.tim2.controller;
 
 import com.example.tim2.common.UserIdentifier;
-import com.example.tim2.dto.RequestDTO;
+import com.example.tim2.dto.BasketDTO;
+import com.example.tim2.dto.RequestWrapDTO;
 import com.example.tim2.model.Role;
 import com.example.tim2.model.User;
 import com.example.tim2.repository.EntrepreneurRepository;
 import com.example.tim2.security.TokenUtils;
 import com.example.tim2.service.RequestService;
-import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +17,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/request")
@@ -46,7 +46,7 @@ public class RequestController {
 
     @PreAuthorize("hasAuthority('CREATE_REQUEST')")
     @RequestMapping(method = RequestMethod.POST, produces = "application/json")
-    public ResponseEntity<HttpStatus> createRequests(@RequestBody String[] reqs, HttpServletRequest request) {
+    public ResponseEntity<HttpStatus> createRequests(@RequestBody ArrayList<BasketDTO> reqs, HttpServletRequest request) {
         User user = userIdentifier.verifyUser(request);
         String token = tokenUtils.getToken(request);
         String username = tokenUtils.getUsernameFromToken(token);
@@ -67,31 +67,29 @@ public class RequestController {
 
     @PreAuthorize("hasAuthority('READ_REQUEST')")
     @RequestMapping(method = RequestMethod.GET, produces = "application/json", value= "")
-    public Response findRequests(HttpServletRequest request) {
+    public ResponseEntity<List<RequestWrapDTO>> findRequests(HttpServletRequest request) {
         User user = userIdentifier.verifyUser(request);
         requestService.after24hOr12h();
         if (user != null) {
-            ArrayList<RequestDTO> frontRequests = new ArrayList<RequestDTO>();
+            ArrayList<RequestWrapDTO> frontRequests ;
             String role = ((Role) user.getRoles().toArray()[0]).getName();
             if (role.equals("ROLE_SELLER")) {
-                frontRequests = requestService.requestsForApproving(user.getId());
+                frontRequests = requestService.requestsForApproving(user.getUsername());
                 if (frontRequests.isEmpty()) {
-                    return Response.status(Response.Status.NO_CONTENT).entity("No cars requested.").build();     // 204
+                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);     // 204
                 } else {
-                    String json = new Gson().toJson(frontRequests);
-                    return Response.ok(json, MediaType.APPLICATION_JSON).build();
+                    return new ResponseEntity<>(frontRequests, HttpStatus.OK);
                 }
             } else {
-                frontRequests = requestService.requestedCars(user.getId());
+                frontRequests = requestService.requestedCars(user.getUsername());
                 if (frontRequests.isEmpty()) {
-                    return Response.status(Response.Status.NO_CONTENT).entity("Your renting history is empty!").build();     // 204
+                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);     // 204
                 } else {
-                    String json = new Gson().toJson(frontRequests);
-                    return Response.ok(json, MediaType.APPLICATION_JSON).build();
+                    return new ResponseEntity<>(frontRequests, HttpStatus.OK);
                 }
             }
         } else {
-            return Response.status(Response.Status.FORBIDDEN).entity("Not permitted!").build();
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
 
@@ -102,8 +100,10 @@ public class RequestController {
         User user = userIdentifier.verifyUser(request);
         String token = tokenUtils.getToken(request);
         String username = tokenUtils.getUsernameFromToken(token);
+        String role = tokenUtils.getRoleFromToken(token);
         if (user != null) {
-            boolean success = requestService.modifyRequest(requestId, flag, username);
+            System.out.println(role);
+            boolean success = requestService.modifyRequest(requestId, flag, username, role);
             if(!success && flag){       // flag true - accept request
                 return Response.status(Response.Status.NOT_MODIFIED).entity("Car has already been booked for these days.").build();
             } else if (!success && !flag){       // flag false - cancel request
@@ -136,7 +136,7 @@ public class RequestController {
                                                       @PathVariable String start, @PathVariable String end)
     {
         User user = userIdentifier.verifyUser(request);
-        boolean ret = requestService.isInBasket(id, user.getUsername(), start, end);       // customer username
+        boolean ret = requestService.addToWishlist(id, user.getUsername(), start, end);       // customer username
         return  new ResponseEntity<>(ret, HttpStatus.OK);
     }
 

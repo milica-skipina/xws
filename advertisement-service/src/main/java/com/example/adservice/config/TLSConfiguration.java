@@ -22,55 +22,59 @@ import java.security.NoSuchAlgorithmException;
 @Configuration
 public class TLSConfiguration {
 
-    public static final String URL = "https://zuul/";
+    public static final String URL = "http://zuul/";
 
-    private String keystoreType = "PKCS12";
+ //   private String keystoreType = "PKCS12";
     /**
      * TLS version.
      */
-    @Value("${server.ssl.algorithm}")
-    private String algorithm;
+ //   @Value("${server.ssl.algorithm}")
+ //   private String algorithm;
 
     /**
      * Application keystore path.
      */
-    @Value("${server.ssl.key-store}")
-    private String keystore;
+ //   @Value("${server.ssl.key-store}")
+//    private String keystore;
 
     /**
      * Application keystore password.
      */
-    @Value("${server.ssl.key-store-password}")
-    private String keystorePassword;
+ //   @Value("${server.ssl.key-store-password}")
+ //   private String keystorePassword;
 
     /**
      * Keystore alias for application client credential.
      */
-    @Value("${server.ssl.key-alias}")
-    private String applicationKeyAlias;
+  //  @Value("${server.ssl.key-alias}")
+  //  private String applicationKeyAlias;
 
     /**
      * Application truststore path.
      */
-    @Value("${server.ssl.trust-store}")
-    private String truststore;
+ //   @Value("${server.ssl.trust-store}")
+ //   private String truststore;
 
-    private String truststoreType = "PKCS12";
+ //   private String truststoreType = "PKCS12";
 
     /**
      * Application truststore password.
      */
-    @Value("${server.ssl.trust-store-password}")
-    private String truststorePassword;
+ //   @Value("${server.ssl.trust-store-password}")
+ //   private String truststorePassword;
 
     @Bean
     @LoadBalanced
     public RestTemplate restTemplate() {
+        return new RestTemplate();
+        /*
         return new RestTemplate(new HttpComponentsClientHttpRequestFactory(
                 httpClient(keystoreType, keystore, keystorePassword, applicationKeyAlias,
                         truststoreType, truststore, truststorePassword)));
-    }
+                        */
 
+    }
+/*
     @Bean
     public HttpClient httpClient(String keystoreType, String keystore, String keystorePassword, String alias,
                                  String truststoreType, String truststore, String truststorePassword) {
@@ -110,5 +114,5 @@ public class TLSConfiguration {
         builder.withMaxConnectionsPerHost(10);
         args.setEurekaJerseyClient(builder.build());
         return args;
-    }
+    }*/
 }

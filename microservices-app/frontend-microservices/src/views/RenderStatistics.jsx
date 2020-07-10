@@ -19,7 +19,7 @@ class RenderStatistics extends RoleAwareComponent {
         let arr = new Array();
         arr.push(localStorage.getItem('role'));        
         this.userRoles = arr;
-        this.allowedRoles = ['ROLE_SELLER'];
+        this.allowedRoles = ['ROLE_SELLER', 'ROLE_CUSTOMER', 'ROLE_ADMIN'];
 
         this.getColor = this.getColor.bind(this);
         this.saznajVise = this.saznajVise.bind(this);
@@ -86,14 +86,12 @@ class RenderStatistics extends RoleAwareComponent {
                                     <Row>
                                         <Col>
                                             <MDBCardTitle tag="h6"> Car class: <p style={{ color: "red" }}>{car.carClass}</p>  </MDBCardTitle>
-                                            <MDBCardTitle tag="h6"> Daily price: <p style={{ color: "red" }}>{car.priceDay}</p>  </MDBCardTitle>
                                             <MDBCardTitle tag="h6"> Mileage: <p style={{ color: "red" }}>{car.mileage}</p>  </MDBCardTitle>
                                             <MDBCardTitle tag="h6"> Fuel type: <p style={{ color: "red" }}>{car.fuel}</p> </MDBCardTitle>
                                         </Col>
                                         <Col>
                                             <MDBCardTitle tag="h6"> Kids seats: <p style={{ color: "red" }}>{car.kidsSeats}</p>  </MDBCardTitle>
                                             <MDBCardTitle tag="h6"> Collision Damage Waiver: <i style={{ color: "red" }} hidden={!car.insurance} className="fa fa-check" /><i style={{ color: "red" }} hidden={car.insurance} className="fa fa-close" />  </MDBCardTitle>
-                                            <MDBCardTitle tag="h6"> Mileage limit: <p style={{ color: "red" }}>{car.mileageLimit}</p>  </MDBCardTitle>
                                             <MDBCardTitle tag="h6"> Gearbox type: <p style={{ color: "red" }}>{car.gearbox}</p>  </MDBCardTitle>
                                         </Col>
                                     </Row>

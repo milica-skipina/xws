@@ -50,7 +50,7 @@ public class CarService {
     }
 
     public void addImages(Long id, String [] images){
-        Car car = carRepository.getOne(id);
+        Car car = carRepository.findOneById(id);
         for(String s : images){
             Image i = new Image();
             i.setOwner(car);

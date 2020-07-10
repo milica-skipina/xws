@@ -29,8 +29,7 @@ public class UserIdentifier {
         String token = tokenUtils.getToken(request);
         data[0] = regularExpressions.isValidCharNum(tokenUtils.getUsernameFromToken(token)) ?
                 tokenUtils.getUsernameFromToken(token) : "";
-        data[1] = regularExpressions.isValidCharNum(tokenUtils.getNameFromToken(token)) ?
-                tokenUtils.getNameFromToken(token) : "";
+        data[1] = tokenUtils.getNameFromToken(token);
         return data;
     }
 

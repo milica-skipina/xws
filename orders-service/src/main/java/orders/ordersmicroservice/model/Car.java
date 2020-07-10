@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.Setter;
 import orders.ordersmicroservice.dto.CarOrderDTO;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.util.*;
@@ -17,6 +18,9 @@ public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, unique = true)
+    private Long adId;
 
     // Tesla
     @Column(name = "make", nullable = false)
@@ -59,18 +63,15 @@ public class Car {
     private Set<Request> request = new HashSet<Request>();
 
     @JsonManagedReference(value = "advertisementcar_mov")
-    @OneToMany(mappedBy = "carAd", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "carAd", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private Set<Advertisement> carAdvertisement = new HashSet<Advertisement>();
 
     @JsonManagedReference(value = "car_report_mov")
-    @OneToMany(mappedBy = "car", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "car", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private Set<Report> reports = new HashSet<Report>();
 
     @Column(name = "image_url", nullable = false, length=10485760)
     String image;
-
-    @Column(name = "microId", nullable = true)
-    Long microId;       // da bi se izjednacilo sa advertisementom
 
     public Car() {
     }
@@ -88,6 +89,7 @@ public class Car {
         this.gearbox = c.getGearbox();
         this.entrepreneurUsername = c.getEntrepreneurUsername();
         this.image = c.getImage();
+        this.adId = c.getId();
     }
 
     public Car(String make, String model, String fuel, String gearbox, String carClass,
@@ -236,6 +238,14 @@ public class Car {
 
     public void setReports(Set<Report> reports) {
         this.reports = reports;
+    }
+
+    public Long getAdId() {
+        return adId;
+    }
+
+    public void setAdId(Long adId) {
+        this.adId = adId;
     }
 }
 

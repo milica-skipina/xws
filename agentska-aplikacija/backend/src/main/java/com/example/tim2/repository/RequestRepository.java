@@ -28,5 +28,5 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
     List<Request> findAllByUserUsernameAndEntrepreneurUserUsernameAndState(String endUsername,String enterUsername,String state);
 
-    List<Request> findAllByStartDateGreaterThanEqualOrEndDateLessThanEqualAndUserUsername(String customerUsername, Date start, Date end);
+    List<Request> findAllByStartDateGreaterThanEqualOrEndDateLessThanEqual( Date start, Date end);
 }

@@ -11,5 +11,5 @@ public interface CarRepository extends JpaRepository<Car, Long> {
 
     List<Car> findAllByEntrepreneurUsername(String username);
 
-    Car findOneByMicroId(Long id);
+     Car findOneByAdId(Long id);
 }

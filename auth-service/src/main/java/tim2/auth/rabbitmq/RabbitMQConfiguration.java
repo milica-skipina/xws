@@ -16,61 +16,66 @@ import java.security.KeyStore;
 @Configuration
 public class RabbitMQConfiguration {
 
-    public static final String KEYSTORE_PROVIDER = "SunX509";
+   // public static final String KEYSTORE_PROVIDER = "SunX509";
     public static final String QUEUE_NAME = "emailRequests";
+
+    @Bean
+    public Queue queue() {
+        return new Queue(QUEUE_NAME, true);
+    }
 
     /**
      * TLS version.
      */
-    @Value("${server.ssl.algorithm}")
-    private String algorithm;
+   // @Value("${server.ssl.algorithm}")
+   // private String algorithm;
 
     /**
      * Application keystore path.
      */
-    @Value("${server.ssl.key-store}")
-    private String keystore;
+ //   @Value("${server.ssl.key-store}")
+ //   private String keystore;
 
-    private String keystoreType = "PKCS12";
+  //  private String keystoreType = "PKCS12";
 
     /**
      * Application keystore password.
      */
-    @Value("${server.ssl.key-store-password}")
-    private String keystorePassword;
+//    @Value("${server.ssl.key-store-password}")
+ //   private String keystorePassword;
 
     /**
      * Keystore alias for application client credential.
      */
-    @Value("${server.ssl.key-alias}")
-    private String applicationKeyAlias;
+  //  @Value("${server.ssl.key-alias}")
+  //  private String applicationKeyAlias;
 
     /**
      * Application truststore path.
      */
-    @Value("${server.ssl.trust-store}")
-    private String truststore;
+  //  @Value("${server.ssl.trust-store}")
+  //  private String truststore;
 
     /**
      * Application truststore type.
      */
     //@Value("${server.ssl.trust-store-type}")
-    private String truststoreType = "PKCS12";;
+    //private String truststoreType = "PKCS12";;
 
     /**
      * Application truststore password.
      */
-    @Value("${server.ssl.trust-store-password}")
-    private String truststorePassword;
+   // @Value("${server.ssl.trust-store-password}")
+   // private String truststorePassword;
 
-    @Value("${RMQ_HOST:localhost}")
-    private String host;
+ //   @Value("${RMQ_HOST:localhost}")
+ //   private String host;
 
-    @Value("${RMQ_PORT:5671}")
-    private String port;
+  //  @Value("${RMQ_PORT:5671}")
+  //  private String port;
 
 
-    @Bean
+   /* @Bean
     public Queue queue() {
         return new Queue(QUEUE_NAME, false);
     }
@@ -104,5 +109,5 @@ public class RabbitMQConfiguration {
         } catch (Exception e) {
             throw new IllegalStateException("Error while configuring rabbitmq template", e);
         }
-    }
+    }*/
 }

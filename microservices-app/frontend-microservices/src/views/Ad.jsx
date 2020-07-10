@@ -97,11 +97,24 @@ class Ad extends RoleAwareComponent {
      headers: { "Authorization": AuthStr } ,       
     }).then((response) => {
       if (response.status === 200){
-        this.setState({ pricelists: response.data, showpricelist:response.data.slice(0, pricelistPerPage) })
-        this.setState({ cjenovnici: response.data, cjenovnikId: response.data[0].id });
-        // dodati setovanje prvog
+        if(localStorage.getItem('role') === 'ROLE_CUSTOMER'){
+          let respon = response.data;
+          let temp = [];
+          for(let i=1; i<respon.length; i++){
+            if(respon[i].discount30 === 0 && respon[i].discount20 === 0){
+              temp.push(respon[i]);
+            }
+          }
+          this.setState({ pricelists: temp, showpricelist:temp.slice(0, pricelistPerPage) })
+          this.setState({ cjenovnici: temp, cjenovnikId: temp[0].id });
+        }
+        else{
+          this.setState({ pricelists: response.data, showpricelist:response.data.slice(0, pricelistPerPage) })
+          this.setState({ cjenovnici: response.data, cjenovnikId: response.data[0].id });
+        }
       }
     }, (error) => {
+      this.setState({ possible: true })
       console.log(error);
     });
   }
@@ -134,18 +147,7 @@ class Ad extends RoleAwareComponent {
     }, (error) => {
       console.log(error);
     });
-    axios({
-      method: 'get',
-      url: url + 'advertisement/pricelist',
-      headers: { "Authorization": AuthStr } ,       
-    }).then((response) => {
-      if (response.status === 200)
-      this.setState({ pricelists: response.data, showpricelist:response.data.slice(0, pricelistPerPage) })
-        this.setState({ cjenovnici: response.data, cjenovnikId: response.data[0].id });
-    }, (error) => {
-      console.log(error);
-      this.setState({ possible: true })
-    });
+
     }
   }
 

@@ -2,6 +2,7 @@ package com.example.tim2.soap.configuration;
 
 import com.example.tim2.security.TokenUtils;
 import com.example.tim2.soap.clients.AdvertisementClient;
+import com.example.tim2.soap.clients.MessageClient;
 import com.example.tim2.soap.clients.OrderClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,44 +29,44 @@ public class SOAPConfiguration {
     @Autowired
     TokenUtils tokenUtils;
 
-    private String keystoreType = "PKCS12";
+ //   private String keystoreType = "PKCS12";
     /**
      * TLS version.
      */
-    @Value("${server.ssl.algorithm}")
-    private String algorithm;
+  //  @Value("${server.ssl.algorithm}")
+  //  private String algorithm;
 
     /**
      * Application keystore path.
      */
-    @Value("${server.ssl.key-store}")
-    private String keystore;
+   // @Value("${server.ssl.key-store}")
+  //  private String keystore;
 
     /**
      * Application keystore password.
      */
-    @Value("${server.ssl.key-store-password}")
-    private String keystorePassword;
+   // @Value("${server.ssl.key-store-password}")
+    //private String keystorePassword;
 
     /**
      * Keystore alias for application client credential.
      */
-    @Value("${server.ssl.key-alias}")
-    private String applicationKeyAlias;
+   // @Value("${server.ssl.key-alias}")
+    //private String applicationKeyAlias;
 
     /**
      * Application truststore path.
      */
-    @Value("${server.ssl.trust-store}")
-    private String truststore;
+   // @Value("${server.ssl.trust-store}")
+    //private String truststore;
 
-    private String truststoreType = "PKCS12";
+    //private String truststoreType = "PKCS12";
 
     /**
      * Application truststore password.
      */
-    @Value("${server.ssl.trust-store-password}")
-    private String truststorePassword;
+    //@Value("${server.ssl.trust-store-password}")
+    //private String truststorePassword;
 
     @Bean
     public Jaxb2Marshaller marshaller() {
@@ -81,10 +82,23 @@ public class SOAPConfiguration {
         AdvertisementClient client = new AdvertisementClient();
         ClientInterceptor[] interceptors = new ClientInterceptor[]{new SecurityInterceptor(tokenUtils)};
         client.setInterceptors(interceptors);
-        client.setDefaultUri("https://localhost:8082/advertisement/ws");
+        client.setDefaultUri("http://zuul:8082/advertisement/ws");
         client.setMarshaller(marshaller);
         client.setUnmarshaller(marshaller);
-        client.setMessageSender(messageSender());
+      //  client.setMessageSender(messageSender());
+
+        return client;
+    }
+
+    @Bean
+    public MessageClient messageClient(Jaxb2Marshaller marshaller) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException {
+        MessageClient client = new MessageClient();
+        ClientInterceptor[] interceptors = new ClientInterceptor[]{new SecurityInterceptor(tokenUtils)};
+        client.setInterceptors(interceptors);
+        client.setDefaultUri("http://zuul:8082/message/ws");
+        client.setMarshaller(marshaller);
+        client.setUnmarshaller(marshaller);
+      //  client.setMessageSender(messageSender());
 
         return client;
     }
@@ -94,15 +108,15 @@ public class SOAPConfiguration {
         OrderClient client = new OrderClient();
         ClientInterceptor[] interceptors = new ClientInterceptor[]{new SecurityInterceptor(tokenUtils)};
         client.setInterceptors(interceptors);
-        client.setDefaultUri("https://localhost:8082/orders/ws");
+        client.setDefaultUri("http://zuul:8082/orders/ws");
         client.setMarshaller(marshaller);
         client.setUnmarshaller(marshaller);
-        client.setMessageSender(messageSender());
+       // client.setMessageSender(messageSender());
 
         return client;
     }
 
-    @Bean
+   /* @Bean
     public HttpsUrlConnectionMessageSender messageSender() throws IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException {
         KeyStore keyStore = KeyStore.getInstance(keystoreType);
         keyStore.load(new FileInputStream(new File(keystore)), keystorePassword.toCharArray());
@@ -128,6 +142,6 @@ public class SOAPConfiguration {
             return false;
         });
         return messageSender;
-    }
+    }*/
 
 }

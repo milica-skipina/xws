@@ -22,10 +22,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.datatype.DatatypeConfigurationException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 
@@ -67,6 +64,9 @@ public class AdvertisementService {
 
     @Autowired
     AdvertisementClient advertisementClient;
+
+    @Autowired
+    private WishlistRepository wishlistRepository;
 
     public boolean carValidation(CarDTO car){
         boolean ok = true;
@@ -332,6 +332,7 @@ public class AdvertisementService {
                     NewAdvertisementResponse response = advertisementClient.addAdvertisement(newAd, p.getMicroId());
                     newAd.setMicroId(response.getMicroId());
                     car.setMicroId(response.getMicroId());
+                    carRepository.save(car);
                 }catch (Exception e){
                     e.getStackTrace();
                 }
@@ -364,20 +365,18 @@ public class AdvertisementService {
         return ret;
     }
 
-    public List<BasketDTO> getAllInBasket(Long[] identifiers) {
-        if (!validateIds(identifiers)) {
-            return null;
-        }
-        ArrayList<BasketDTO> foundAds = new ArrayList<>(10);
+    public List<BasketDTO> getAllInBasket(String customerUsername) {
+        Set<BasketDTO> foundAds = new HashSet<>(10);
         BasketDTO adv = new BasketDTO();
-        Advertisement ad = new Advertisement();
-        for (int i=0; i < identifiers.length ; i++) {
-            ad = advertisementRepository.findOneById(identifiers[i]);
-            adv = new BasketDTO(ad);
-            adv.setPrice(countPricePerAdv(adv.getStartDate(), adv.getEndDate(), ad.getPricelist()));
-            foundAds.add(adv);
+        ArrayList<WishlistItem> wishes = (ArrayList<WishlistItem>) wishlistRepository.findAllByCustomerUsername(customerUsername);
+        for (WishlistItem wish : wishes) {
+            if (!wish.isTurnedIntoRequest()) {
+                adv = new BasketDTO(wish);
+                foundAds.add(adv);
+            }
         }
-        return foundAds;
+
+        return new ArrayList<BasketDTO>(foundAds);
     }
 
     public boolean validateIds(Long[] identifiers) {

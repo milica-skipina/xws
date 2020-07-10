@@ -27,4 +27,8 @@ INSERT INTO pricelist(collisiondw, discount20, discount30, exceed_mileage, price
 INSERT INTO pricelist(collisiondw, discount20, discount30, exceed_mileage, price_day, deleted, username) VALUES (31, 150, 10, 20, 50, false, 'prodavac');
 INSERT INTO pricelist(collisiondw, discount20, discount30, exceed_mileage, price_day, deleted, username) VALUES (15, 20, 10, 20, 50, false, 'prodavac');
 INSERT INTO pricelist(collisiondw, discount20, discount30, exceed_mileage, price_day, deleted, username) VALUES (140, 40, 10, 20, 50, false, 'prodavac');
+INSERT INTO pricelist(collisiondw, discount20, discount30, exceed_mileage, price_day, deleted, username) VALUES (140, 0, 0, 20, 50, false, 'prodavac');
+INSERT INTO pricelist(collisiondw, discount20, discount30, exceed_mileage, price_day, deleted, username) VALUES (540, 0, 0, 35, 150, false, 'prodavac');
+
+INSERT INTO coords(x,y) VALUES (45.2464362, 19.8517172);
 

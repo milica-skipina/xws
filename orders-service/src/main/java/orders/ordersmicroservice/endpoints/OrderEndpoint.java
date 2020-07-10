@@ -1,18 +1,19 @@
 package orders.ordersmicroservice.endpoints;
 
 import net.bytebuddy.asm.Advice;
+import orders.ordersmicroservice.dto.RequestWrapDTO;
 import orders.ordersmicroservice.model.Car;
 import orders.ordersmicroservice.model.Request;
+import orders.ordersmicroservice.model.RequestWrapper;
 import orders.ordersmicroservice.service.RequestService;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
-import rs.ac.uns.ftn.xws_tim2.AddOrderRequest;
-import rs.ac.uns.ftn.xws_tim2.AddOrderResponse;
+import rs.ac.uns.ftn.xws_tim2.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import rs.ac.uns.ftn.xws_tim2.Order;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Endpoint
@@ -33,30 +34,29 @@ public class OrderEndpoint {
         Order order = request.getOrder();
         Request newRequest = new Request();
         AddOrderResponse response = new AddOrderResponse();
-        List<Request> checkReq = requestService.findAllByEndDateLessThanEqualOrStartDateGreaterThanEqualAndAgentUsernameAndState(
-                order.getEndDate().toGregorianCalendar().getTime(), order.getStartDate().toGregorianCalendar().getTime(),
-                order.getCustomerUsername(), "PAID");
-        if (checkReq.isEmpty()) {       // nema tog zahteva, pa ga treba dodati
-            newRequest = requestService.requestWrapper(order);
-            response.setOk(true);
-        } else {
-            for (Request r : checkReq ) {
-                for (Car car : r.getCars() ) {
-                    for (Long idX : order.getCars() ) {
-                        if (car.getId() == idX ) {
-                            response.setOk(false);
-                            System.out.println("Pronadjen auto " + idX);
-                             break;
-                        }
-                    }
+        boolean isOk = requestService.availableForAgent(order, response);
+        response.setOk(isOk);
 
-                }
-            }
+        return response;
+    }
 
-        }
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "payOrderRequest")
+    @ResponsePayload
+    public PayOrderResponse payOrder(@RequestPayload PayOrderRequest request) {
+        PayOrderResponse response = new PayOrderResponse();
+        boolean isOk = requestService.paymentMethod(request.getMicroId(), request.getCustomerUsername());
+        response.setOk(isOk);
 
-        response.setMicroId(newRequest.getId());
+        return response;
+    }
 
+    @PayloadRoot(namespace = NAMESPACE_URI, localPart = "modifyOrderRequest")
+    @ResponsePayload
+    public ModifyOrderResponse getMicroOrders(@RequestPayload ModifyOrderRequest request) {
+        ModifyOrderResponse response = new ModifyOrderResponse();
+        ArrayList<Wrapper> ret = requestService.convertForSoap(request.getUsername());
+        response.setOk(true);
+        response.getRequestWrappers().addAll(ret);
         return response;
     }
 

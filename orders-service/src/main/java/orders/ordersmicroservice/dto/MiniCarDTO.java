@@ -8,6 +8,7 @@ public class MiniCarDTO {
     private String model;
     private String fuel;
     private Double price;   // broj dana * cena na dan
+    private String image;
 
     public MiniCarDTO() {
     }
@@ -17,6 +18,7 @@ public class MiniCarDTO {
         this.model = c.getModel();
         this.fuel = c.getFuel();
         this.id = c.getId();
+        this.image = c.getImage();
     }
 
     public MiniCarDTO(Long id, String make, String model, String fuel, Double price) {

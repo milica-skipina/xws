@@ -186,6 +186,13 @@ public class UserService {
         return true;
     }
 
+    public boolean changeRefusedNumber(String username, Integer number){
+        EndUser endUser = endUserRepository.findByUserUsername(username);
+        endUser.setNumberCanceledRequest(endUser.getNumberCanceledRequest() + 1);
+        endUserRepository.save(endUser);
+        return true;
+    }
+
     public boolean canR(String username){
         EndUser endUser = endUserRepository.findByUserUsername(username);
         return endUser.isCanReserve();

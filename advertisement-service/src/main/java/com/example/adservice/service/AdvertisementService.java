@@ -4,7 +4,7 @@ import com.example.adservice.config.TLSConfiguration;
 import com.example.adservice.config.TokenUtils;
 import com.example.adservice.datavalidation.RegularExpressions;
 import com.example.adservice.dto.AdvertisementDTO;
-import com.example.adservice.dto.BasketDTO;
+import com.example.adservice.dto.AdvertisementOrderDTO;
 import com.example.adservice.dto.CarDTO;
 import com.example.adservice.dto.SearchDTO;
 import com.example.adservice.model.*;
@@ -49,11 +49,14 @@ public class AdvertisementService {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Autowired
+    private MessageProducer messageProducer;
+
     public List<AdvertisementDTO> search(String start, String end, String city, String jwt){
         city = Encode.forHtml(city);
         Date startDate = new Date(Long.parseLong(start));
         Date endDate = new Date(Long.parseLong(end));
-        List<Advertisement> ads = advertisementRepository.findAllByDeletedAndCityIgnoreCaseAndStartDateLessThanEqualAndEndDateGreaterThanEqual(false, city, startDate, endDate);
+        List<Advertisement> ads = advertisementRepository.findAllByDeletedAndStateAndCityIgnoreCaseAndStartDateLessThanEqualAndEndDateGreaterThanEqual(false, "APPROVED", city, startDate, endDate);
         List<AdvertisementDTO> ret = new ArrayList<>();
         String url = TLSConfiguration.URL + "orders/request/car/" + start + "/" + end;
         HttpHeaders headers = new HttpHeaders();
@@ -134,7 +137,7 @@ public class AdvertisementService {
 
     public List<AdvertisementDTO> getAllAdvertisements(){
         List<AdvertisementDTO>retValue = new ArrayList<AdvertisementDTO>();
-        List<Advertisement>ads = advertisementRepository.findAll();
+        List<Advertisement>ads = advertisementRepository.findAllByState("APPROVED");
         for(Advertisement a : ads){
             if(!a.isDeleted()){
                 retValue.add(new AdvertisementDTO(a));
@@ -235,7 +238,9 @@ public class AdvertisementService {
             ad.getCarAd().setMileage(a.getCarAd().getMileage());
             ad.getCarAd().setKidsSeats(a.getCarAd().getKidsSeats());
             ad.getCarAd().setInsurance(a.getCarAd().getInsurance());
-
+            ad.setState("PENDING");
+            AdvertisementOrderDTO temp = new AdvertisementOrderDTO(ad);
+            messageProducer.send(temp);
             return new AdvertisementDTO(advertisementRepository.save(ad));
         } else{
             return null;
@@ -285,7 +290,7 @@ public class AdvertisementService {
      * @return
      */
     public Car addNewAd(AdvertisementDTO advertisement, Long id, String username, String name, String role){
-        List<Advertisement> ads = advertisementRepository.findAll();
+        List<Advertisement> ads = advertisementRepository.findAllByState("APPROVED");
         int x = 0;
         if (role.equals("ROLE_CUSTOMER")){
             for(Advertisement a : ads){
@@ -339,6 +344,9 @@ public class AdvertisementService {
                 imageRepository.save(i);
             }
             advertisementRepository.save(newAd);
+            if(advertisement.getCarAd().getImages().size() > 0) {
+                messageProducer.send(new AdvertisementOrderDTO(newAd));
+            }
             return car;
         }
         else{
@@ -348,14 +356,14 @@ public class AdvertisementService {
 
 
     public Advertisement getByCar(Long id){
-        Advertisement ad = advertisementRepository.findOneByCarAdId(id);
+        Advertisement ad = advertisementRepository.findOneByCarAdIdAndState(id, "PENDING");
         return  ad;
     }
 
     public boolean canAdd(String name, String username, String role){
         int x = 0;
         if(role.equals("ROLE_CUSTOMER")){
-            List<Advertisement> ads = advertisementRepository.findAll();
+            List<Advertisement> ads = advertisementRepository.findAllByState("APPROVED");
             for(Advertisement a : ads) {
                 if (a.getEntrepreneurName().equals(name) && a.getEntrepreneurUsername().equals(username) && (!a.isDeleted())) {
                     x++;
@@ -372,18 +380,6 @@ public class AdvertisementService {
         }
     }
 
-    public List<BasketDTO> getAllInBasket(Long[] identifiers) {
-        ArrayList<BasketDTO> foundAds = new ArrayList<>();
-        BasketDTO adv = new BasketDTO();
-        Advertisement ad = new Advertisement();
-        for (int i=0; i < identifiers.length ; i++) {
-            ad = advertisementRepository.findOneById(identifiers[i]);
-            adv = new BasketDTO(ad);
-            adv.setPrice(countPricePerAdv(adv.getStartDate(), adv.getEndDate(), ad.getPricelist()));
-            foundAds.add(adv);
-        }
-        return foundAds;
-    }
 
     private double countPricePerAdv(Date startDate, Date endDate, Pricelist pricelist) {
         double pricePerDay = pricelist.getPriceDay();

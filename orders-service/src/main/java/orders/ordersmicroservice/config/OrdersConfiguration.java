@@ -53,7 +53,8 @@ public class OrdersConfiguration extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint).and()
                 .authorizeRequests()
-                .antMatchers( "/request/available", "/ws/*", "/ws").hasAnyAuthority("SEND_SOAP")
+                .antMatchers("/ws/*", "/ws").hasAnyAuthority("SEND_SOAP")
+                .antMatchers( "/request/available", "/advertisement/*").permitAll() /*.hasAnyAuthority("SEND_SOAP")*/
                 .anyRequest().authenticated();
 
         http.addFilterAfter(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);

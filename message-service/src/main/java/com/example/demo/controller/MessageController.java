@@ -22,6 +22,7 @@ public class MessageController {
     @Autowired
     private TokenUtils tokenUtils;
 
+    @PreAuthorize("hasAuthority('CREATE_MESSAGE')")
     @GetMapping()
     public ResponseEntity<List<MessageDTO>> getUserMessages(HttpServletRequest request){
         String token = tokenUtils.getToken(request);
@@ -35,7 +36,7 @@ public class MessageController {
         String token = tokenUtils.getToken(request);
         String username = tokenUtils.getUsernameFromToken(token);
         messageDTO.setSenderUsername(username);
-        if(messageService.addMessage(messageDTO,token))
+        if(messageService.addMessage(messageDTO,token)!=null)
             return new ResponseEntity<>(HttpStatus.OK);
         else
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

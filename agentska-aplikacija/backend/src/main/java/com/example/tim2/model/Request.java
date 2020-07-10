@@ -47,6 +47,13 @@ public class Request {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Entrepreneur entrepreneur;
 
+    @JsonBackReference(value = "bundle_mov")
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private RequestWrapper requestWrapper;
+
+    @Column(name = "micro_id", unique = true, nullable = true)
+    private Long microId;       // id iz orders microservisa
+
     public Request() {
     }
 
@@ -61,10 +68,18 @@ public class Request {
         this.dateCreated = dateCreated;
     }
 
+
+
     public com.example.tim2.soap.gen.Order getGenerated(){
         com.example.tim2.soap.gen.Order ret = new com.example.tim2.soap.gen.Order();
         ret.setAgentUsername(this.entrepreneur.getUser().getUsername());
         ret.setCustomerUsername(this.user.getUsername());
+        if (this.microId != null) {
+            ret.setMicroId(this.microId);       // bice null ako je novi zahtev na agentu i nema ga na micro
+        } else {
+            ret.setMicroId(-100L);
+        }
+
         GregorianCalendar c = new GregorianCalendar();
         c.setTime(getEndDate());
         try {
@@ -166,6 +181,19 @@ public class Request {
         this.dateCreated = dateCreated;
     }
 
+    public Request escapeParameters(Request r) {
+        r.setState(Encode.forHtml(r.getState()));
+        return r;
+    }
+
+    public RequestWrapper getRequestWrapper() {
+        return requestWrapper;
+    }
+
+    public void setRequestWrapper(RequestWrapper requestWrapper) {
+        this.requestWrapper = requestWrapper;
+    }
+
     public Entrepreneur getEntrepreneur() {
         return entrepreneur;
     }
@@ -174,8 +202,11 @@ public class Request {
         this.entrepreneur = entrepreneur;
     }
 
-    public Request escapeParameters(Request r) {
-        r.setState(Encode.forHtml(r.getState()));
-        return r;
+    public Long getMicroId() {
+        return microId;
+    }
+
+    public void setMicroId(Long microId) {
+        this.microId = microId;
     }
 }

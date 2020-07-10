@@ -17,6 +17,7 @@ public class RequestDTO {
     private String userUsername;
     private String agentUsername;
 
+
     public RequestDTO(Long id, String state, Date startDate, Date endDate, String userName, String agentName, Set<MiniCarDTO> cars,String userUsername,String agentUsername) {
         this.id = id;
         this.state = state;
@@ -27,6 +28,7 @@ public class RequestDTO {
         this.cars = cars;
         this.userUsername = userUsername;
         this.agentUsername = agentUsername;
+
     }
 
     public RequestDTO(Request r) {
@@ -36,8 +38,9 @@ public class RequestDTO {
         this.endDate = r.getEndDate();
         this.agentName = r.getSender().getCompanyName();
         this.cars = new HashSet<>();
-        this.agentUsername = r.getEntrepreneur().getUser().getUsername();
+        this.agentUsername = r.getSender().getUser().getUsername();
         this.userUsername = r.getUser().getUsername();
+
     }
 
 
@@ -116,4 +119,5 @@ public class RequestDTO {
     public void setAgentUsername(String agentUsername) {
         this.agentUsername = agentUsername;
     }
+
 }

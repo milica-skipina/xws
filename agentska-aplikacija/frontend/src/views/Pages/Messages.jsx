@@ -38,6 +38,12 @@ class Messages extends RoleAwareComponent {
       from: "",
       rowContent: ""
     };
+
+    let arr = [];
+    arr.push(localStorage.getItem('role'));
+    console.log("KONS",arr);
+    this.userRoles = arr;
+    this.allowedRoles = ['ROLE_SELLER', 'ROLE_CUSTOMER'];
   }
 
   messageValidation(c){

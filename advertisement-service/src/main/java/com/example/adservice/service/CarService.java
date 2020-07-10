@@ -1,20 +1,22 @@
 package com.example.adservice.service;
 
+import com.example.adservice.config.TLSConfiguration;
+import com.example.adservice.dto.AdvertisementOrderDTO;
 import com.example.adservice.dto.CarDTO;
 import com.example.adservice.dto.CarOrderDTO;
-import com.example.adservice.model.Advertisement;
-import com.example.adservice.model.Car;
-import com.example.adservice.model.Image;
-import com.example.adservice.model.Review;
-import com.example.adservice.repository.CarRepository;
-import com.example.adservice.repository.ImageRepository;
-import com.example.adservice.repository.ReviewRepository;
+import com.example.adservice.dto.CoordsDTO;
+import com.example.adservice.model.*;
+import com.example.adservice.repository.*;
+import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class CarService {
@@ -28,15 +30,69 @@ public class CarService {
     @Autowired
     private ReviewRepository reviewRepository;
 
+    @Autowired
+    private MessageProducer messageProducer;
+
+    @Autowired
+    private AdvertisementRepository advertisementRepository;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private CoordinatesRepository coordinatesRepository;
+
+    public CoordsDTO getCurrentCoord(Long carId,String token){
+
+            final String url = TLSConfiguration.URL + "orders/car/trackingCheck/"+carId.toString();
+            Map<String, Long> params = new HashMap<String, Long>();
+            params.put("id",carId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", token);
+        HttpEntity header = new HttpEntity(headers);
+           // HttpEntity header = createAuthHeader(token, null);
+            ResponseEntity<Boolean> result = restTemplate.exchange(url, HttpMethod.GET, header, Boolean.class, params);
+
+           // boolean result = restTemplate.getForObject(url,Boolean.class);
+
+            if( result.getBody()) {
+                long id = 1;
+                Coords curr = coordinatesRepository.getOne(id);
+                if (curr != null) {
+                    CoordsDTO dto = new CoordsDTO(curr);
+                    return dto;
+                }
+                CoordsDTO dto = new CoordsDTO();
+                dto.setX(45.2464362);
+                dto.setY(19.8517172);
+                return new CoordsDTO();
+            }
+            return null;
+
+    }
+
+    public <T> HttpEntity<T> createAuthHeader(String token, T bodyType) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", token);
+        HttpEntity<T> request = new HttpEntity<>(bodyType, headers);
+        return request;
+    }
+
     public void addImages(Long id, String [] images){
         Car car = carRepository.findOneById(id);
         for(String s : images){
             Image i = new Image();
             i.setOwner(car);
             i.setImageUrl(s);
-            imageRepository.save(i);
+            i = imageRepository.save(i);
+            car.getImages().add(i);
         }
-        carRepository.save(car);
+        Car c = carRepository.save(car);
+        Set<Advertisement> ads = c.getCarAdvertisement();
+        for(Advertisement a:ads){
+            a.setCarAd(c);
+            messageProducer.send(new AdvertisementOrderDTO(a));
+        }
     }
 
     public boolean changeMileage(Double temp, Long id){
@@ -121,5 +177,10 @@ public class CarService {
         CarOrderDTO ret = new CarOrderDTO(car);
         ret.setEntrepreneurName(((Advertisement) car.getCarAdvertisement().toArray()[0]).getEntrepreneurName());
         return ret;
+    }
+
+    public void trackingSimulation(Long id) {
+        String token = carRepository.findOneById(id).getTrackingToken();
+        // ovaj token slati u rabita i prihvatati u tracking servisu
     }
 }

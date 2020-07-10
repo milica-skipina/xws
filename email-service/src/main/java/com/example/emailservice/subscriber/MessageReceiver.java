@@ -10,7 +10,10 @@ import org.springframework.stereotype.Service;
 
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeoutException;
 import javax.mail.MessagingException;
 
@@ -18,16 +21,13 @@ import javax.mail.MessagingException;
 public class MessageReceiver {
 
     private final ApplicationConfiguration configuration;
-    private final ConnectionFactory factory;
     private EmailService emailService;
 
 
     @Autowired
-    public MessageReceiver(ApplicationConfiguration configuration,
-                           ConnectionFactory factory, EmailService emailService){
+    public MessageReceiver(ApplicationConfiguration configuration, EmailService emailService){
 
         this.configuration = configuration;
-        this.factory = factory;
         this.emailService = emailService;
         init();
     }
@@ -35,10 +35,14 @@ public class MessageReceiver {
     private void init() {
         try {
             String queueName = RabbitMQConfiguration.QUEUE_NAME;
+            ConnectionFactory factory = new ConnectionFactory();
+            factory.setUri("amqp://qphutegs:X3f6xAhz9VClTmtXksUBAbhLzGci5wRI@roedeer.rmq.cloudamqp.com/qphutegs");
+            //factory.setRequestedHeartbeat(30);
+            //factory.setConnectionTimeout(30);
             Connection connection = factory.newConnection();
             Channel channel = connection.createChannel();
 
-            channel.queueDeclare(queueName, false, false, false, null);
+            channel.queueDeclare(queueName, true, false, false, null);
 
             Consumer consumer = new DefaultConsumer(channel) {
 
@@ -66,6 +70,12 @@ public class MessageReceiver {
         } catch (IOException | TimeoutException e) {
             e.printStackTrace();
             System.exit(1);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
 
     }

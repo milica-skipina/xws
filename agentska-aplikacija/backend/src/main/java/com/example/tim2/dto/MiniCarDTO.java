@@ -1,13 +1,22 @@
 package com.example.tim2.dto;
 
 import com.example.tim2.model.Car;
+import com.example.tim2.model.Image;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+
+@Getter
+@Setter
 public class MiniCarDTO {
     private String make;
     private String model;
     private String fuel;
     private Double price;   // broj dana * cena na dan
     private Long id;
+    private Set<Image> images = new HashSet<Image>();
 
     public MiniCarDTO() {
     }
@@ -17,6 +26,7 @@ public class MiniCarDTO {
         this.model = c.getModel().getName();
         this.fuel = c.getFuel().getName();
         this.id = c.getId();
+        this.images = c.getImages();
     }
 
     public MiniCarDTO(String make, String model, String fuel, Double price, Long id) {

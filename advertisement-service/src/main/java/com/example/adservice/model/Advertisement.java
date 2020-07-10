@@ -45,6 +45,9 @@ public class Advertisement {
     @Column(name = "deleted", nullable = false)
     private boolean deleted;
 
+    @Column(name = "state", nullable = false)
+    private String state;
+
     public Advertisement(rs.ac.uns.ftn.xws_tim2.Advertisement advertisement) {
         //this.carAd = new P;
         this.startDate = advertisement.getStartDate().toGregorianCalendar().getTime();
@@ -52,6 +55,7 @@ public class Advertisement {
         this.entrepreneurName = advertisement.getEntrepreneurName();
         this.city = advertisement.getCity();
         this.deleted = advertisement.isDeleted();
+        this.state = "PENDING";
     }
     public String getCity() {
         return city;
@@ -63,6 +67,7 @@ public class Advertisement {
 //slike
 
     public Advertisement() {
+        this.state = "PENDING";
     }
 
     public Advertisement(Car car, Date startDate, Date endDate, String entrepreneurName, Pricelist pricelist, String city, boolean request) {
@@ -73,9 +78,16 @@ public class Advertisement {
         this.pricelist = pricelist;
         this.city = city;
         this.request = request;
+        this.state = "PENDING";
     }
 
+    public String getState() {
+        return state;
+    }
 
+    public void setState(String state) {
+        this.state = state;
+    }
 
     public Long getId() {
         return id;

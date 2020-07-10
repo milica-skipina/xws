@@ -4,8 +4,13 @@ import lombok.Getter;
 import lombok.Setter;
 import orders.ordersmicroservice.model.Car;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+
 @Getter @Setter
-public class CarOrderDTO {
+public class CarOrderDTO implements Serializable {
     private String make;
     private String model;
     private String fuel;
@@ -51,6 +56,25 @@ public class CarOrderDTO {
         this.gearbox = c.getGearbox();
         this.entrepreneurUsername = c.getEntrepreneurUsername();
         this.image = c.getImage();
+        this.id = c.getId();
+    }
+
+    public static CarOrderDTO fromBytes(byte[] body) {
+        CarOrderDTO obj = null;
+        try {
+            ByteArrayInputStream bis = new ByteArrayInputStream (body);
+            ObjectInputStream ois = new ObjectInputStream (bis);
+            obj = (CarOrderDTO) ois.readObject();
+            ois.close();
+            bis.close();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        catch (ClassNotFoundException ex) {
+            ex.printStackTrace();
+        }
+        return obj;
     }
 
     public String getMake() {
@@ -147,6 +171,22 @@ public class CarOrderDTO {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public String getEntrepreneurName() {
+        return entrepreneurName;
+    }
+
+    public void setEntrepreneurName(String entrepreneurName) {
+        this.entrepreneurName = entrepreneurName;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }
 

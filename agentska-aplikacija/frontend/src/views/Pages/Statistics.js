@@ -38,7 +38,7 @@ class Statistics extends RoleAwareComponent {
     }
 
     saznajVise(id) {
-        window.location.assign('showAd/' + id);
+        window.location.assign('oglas/' + id);
       }
 
     render() {

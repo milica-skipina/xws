@@ -4,7 +4,9 @@ import com.google.gson.Gson;
 import orders.ordersmicroservice.common.UserIdentifier;
 import orders.ordersmicroservice.config.TLSConfiguration;
 import orders.ordersmicroservice.config.TokenUtils;
+import orders.ordersmicroservice.dto.BasketDTO;
 import orders.ordersmicroservice.dto.RequestDTO;
+import orders.ordersmicroservice.dto.RequestWrapDTO;
 import orders.ordersmicroservice.model.Request;
 import orders.ordersmicroservice.service.RequestService;
 import org.apache.catalina.User;
@@ -57,20 +59,21 @@ public class RequestController {
     }
 
     @PreAuthorize("hasAuthority('CREATE_REQUEST')")
-    @RequestMapping(method = RequestMethod.POST, value = "/{id}") // car id
-    public ResponseEntity<Boolean> availableForBasket(@PathVariable Long id, HttpServletRequest request)
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}/{start}/{end}")
+    public ResponseEntity<Boolean> availableForBasket(@PathVariable Long id, HttpServletRequest request,
+                                                      @PathVariable String start, @PathVariable String end)
     {
         String[] data = userIdentifier.extractFromJwt(request);
         String token = tokenUtils.getToken(request);
         String username = tokenUtils.getUsernameFromToken(token);
-        boolean ret = requestService.isInBasket(id, data[0]);       // customer username
-        final String url = TLSConfiguration.URL + "authpoint/user/canReserve";
+        boolean ret = requestService.addToWishlist(id, data[0], start, end);
+        final String url = TLSConfiguration.URL + "authpoint/user/canReserve/{username}";
         Map<String, String> params = new HashMap<String, String>();
         params.put("username", username);
         HttpEntity header = requestService.createAuthHeader(tokenUtils.getToken(request), null);
         ResponseEntity<Boolean> result = restTemplate.exchange(url, HttpMethod.GET, header, Boolean.class, params);
         if(!result.getBody()){
-            ret = false;
+            return  new ResponseEntity<>(true, HttpStatus.FORBIDDEN);
         }
         return  new ResponseEntity<>(ret, HttpStatus.OK);
     }
@@ -84,7 +87,7 @@ public class RequestController {
 
     @PreAuthorize("hasAuthority('CREATE_REQUEST')")
     @RequestMapping(method = RequestMethod.POST, produces = "application/json")
-    public ResponseEntity<HttpStatus> createRequests(@RequestBody String[] reqs, HttpServletRequest request) {
+    public ResponseEntity<HttpStatus> createRequests(@RequestBody ArrayList<BasketDTO> reqs, HttpServletRequest request) {
         String jwt = tokenUtils.getToken(request);
         String[] data = userIdentifier.extractFromJwt(request);
         if (data[0] != null) {      // data[0] je username
@@ -104,37 +107,29 @@ public class RequestController {
 
     @PreAuthorize("hasAuthority('READ_REQUEST')")
     @RequestMapping(method = RequestMethod.GET, produces = "application/json", value= "/{order}")
-    public Response findRequests(HttpServletRequest request, @PathVariable boolean order) {
+    public ResponseEntity<List<RequestWrapDTO>> findRequests(HttpServletRequest request, @PathVariable boolean order) {
         String[] user = userIdentifier.extractFromJwt(request);
         if (user[0] != null) {
             requestService.after24hOr12h();
-            ArrayList<RequestDTO> frontRequests = new ArrayList<RequestDTO>();
+            ArrayList<RequestWrapDTO> frontRequests;
             String role = userIdentifier.roleFromJwt(request);
             if (!order) {
                 frontRequests = requestService.requestsForApproving(user[0]);
-                if (frontRequests == null) {
-                    return Response.status(Response.Status.BAD_REQUEST).entity("Validation didn't pass.").build();
-                }
-                else if (frontRequests.isEmpty()) {
-                    return Response.status(Response.Status.NO_CONTENT).entity("No cars requested.").build();     // 204
+                if (frontRequests == null || frontRequests.isEmpty()) {
+                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                 } else {
-                    String json = new Gson().toJson(frontRequests);
-                    return Response.ok(json, MediaType.APPLICATION_JSON).build();
+                    return new ResponseEntity<>(frontRequests, HttpStatus.OK);
                 }
             } else {
                 frontRequests = requestService.requestedCars(user[0]);
-                if (frontRequests == null) {
-                    return Response.status(Response.Status.BAD_REQUEST).entity("Validation didn't pass.").build();
-                }
-                else if (frontRequests.isEmpty()) {
-                    return Response.status(Response.Status.NO_CONTENT).entity("Your renting history is empty!").build();     // 204
+                if (frontRequests == null || frontRequests.isEmpty()) {
+                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);     // 204
                 } else {
-                    String json = new Gson().toJson(frontRequests);
-                    return Response.ok(json, MediaType.APPLICATION_JSON).build();
+                    return new ResponseEntity<>(frontRequests, HttpStatus.OK);
                 }
             }
         } else {
-            return Response.status(Response.Status.FORBIDDEN).entity("Not permitted!").build();
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
     }
 
@@ -145,8 +140,9 @@ public class RequestController {
         String[] user = userIdentifier.extractFromJwt(request);
         String token = tokenUtils.getToken(request);
         String username = tokenUtils.getUsernameFromToken(token);
+        String role = tokenUtils.getRoleFromToken(token);
         if (user[0] != null) {
-            boolean success = requestService.modifyRequest(requestId, flag);
+            boolean success = requestService.modifyRequest(requestId, flag, role, username, token);
             if(!success){       // flag true - accept request
                 return Response.status(Response.Status.NOT_MODIFIED).entity("Request is not modified.").build();
             }
@@ -190,7 +186,7 @@ public class RequestController {
         List<Long> ids = requestService.findAllByStateAndStartDateAndEndDate("PAID", startDate, endDate);
         Long[] ret = new Long[ids.size()];
         if (!ids.isEmpty()) {
-            ret = (Long[]) ids.toArray();
+            ids.toArray(ret);
         }
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }

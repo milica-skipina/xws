@@ -201,7 +201,7 @@ class Dashboard extends RoleAwareComponent{
               <th scope="col"></th>
               <th scope="col"></th>
               <th scope="col">Refused comments</th>
-              <th scope="col">Canceled request</th>
+              <th scope="col">Canceled requests</th>
             </tr>
             </thead>
             <tbody>

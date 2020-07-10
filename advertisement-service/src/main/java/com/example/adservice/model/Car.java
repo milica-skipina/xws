@@ -70,11 +70,11 @@ public class Car {
     private boolean following;
 
     @JsonManagedReference(value = "advertisementcar_mov")
-    @OneToMany(mappedBy = "carAd", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "carAd", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Set<Advertisement> carAdvertisement = new HashSet<Advertisement>();
 
     @JsonManagedReference(value = "image_mov")
-    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @OneToMany(mappedBy = "owner", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     private Set<Image>images = new HashSet<Image>();
 
     @Column(name = "trackingToken", nullable = true)

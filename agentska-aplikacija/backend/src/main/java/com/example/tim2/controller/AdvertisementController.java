@@ -184,8 +184,10 @@ public class AdvertisementController {
      */
     @PreAuthorize("hasAuthority('READ_AD')")
     @PostMapping(value = "/filter", produces="application/json")
-    public ResponseEntity<List<BasketDTO>> getAllInBasket(@RequestBody Long[] identifiers) {
-        List<BasketDTO>retValue = advertisementService.getAllInBasket(identifiers);
+    public ResponseEntity<List<BasketDTO>> getAllInBasket(HttpServletRequest request) {
+        String token = tokenUtils.getToken(request);
+        String username = tokenUtils.getUsernameFromToken(token);
+        List<BasketDTO>retValue = advertisementService.getAllInBasket(username);        // customer username
         if(retValue.size() == 0){
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

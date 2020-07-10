@@ -2,11 +2,14 @@ package com.example.tim2.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
-import java.util.*;
-import java.time.LocalDate;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Advertisement {
@@ -49,6 +52,9 @@ public class Advertisement {
     @Column
     private Long microId;
 
+    @JsonBackReference(value = "wishlist_movement")
+    @OneToOne(mappedBy = "advertisement", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private WishlistItem wishlistItem;
 
     //slike
 
@@ -163,5 +169,13 @@ public class Advertisement {
 
     public void setMicroId(Long microId) {
         this.microId = microId;
+    }
+
+    public WishlistItem getWishlistItem() {
+        return wishlistItem;
+    }
+
+    public void setWishlistItem(WishlistItem wishlistItem) {
+        this.wishlistItem = wishlistItem;
     }
 }

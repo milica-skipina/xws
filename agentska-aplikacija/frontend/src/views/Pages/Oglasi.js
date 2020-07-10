@@ -100,6 +100,7 @@ class Oglasi extends Component {
     this.CustomerEmailValidation = this.CustomerEmailValidation.bind(this);
     this.CustomerNameValidation = this.CustomerNameValidation.bind(this);
     this.validateFields = this.validateFields.bind(this);
+    this.datesBetween = this.datesBetween.bind(this);
   }
 
   componentDidMount() {
@@ -224,7 +225,7 @@ class Oglasi extends Component {
     ret = date.getFullYear() + '-' + month + '-' + pom;
     this.setState({manualEndDate:ret, manualId: oglas.carAd.id});
     this.setState({endDateDisable:ret});
-    this.setState({showModal:true});
+    this.setState({showModal:true});    
   }
 
   startDateValidationModal(ddatum) {
@@ -676,32 +677,24 @@ if (godina < year) {
         url: url + 'request/' + id + '/' + start + '/' + end,    // provera da li je taj oglas vec rezervisan za te datume
         headers: { "Authorization": AuthStr } ,       
       }).then((response) => {
-        if (response.data) {    // ima ga u zahtevu
+        if (!response.data) {    // ima ga u zahtevu
             dodaj = false;
             NotificationManager.info("You have already created order for this car!", '', 3000);             
-        } else {
-          let array = JSON.parse(sessionStorage.getItem('basket')) || [] ;
-          for (let i = 0 ; i < array.length ; i++) {
-            if (array[i] === id) {
-              NotificationManager.error("Item already in basket!", '', 3000);
-              dodaj=false;
-              break;
-            }
-          }
-    
-          if (dodaj) {  //prosao ceo niz i nema ga u kanti
-            array.push(id);
-            console.log(array);
-            sessionStorage.setItem('basket', JSON.stringify(array));   
+        } else {              
             NotificationManager.success("Item successfully added!", '', 3000);
           }
           
-        }
+        
       }, (error) => {
         console.log(error);
-      });
-    
+      });    
   }
+
+  datesBetween = ( startOffset, endOffset, checkDate) => {
+      return checkDate >= startOffset && checkDate < endOffset ;
+  }
+
+
 
   validateFields = (event) => {
     if (this.state.shouldRegister && (this.state.manualCustomerEmail === "" || this.state.manualCustomerName === "" || 

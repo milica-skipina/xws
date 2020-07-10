@@ -22,7 +22,7 @@ public class Report {
     private double predjeniKilometri;
 
     @JsonBackReference(value = "car_report_mov")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
     private Car car;
 
     public Report() {

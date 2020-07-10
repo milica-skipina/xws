@@ -2,12 +2,14 @@ package orders.ordersmicroservice.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import orders.ordersmicroservice.model.Car;
 import orders.ordersmicroservice.model.Request;
+import rs.ac.uns.ftn.xws_tim2.Order;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
@@ -36,7 +38,7 @@ public class RequestDTO {
         this.state = r.getState();
         this.startDate = r.getStartDate();
         this.endDate = r.getEndDate();
-        this.userId = r.getCustomerName();
+        this.userId = r.getCustomerUsername();
         this.agentId = r.getAgentNamee();
         this.agentUsername = r.getAgentUsername();
         this.cars = new HashSet<>();
@@ -84,5 +86,7 @@ public class RequestDTO {
     public void setCars(Set<MiniCarDTO> cars) {
         this.cars = cars;
     }
+
+
 }
 

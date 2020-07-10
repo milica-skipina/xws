@@ -3,6 +3,7 @@ package tim2.auth.service;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tim2.auth.rabbitmq.RabbitMQConfiguration;
@@ -13,8 +14,17 @@ import java.util.concurrent.TimeoutException;
 @Service
 public class MessageProducer {
 
+    private RabbitTemplate rabbitTemplate;
 
-    private ConnectionFactory factory;
+    public MessageProducer(RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
+    }
+
+    public void send(String message) {
+        rabbitTemplate.convertAndSend(RabbitMQConfiguration.QUEUE_NAME, message);
+    }
+
+   /* private ConnectionFactory factory;
 
     @Autowired
     public MessageProducer(ConnectionFactory factory) {
@@ -31,6 +41,6 @@ public class MessageProducer {
         channel.basicPublish("", queueName, null, message.getBytes());
         channel.close();
         connection.close();
-    }
+    }*/
 
 }

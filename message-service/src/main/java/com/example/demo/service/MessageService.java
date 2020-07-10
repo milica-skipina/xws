@@ -32,7 +32,7 @@ public class MessageService {
     private RestTemplate restTemplate;
 
 
-    public boolean addMessage(MessageDTO messageDTO,String token){
+    public Message addMessage(MessageDTO messageDTO,String token){
         if(checkRequestState(token,messageDTO.getSenderUsername(),messageDTO.getReceiverUsername())) {
             Message mess = new Message();
             mess.setReceiverUsername(messageDTO.getReceiverUsername());
@@ -41,12 +41,15 @@ public class MessageService {
             mess.setText(messageDTO.getText());
             mess.setTimeSent(messageDTO.getTimeSent());
             messageRepository.save(mess);
-            return true;
+            return mess;
         }else
-            return false;
+            return null;
     }
 
     public boolean checkRequestState(String token,String senderUsername,String receiverUsername){
+        if(token.equals("")){
+            return true;
+        }
 
         String role = tokenUtils.getRoleFromToken(token);
 

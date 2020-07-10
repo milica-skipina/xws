@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.datatype.DatatypeConfigurationException;
 import java.util.List;
 
 @RestController
@@ -30,7 +31,7 @@ public class MessageController {
     private UserIdentifier userIdentifier;
 
     @GetMapping()
-    public ResponseEntity<List<MessageDTO>> getAllByUser(HttpServletRequest request){
+    public ResponseEntity<List<MessageDTO>> getAllByUser(HttpServletRequest request) throws DatatypeConfigurationException {
         User user = userIdentifier.verifyUser(request);
         String role = ((Role) user.getRoles().toArray()[0]).getName();
         String token = tokenUtils.getToken(request);
@@ -42,7 +43,7 @@ public class MessageController {
         User user = userIdentifier.verifyUser(request);
         String role = ((Role) user.getRoles().toArray()[0]).getName();
         String token = tokenUtils.getToken(request);
-        if(messageService.saveMessage(messageDTO))
+        if(messageService.saveMessage(messageDTO,role))
             return new ResponseEntity<>(HttpStatus.OK);
         else
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

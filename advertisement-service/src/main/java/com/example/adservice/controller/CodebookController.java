@@ -87,7 +87,7 @@ public class CodebookController {
         }
     }
 
-    @PreAuthorize("hasAuthority('READ_CODE')")
+   // @PreAuthorize("hasAuthority('READ_CODE')")
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity<List<CodebookDTO>> getAllCodebooks() {
         return new ResponseEntity<>(codebookService.getAll(), HttpStatus.OK);

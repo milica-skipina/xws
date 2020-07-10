@@ -3,14 +3,14 @@ package orders.ordersmicroservice.service;
 import orders.ordersmicroservice.dto.CarOrderDTO;
 import orders.ordersmicroservice.model.Car;
 import orders.ordersmicroservice.model.Report;
+import orders.ordersmicroservice.model.Request;
 import orders.ordersmicroservice.repository.CarRepository;
 import orders.ordersmicroservice.repository.ReportRepository;
+import orders.ordersmicroservice.repository.RequestRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class CarService {
@@ -20,6 +20,20 @@ public class CarService {
 
     @Autowired
     private ReportRepository reportRepository;
+
+    @Autowired
+    private RequestRepository requestRepository;
+
+    public boolean checkTracking(Long id){
+        Calendar cal = Calendar.getInstance();
+        Date now = cal.getTime();
+        List<Request> requestsReserved = requestRepository.findAllByEndDateLessThanEqualOrStartDateGreaterThanEqualAndStateAndCarsId(now,now,"RESERVED",id);
+        List<Request> requestsPaid = requestRepository.findAllByEndDateLessThanEqualOrStartDateGreaterThanEqualAndStateAndCarsId(now,now,"PAID",id);
+        if(!requestsReserved.isEmpty() || !requestsPaid.isEmpty()){
+            return true;
+        }
+        return false;
+    }
 
     public List<CarOrderDTO> getStatistics(String  username){
         List<Car> cars = carRepository.findAllByEntrepreneurUsername(username);

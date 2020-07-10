@@ -38,4 +38,12 @@ public class CarController {
         List<CarOrderDTO> cars = carService.getStatistics(username);
         return new ResponseEntity<>(cars, HttpStatus.OK);
     }
+
+    @GetMapping(produces="application/json", value="/trackingCheck/{id}")
+    public ResponseEntity<Boolean> checkCar(@PathVariable Long id){
+        if(carService.checkTracking(id))
+            return new ResponseEntity<>(true, HttpStatus.OK);
+        else
+            return new ResponseEntity<>(false, HttpStatus.OK);
+    }
 }

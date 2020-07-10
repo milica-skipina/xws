@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface AdvertisementRepository extends JpaRepository<Advertisement, Long> {
 
-    List<Advertisement> findAll();
+    List<Advertisement> findAllByState(String state);
 
     Advertisement findOneById(Long id);
 
@@ -17,10 +17,10 @@ public interface AdvertisementRepository extends JpaRepository<Advertisement, Lo
 
     Advertisement save(Advertisement advertisement);
 
-    Advertisement findOneByCarAdId(Long id);
+    Advertisement findOneByCarAdIdAndState(Long id, String state);
 
-    List<Advertisement> findAllByDeletedAndCityIgnoreCaseAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
-            Boolean deleted, String city, Date startDate, Date endDate);
+    List<Advertisement> findAllByDeletedAndStateAndCityIgnoreCaseAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+            Boolean deleted, String state, String city, Date startDate, Date endDate);
 
     List<Advertisement> findAllByEntrepreneurUsername(String agentUsername);
 }

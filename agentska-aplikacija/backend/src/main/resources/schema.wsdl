@@ -1,6 +1,46 @@
 <wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:sch="http://www.ftn.uns.ac.rs/xws_tim2" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.ftn.uns.ac.rs/xws_tim2" targetNamespace="http://www.ftn.uns.ac.rs/xws_tim2">
   <wsdl:types>
     <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.ftn.uns.ac.rs/xws_tim2" version="1.0">
+      <xs:element name="sendMessageResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ok" nillable="false" type="xs:boolean"/>
+            <xs:element name="microId" nillable="false" type="xs:long"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="sendMessageRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="message" type="tns:message"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="getAllMessagesRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="username" type="xs:string"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="microIds" nillable="false" type="xs:long"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="getAllMessagesResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="messages" nillable="false" type="tns:message"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:complexType name="message">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="id" type="xs:long"/>
+          <xs:element minOccurs="0" name="text" nillable="false" type="xs:string"/>
+          <xs:element minOccurs="0" name="subject" nillable="false" type="xs:string"/>
+          <xs:element minOccurs="0" name="timeSent" nillable="false" type="xs:dateTime"/>
+          <xs:element minOccurs="0" name="senderUsername" nillable="false" type="xs:string"/>
+          <xs:element minOccurs="0" name="receiverUsername" nillable="false" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
       <xs:element name="addOrderRequest">
         <xs:complexType>
           <xs:sequence>
@@ -21,12 +61,26 @@
         <xs:complexType>
           <xs:sequence>
             <xs:element name="username" type="xs:string"/>
-            <xs:element name="id" type="xs:long"/>
-            <xs:element name="flag" type="xs:boolean"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
       <xs:element name="modifyOrderResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="ok" type="xs:boolean"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="requestWrappers" nillable="false" type="tns:wrapper"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="payOrderRequest">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="microId" type="xs:long"/>
+            <xs:element name="customerUsername" type="xs:string"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="payOrderResponse">
         <xs:complexType>
           <xs:sequence>
             <xs:element name="ok" type="xs:boolean"/>
@@ -44,6 +98,17 @@
           <xs:element name="agentUsername" nillable="false" type="xs:string"/>
           <xs:element name="startDate" nillable="false" type="xs:dateTime"/>
           <xs:element name="endDate" nillable="false" type="xs:dateTime"/>
+          <xs:element name="microId" type="xs:long"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="wrapper">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="id" type="xs:long"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="requests" nillable="false" type="tns:order"/>
+          <xs:element name="state" nillable="false" type="xs:string"/>
+          <xs:element name="customerUsername" nillable="false" type="xs:string"/>
+          <xs:element name="agentUsername" nillable="false" type="xs:string"/>
+          <xs:element name="microId" type="xs:long"/>
         </xs:sequence>
       </xs:complexType>
       <xs:element name="addImagesRequest">
@@ -258,35 +323,14 @@
       </xs:complexType>
     </xs:schema>
   </wsdl:types>
-  <wsdl:message name="editPricelistRequest">
-    <wsdl:part element="tns:editPricelistRequest" name="editPricelistRequest"> </wsdl:part>
-  </wsdl:message>
   <wsdl:message name="deletePricelistRequest">
     <wsdl:part element="tns:deletePricelistRequest" name="deletePricelistRequest"> </wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="editAdvertisementResponse">
-    <wsdl:part element="tns:editAdvertisementResponse" name="editAdvertisementResponse"> </wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="allPricelistsResponse">
-    <wsdl:part element="tns:allPricelistsResponse" name="allPricelistsResponse"> </wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="modifyOrderResponse">
-    <wsdl:part element="tns:modifyOrderResponse" name="modifyOrderResponse"> </wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="deleteAdvertisementRequest">
-    <wsdl:part element="tns:deleteAdvertisementRequest" name="deleteAdvertisementRequest"> </wsdl:part>
   </wsdl:message>
   <wsdl:message name="addImagesRequest">
     <wsdl:part element="tns:addImagesRequest" name="addImagesRequest"> </wsdl:part>
   </wsdl:message>
-  <wsdl:message name="addOrderRequest">
-    <wsdl:part element="tns:addOrderRequest" name="addOrderRequest"> </wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="newAdvertisementRequest">
-    <wsdl:part element="tns:newAdvertisementRequest" name="newAdvertisementRequest"> </wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="newAdvertisementResponse">
-    <wsdl:part element="tns:newAdvertisementResponse" name="newAdvertisementResponse"> </wsdl:part>
+  <wsdl:message name="getAllMessagesRequest">
+    <wsdl:part element="tns:getAllMessagesRequest" name="getAllMessagesRequest"> </wsdl:part>
   </wsdl:message>
   <wsdl:message name="editAdvertisementRequest">
     <wsdl:part element="tns:editAdvertisementRequest" name="editAdvertisementRequest"> </wsdl:part>
@@ -300,8 +344,8 @@
   <wsdl:message name="allAdvertisementsResponse">
     <wsdl:part element="tns:allAdvertisementsResponse" name="allAdvertisementsResponse"> </wsdl:part>
   </wsdl:message>
-  <wsdl:message name="addImagesResponse">
-    <wsdl:part element="tns:addImagesResponse" name="addImagesResponse"> </wsdl:part>
+  <wsdl:message name="getAllMessagesResponse">
+    <wsdl:part element="tns:getAllMessagesResponse" name="getAllMessagesResponse"> </wsdl:part>
   </wsdl:message>
   <wsdl:message name="deletePricelistResponse">
     <wsdl:part element="tns:deletePricelistResponse" name="deletePricelistResponse"> </wsdl:part>
@@ -309,14 +353,11 @@
   <wsdl:message name="modifyOrderRequest">
     <wsdl:part element="tns:modifyOrderRequest" name="modifyOrderRequest"> </wsdl:part>
   </wsdl:message>
-  <wsdl:message name="newPricelistResponse">
-    <wsdl:part element="tns:newPricelistResponse" name="newPricelistResponse"> </wsdl:part>
+  <wsdl:message name="payOrderResponse">
+    <wsdl:part element="tns:payOrderResponse" name="payOrderResponse"> </wsdl:part>
   </wsdl:message>
   <wsdl:message name="addOrderResponse">
     <wsdl:part element="tns:addOrderResponse" name="addOrderResponse"> </wsdl:part>
-  </wsdl:message>
-  <wsdl:message name="deleteAdvertisementResponse">
-    <wsdl:part element="tns:deleteAdvertisementResponse" name="deleteAdvertisementResponse"> </wsdl:part>
   </wsdl:message>
   <wsdl:message name="newPricelistRequest">
     <wsdl:part element="tns:newPricelistRequest" name="newPricelistRequest"> </wsdl:part>
@@ -324,105 +365,114 @@
   <wsdl:message name="allPricelistsRequest">
     <wsdl:part element="tns:allPricelistsRequest" name="allPricelistsRequest"> </wsdl:part>
   </wsdl:message>
+  <wsdl:message name="editPricelistRequest">
+    <wsdl:part element="tns:editPricelistRequest" name="editPricelistRequest"> </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="editAdvertisementResponse">
+    <wsdl:part element="tns:editAdvertisementResponse" name="editAdvertisementResponse"> </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="allPricelistsResponse">
+    <wsdl:part element="tns:allPricelistsResponse" name="allPricelistsResponse"> </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="modifyOrderResponse">
+    <wsdl:part element="tns:modifyOrderResponse" name="modifyOrderResponse"> </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="payOrderRequest">
+    <wsdl:part element="tns:payOrderRequest" name="payOrderRequest"> </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="deleteAdvertisementRequest">
+    <wsdl:part element="tns:deleteAdvertisementRequest" name="deleteAdvertisementRequest"> </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="addOrderRequest">
+    <wsdl:part element="tns:addOrderRequest" name="addOrderRequest"> </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="newAdvertisementRequest">
+    <wsdl:part element="tns:newAdvertisementRequest" name="newAdvertisementRequest"> </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="newAdvertisementResponse">
+    <wsdl:part element="tns:newAdvertisementResponse" name="newAdvertisementResponse"> </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="sendMessageResponse">
+    <wsdl:part element="tns:sendMessageResponse" name="sendMessageResponse"> </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="addImagesResponse">
+    <wsdl:part element="tns:addImagesResponse" name="addImagesResponse"> </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="sendMessageRequest">
+    <wsdl:part element="tns:sendMessageRequest" name="sendMessageRequest"> </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="newPricelistResponse">
+    <wsdl:part element="tns:newPricelistResponse" name="newPricelistResponse"> </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="deleteAdvertisementResponse">
+    <wsdl:part element="tns:deleteAdvertisementResponse" name="deleteAdvertisementResponse"> </wsdl:part>
+  </wsdl:message>
   <wsdl:portType name="OrdersPort">
-    <wsdl:operation name="editPricelist">
-      <wsdl:input message="tns:editPricelistRequest" name="editPricelistRequest"> </wsdl:input>
-      <wsdl:output message="tns:editPricelistResponse" name="editPricelistResponse"> </wsdl:output>
-    </wsdl:operation>
     <wsdl:operation name="deletePricelist">
       <wsdl:input message="tns:deletePricelistRequest" name="deletePricelistRequest"> </wsdl:input>
       <wsdl:output message="tns:deletePricelistResponse" name="deletePricelistResponse"> </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="editAdvertisement">
-      <wsdl:input message="tns:editAdvertisementRequest" name="editAdvertisementRequest"> </wsdl:input>
-      <wsdl:output message="tns:editAdvertisementResponse" name="editAdvertisementResponse"> </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="allPricelists">
-      <wsdl:input message="tns:allPricelistsRequest" name="allPricelistsRequest"> </wsdl:input>
-      <wsdl:output message="tns:allPricelistsResponse" name="allPricelistsResponse"> </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="modifyOrder">
-      <wsdl:input message="tns:modifyOrderRequest" name="modifyOrderRequest"> </wsdl:input>
-      <wsdl:output message="tns:modifyOrderResponse" name="modifyOrderResponse"> </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="deleteAdvertisement">
-      <wsdl:input message="tns:deleteAdvertisementRequest" name="deleteAdvertisementRequest"> </wsdl:input>
-      <wsdl:output message="tns:deleteAdvertisementResponse" name="deleteAdvertisementResponse"> </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="addImages">
       <wsdl:input message="tns:addImagesRequest" name="addImagesRequest"> </wsdl:input>
       <wsdl:output message="tns:addImagesResponse" name="addImagesResponse"> </wsdl:output>
     </wsdl:operation>
-    <wsdl:operation name="addOrder">
-      <wsdl:input message="tns:addOrderRequest" name="addOrderRequest"> </wsdl:input>
-      <wsdl:output message="tns:addOrderResponse" name="addOrderResponse"> </wsdl:output>
+    <wsdl:operation name="getAllMessages">
+      <wsdl:input message="tns:getAllMessagesRequest" name="getAllMessagesRequest"> </wsdl:input>
+      <wsdl:output message="tns:getAllMessagesResponse" name="getAllMessagesResponse"> </wsdl:output>
     </wsdl:operation>
-    <wsdl:operation name="newAdvertisement">
-      <wsdl:input message="tns:newAdvertisementRequest" name="newAdvertisementRequest"> </wsdl:input>
-      <wsdl:output message="tns:newAdvertisementResponse" name="newAdvertisementResponse"> </wsdl:output>
+    <wsdl:operation name="editAdvertisement">
+      <wsdl:input message="tns:editAdvertisementRequest" name="editAdvertisementRequest"> </wsdl:input>
+      <wsdl:output message="tns:editAdvertisementResponse" name="editAdvertisementResponse"> </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="allAdvertisements">
       <wsdl:input message="tns:allAdvertisementsRequest" name="allAdvertisementsRequest"> </wsdl:input>
       <wsdl:output message="tns:allAdvertisementsResponse" name="allAdvertisementsResponse"> </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="editPricelist">
+      <wsdl:input message="tns:editPricelistRequest" name="editPricelistRequest"> </wsdl:input>
+      <wsdl:output message="tns:editPricelistResponse" name="editPricelistResponse"> </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="modifyOrder">
+      <wsdl:input message="tns:modifyOrderRequest" name="modifyOrderRequest"> </wsdl:input>
+      <wsdl:output message="tns:modifyOrderResponse" name="modifyOrderResponse"> </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="payOrder">
+      <wsdl:input message="tns:payOrderRequest" name="payOrderRequest"> </wsdl:input>
+      <wsdl:output message="tns:payOrderResponse" name="payOrderResponse"> </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="addOrder">
+      <wsdl:input message="tns:addOrderRequest" name="addOrderRequest"> </wsdl:input>
+      <wsdl:output message="tns:addOrderResponse" name="addOrderResponse"> </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="newPricelist">
       <wsdl:input message="tns:newPricelistRequest" name="newPricelistRequest"> </wsdl:input>
       <wsdl:output message="tns:newPricelistResponse" name="newPricelistResponse"> </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="allPricelists">
+      <wsdl:input message="tns:allPricelistsRequest" name="allPricelistsRequest"> </wsdl:input>
+      <wsdl:output message="tns:allPricelistsResponse" name="allPricelistsResponse"> </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="deleteAdvertisement">
+      <wsdl:input message="tns:deleteAdvertisementRequest" name="deleteAdvertisementRequest"> </wsdl:input>
+      <wsdl:output message="tns:deleteAdvertisementResponse" name="deleteAdvertisementResponse"> </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="newAdvertisement">
+      <wsdl:input message="tns:newAdvertisementRequest" name="newAdvertisementRequest"> </wsdl:input>
+      <wsdl:output message="tns:newAdvertisementResponse" name="newAdvertisementResponse"> </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="sendMessage">
+      <wsdl:input message="tns:sendMessageRequest" name="sendMessageRequest"> </wsdl:input>
+      <wsdl:output message="tns:sendMessageResponse" name="sendMessageResponse"> </wsdl:output>
+    </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="OrdersPortSoap11" type="tns:OrdersPort">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
-    <wsdl:operation name="editPricelist">
-      <soap:operation soapAction=""/>
-      <wsdl:input name="editPricelistRequest">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="editPricelistResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-    </wsdl:operation>
     <wsdl:operation name="deletePricelist">
       <soap:operation soapAction=""/>
       <wsdl:input name="deletePricelistRequest">
         <soap:body use="literal"/>
       </wsdl:input>
       <wsdl:output name="deletePricelistResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="editAdvertisement">
-      <soap:operation soapAction=""/>
-      <wsdl:input name="editAdvertisementRequest">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="editAdvertisementResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="allPricelists">
-      <soap:operation soapAction=""/>
-      <wsdl:input name="allPricelistsRequest">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="allPricelistsResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="modifyOrder">
-      <soap:operation soapAction=""/>
-      <wsdl:input name="modifyOrderRequest">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="modifyOrderResponse">
-        <soap:body use="literal"/>
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="deleteAdvertisement">
-      <soap:operation soapAction=""/>
-      <wsdl:input name="deleteAdvertisementRequest">
-        <soap:body use="literal"/>
-      </wsdl:input>
-      <wsdl:output name="deleteAdvertisementResponse">
         <soap:body use="literal"/>
       </wsdl:output>
     </wsdl:operation>
@@ -435,21 +485,21 @@
         <soap:body use="literal"/>
       </wsdl:output>
     </wsdl:operation>
-    <wsdl:operation name="addOrder">
+    <wsdl:operation name="getAllMessages">
       <soap:operation soapAction=""/>
-      <wsdl:input name="addOrderRequest">
+      <wsdl:input name="getAllMessagesRequest">
         <soap:body use="literal"/>
       </wsdl:input>
-      <wsdl:output name="addOrderResponse">
+      <wsdl:output name="getAllMessagesResponse">
         <soap:body use="literal"/>
       </wsdl:output>
     </wsdl:operation>
-    <wsdl:operation name="newAdvertisement">
+    <wsdl:operation name="editAdvertisement">
       <soap:operation soapAction=""/>
-      <wsdl:input name="newAdvertisementRequest">
+      <wsdl:input name="editAdvertisementRequest">
         <soap:body use="literal"/>
       </wsdl:input>
-      <wsdl:output name="newAdvertisementResponse">
+      <wsdl:output name="editAdvertisementResponse">
         <soap:body use="literal"/>
       </wsdl:output>
     </wsdl:operation>
@@ -462,6 +512,42 @@
         <soap:body use="literal"/>
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="editPricelist">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="editPricelistRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="editPricelistResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="modifyOrder">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="modifyOrderRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="modifyOrderResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="payOrder">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="payOrderRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="payOrderResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="addOrder">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="addOrderRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="addOrderResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="newPricelist">
       <soap:operation soapAction=""/>
       <wsdl:input name="newPricelistRequest">
@@ -471,10 +557,46 @@
         <soap:body use="literal"/>
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="allPricelists">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="allPricelistsRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="allPricelistsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="deleteAdvertisement">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="deleteAdvertisementRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="deleteAdvertisementResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="newAdvertisement">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="newAdvertisementRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="newAdvertisementResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="sendMessage">
+      <soap:operation soapAction=""/>
+      <wsdl:input name="sendMessageRequest">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="sendMessageResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
   </wsdl:binding>
   <wsdl:service name="OrdersPortService">
     <wsdl:port binding="tns:OrdersPortSoap11" name="OrdersPortSoap11">
-      <soap:address location="https://localhost:8072/ws"/>
+      <soap:address location="http://localhost:8072/ws"/>
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>

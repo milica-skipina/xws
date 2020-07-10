@@ -39,14 +39,14 @@ public class EmailService {
         helper.setText(htmlText,true);
         helper.setTo(to);
         helper.setSubject(subject);
-        helper.setFrom("isaprojektovanje@gmail.com");
+        helper.setFrom("pswisa.tim31.2019@gmail.com");
         javaMailSender.send(mess);
     }
 
     @Async
     public void sendRecoveryMail(String email, String newPassword) {
         SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo("ixykovacevic97@gmail.com");
+        msg.setTo("pswisa.tim31.2019@gmail.com");
         msg.setFrom(env.getProperty("spring.mail.username"));
         msg.setSubject("Account recovery - rentacar");
         msg.setText("You received this email due to your request for account recovery in rent-a-car system. \\n " +

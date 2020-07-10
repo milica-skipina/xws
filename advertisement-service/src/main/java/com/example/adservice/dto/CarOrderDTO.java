@@ -3,10 +3,11 @@ package com.example.adservice.dto;
 import com.example.adservice.model.Car;
 import com.example.adservice.model.Image;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CarOrderDTO {
+public class CarOrderDTO implements Serializable {
     private String make;
     private String model;
     private String fuel;
@@ -20,12 +21,13 @@ public class CarOrderDTO {
     private String entrepreneurUsername;
     private String entrepreneurName;
     private String image;
+    private Long id;
 
     public CarOrderDTO() {
     }
 
     public CarOrderDTO(String make, String model, String fuel, String carClass, Boolean insurance,
-                  Double mileage, Double mileageLimit, Double raiting, String state, String image) {
+                  Double mileage, Double mileageLimit, Double raiting, String state, String image, Long id) {
         this.make = make;
         this.model = model;
         this.fuel = fuel;
@@ -36,6 +38,7 @@ public class CarOrderDTO {
         this.raiting = raiting;
         this.state = state;
         this.image = image;
+        this.id = id;
     }
 
     public CarOrderDTO(Car c) {
@@ -50,10 +53,11 @@ public class CarOrderDTO {
         this.state = c.getState();
         this.gearbox = c.getGearbox().getName();
         this.entrepreneurUsername = c.getEntrepreneurUsername();
-
+        this.id = c.getId();
         List<Image> images = new ArrayList<>();
         images.addAll(c.getImages());
         this.image = images.get(0).getImageUrl();
+        this.id = c.getId();
     }
 
     public String getMake() {
@@ -158,5 +162,13 @@ public class CarOrderDTO {
 
     public void setEntrepreneurName(String entrepreneurName) {
         this.entrepreneurName = entrepreneurName;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

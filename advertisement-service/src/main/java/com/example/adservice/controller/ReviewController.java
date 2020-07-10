@@ -5,7 +5,6 @@ import com.example.adservice.config.TokenUtils;
 import com.example.adservice.datavalidation.RegularExpressions;
 import com.example.adservice.dto.ReviewDTO;
 import com.example.adservice.service.ReviewService;
-import com.netflix.ribbon.proxy.annotation.Http;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;

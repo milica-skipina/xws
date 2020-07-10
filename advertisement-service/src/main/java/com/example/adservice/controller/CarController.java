@@ -4,14 +4,15 @@ import com.example.adservice.config.TokenUtils;
 import com.example.adservice.datavalidation.RegularExpressions;
 import com.example.adservice.dto.CarDTO;
 import com.example.adservice.dto.CarOrderDTO;
+import com.example.adservice.dto.CoordsDTO;
 import com.example.adservice.service.CarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -35,6 +36,16 @@ public class CarController {
         }
     }
 
+    @GetMapping(value = "/track/{id}", produces = "application/json")
+    public ResponseEntity<CoordsDTO> carTrack(@PathVariable Long id, HttpServletRequest request) {
+        String token = tokenUtils.getToken(request);
+        CoordsDTO dto = carService.getCurrentCoord(id,token);
+        if(dto != null)
+            return new ResponseEntity<>(dto, HttpStatus.OK);
+        else
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
     @GetMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<CarDTO> getOneCar(@PathVariable Long id) {
         RegularExpressions regularExpressions = new RegularExpressions();
@@ -47,7 +58,7 @@ public class CarController {
         }
     }
 
-    @PreAuthorize("hasAuthority('MODIFY_AD')")
+    //@PreAuthorize("hasAuthority('MODIFY_AD')")
     @PutMapping(value = "/changeMileage/{id}", consumes = "application/json")
     public ResponseEntity<Boolean> changeM(@PathVariable Long id, @RequestBody Double reportMileage){
         RegularExpressions regularExpressions = new RegularExpressions();
@@ -59,7 +70,7 @@ public class CarController {
         }
     }
 
-    @PreAuthorize("hasAuthority('READ_STATISTICS')")
+   // @PreAuthorize("hasAuthority('READ_STATISTICS')")
     @GetMapping(produces="application/json", value="/statistics/{parameter}")
     public ResponseEntity<List<CarDTO>> getStatistics(@PathVariable String parameter, HttpServletRequest request){
         String token = tokenUtils.getToken(request);
@@ -68,7 +79,7 @@ public class CarController {
         return new ResponseEntity<>(cars, HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAuthority('READ_CAR')")
+   // @PreAuthorize("hasAuthority('READ_CAR')")
     @GetMapping(value = "/order/{carId}", produces = "application/json")
     public ResponseEntity<CarOrderDTO> getOrder(@PathVariable Long carId) {
         RegularExpressions regularExpressions = new RegularExpressions();

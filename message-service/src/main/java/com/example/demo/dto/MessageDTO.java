@@ -29,4 +29,59 @@ public class MessageDTO {
         this.receiverUsername = message.getReceiverUsername();
     }
 
+    public MessageDTO(rs.ac.uns.ftn.xws_tim2.Message m){
+        this.receiverUsername = m.getReceiverUsername();
+        this.senderUsername = m.getSenderUsername();
+        this.subject = m.getSubject();
+        this.text = m.getText();
+        this.timeSent = m.getTimeSent().toGregorianCalendar().getTime();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
+
+    public Date getTimeSent() {
+        return timeSent;
+    }
+
+    public void setTimeSent(Date timeSent) {
+        this.timeSent = timeSent;
+    }
+
+    public String getSenderUsername() {
+        return senderUsername;
+    }
+
+    public void setSenderUsername(String senderUsername) {
+        this.senderUsername = senderUsername;
+    }
+
+    public String getReceiverUsername() {
+        return receiverUsername;
+    }
+
+    public void setReceiverUsername(String receiverUsername) {
+        this.receiverUsername = receiverUsername;
+    }
 }

@@ -32,6 +32,7 @@ import Profile from "views/Profile";
 import Orders from "views/Orders.jsx";
 import Messages from "views/Messages";
 import Validation from "views/Validation";
+import TrackingMap from "views/TrackingMap";
 
 var routes = [
 
@@ -92,14 +93,14 @@ var routes = [
     component: Dashboard,
     layout: "/admin"
   },
-  {
+  /*{
     authorize: ["fsg"] ,
     path: "/icons",
     name: "Icons",
     icon: "nc-icon nc-diamond",
     component: Icons,
     layout: "/admin"
-  },
+  },*/
   {
     authorize: ["ROLE_SELLER", 'ROLE_CUSTOMER'] ,
     path: '/ad',
@@ -145,6 +146,13 @@ var routes = [
     path: "/validation",
     name: "Validation",
     component: Validation,
+  },
+  {
+    authorize: ['ROLE_CUSTOMER', 'ROLE_SELLER'] ,       
+    path: "/tracking/:id",
+    name: "Tracking device",
+    icon: "fa fa-user-circle",
+    component: TrackingMap,
   },
 ];
 export default routes;

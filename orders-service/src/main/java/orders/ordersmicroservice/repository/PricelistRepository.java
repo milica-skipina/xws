@@ -4,4 +4,6 @@ import orders.ordersmicroservice.model.Pricelist;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PricelistRepository extends JpaRepository<Pricelist, Long> {
+
+    Pricelist findOneByAdId(Long id);
 }

@@ -30,7 +30,12 @@ public class UserController {
     @Autowired
     private TokenUtils tokenUtils;
 
-//    @PreAuthorize("hasAuthority('CREATE_REVIEW')")
+    @PutMapping(value = "/changeRefusedNumber/{username}", consumes = "application/json")
+    public ResponseEntity<Boolean> changeRefusedNumber(@PathVariable String username, @RequestBody Integer number) {
+        userService.changeRefusedNumber(username, number);
+        return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+    }
+
     @PutMapping(value = "/changeState/{username}", consumes = "application/json")
     public ResponseEntity<Boolean> changeState(@PathVariable String username, @RequestBody String change){
             userService.changeS(username, change);
@@ -45,6 +50,7 @@ public class UserController {
         return  new ResponseEntity<>(ret, HttpStatus.OK);
     }
 
+    
     // TO DO
     @RequestMapping(method = RequestMethod.GET, value = "/verify")
     public ResponseEntity<HttpStatus> verify(HttpServletRequest request) {

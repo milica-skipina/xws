@@ -53,8 +53,8 @@ public class AdvertisementConfiguration extends WebSecurityConfigurerAdapter {
                 .exceptionHandling().authenticationEntryPoint(restAuthenticationEntryPoint).and()
 
                 .authorizeRequests()
-                .antMatchers( "/ws").hasAnyAuthority("SEND_SOAP")
-                .antMatchers( "/advertisement/canAccess/*", "/advertisement", "/advertisement/search/**")
+                .antMatchers( "/ws/*").hasAnyAuthority("SEND_SOAP")
+                .antMatchers( "/advertisement/canAccess/*", "/advertisement", "/advertisement/search/**", "/codebook", "/car/track/*", "/pricelist/**")
                 .permitAll()
                 .anyRequest().authenticated();
 
@@ -63,6 +63,6 @@ public class AdvertisementConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
-        web.ignoring().antMatchers(HttpMethod.GET , "/advertisement", "/car");
+        web.ignoring().antMatchers(HttpMethod.GET , "/advertisement", "/car", "/codebook");
     }
 }

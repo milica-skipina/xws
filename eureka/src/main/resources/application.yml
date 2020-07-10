@@ -5,15 +5,15 @@ spring:
 
 server:
   port: 8761
-  ssl:
-    algorithm: ${TLS_VERSION:TLSv1.2}
-    key-store: ${KEYSTORE:classpath:eureka.keystore.p12}
-    key-store-password: ${KEYSTORE_PASSWORD:soMe_StrOng12_PaSS}
-    key-alias: ${KEYSTORE_ALIAS:eureka}
-    trust-store: ${TRUSTSTORE:classpath:eureka.truststore.p12}
-    trust-store-password: ${TRUSTSTORE_PASSWORD:soMe_StrOng12_PaSS}
-    enabled: true
-    client-auth: need
+  #ssl:
+  #  algorithm: ${TLS_VERSION:TLSv1.2}
+  #  key-store: ${KEYSTORE:src/main/resources/eureka.keystore.p12}
+  #  key-store-password: ${KEYSTORE_PASSWORD:soMe_StrOng12_PaSS}
+  #  key-alias: ${KEYSTORE_ALIAS:eureka}
+  #  trust-store: ${TRUSTSTORE:src/main/resources/eureka.truststore.p12}
+  #  trust-store-password: ${TRUSTSTORE_PASSWORD:soMe_StrOng12_PaSS}
+  #  enabled: true
+  #  client-auth: none
 
 eureka:
   instance:
@@ -26,7 +26,7 @@ eureka:
     registerWithEureka: true
     fetchRegistry: false
     serviceUrl:
-      defaultZone: https://${registry.host:localhost}:${server.port}/eureka/
+      defaultZone: http://${registry.host:localhost}:${server.port}/eureka/
 
 logging:
   level:

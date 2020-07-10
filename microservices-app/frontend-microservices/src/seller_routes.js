@@ -5,6 +5,7 @@ import Ads from "views/Ads.jsx";
 import Profile from "views/Profile.jsx";
 import Requests from "views/Requests.jsx";
 import Messages from "views/Messages.jsx";
+import TrackingMap from "views/TrackingMap";
 
 var routes = [
   {
@@ -54,7 +55,8 @@ var routes = [
     name: "Messages",
     component: Messages,
 
-  }
+  },
+  
 
 
 ];

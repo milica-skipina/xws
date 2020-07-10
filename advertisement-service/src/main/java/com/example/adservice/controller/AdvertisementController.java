@@ -5,7 +5,6 @@ import com.example.adservice.config.TLSConfiguration;
 import com.example.adservice.config.TokenUtils;
 import com.example.adservice.datavalidation.RegularExpressions;
 import com.example.adservice.dto.AdvertisementDTO;
-import com.example.adservice.dto.BasketDTO;
 import com.example.adservice.dto.SearchDTO;
 import com.example.adservice.model.Advertisement;
 import com.example.adservice.model.Car;
@@ -17,7 +16,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -48,7 +46,7 @@ public class AdvertisementController {
 
     private static final Logger logger = LoggerFactory.getLogger(AdvertisementController.class);
 
-    @PreAuthorize("hasAuthority('WRITE_AD')")
+    //@PreAuthorize("hasAuthority('WRITE_AD')")
     @RequestMapping(method = RequestMethod.POST, produces = "application/json", consumes = "application/json", value = "/{id}")
     public ResponseEntity<Car> addAdvertisement(@RequestBody AdvertisementDTO advertisement,
                                                 @PathVariable Long id,
@@ -83,7 +81,7 @@ public class AdvertisementController {
      * @param id1 - id pricelista
      * @return
      */
-    @PreAuthorize("hasAuthority('WRITE_AD')")
+    //@PreAuthorize("hasAuthority('WRITE_AD')")
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", value = "/{id}/{id1}")
     public ResponseEntity<Car> addAd(@RequestBody AdvertisementDTO advertisement, @PathVariable Long id,
                                      @PathVariable Long id1, HttpServletRequest request) {
@@ -142,7 +140,7 @@ public class AdvertisementController {
         }
     }
 
-    @PreAuthorize("hasAuthority('WRITE_AD')")
+    //@PreAuthorize("hasAuthority('WRITE_AD')")
     @GetMapping(value = "/cadEndUserAdd")
     public ResponseEntity<Boolean> canEndUserAdd(HttpServletRequest request) {
         String token = tokenUtils.getToken(request);
@@ -158,7 +156,7 @@ public class AdvertisementController {
         }
     }
 
-    @PreAuthorize("hasAuthority('DELETE_AD')")
+    //@PreAuthorize("hasAuthority('DELETE_AD')")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<HttpStatus>deleteAdvertisement(@PathVariable Long id, HttpServletRequest request){
         RegularExpressions regularExpressions = new RegularExpressions();
@@ -190,7 +188,7 @@ public class AdvertisementController {
         }
     }
 
-    @PreAuthorize("hasAuthority('MODIFY_AD')")
+    //@PreAuthorize("hasAuthority('MODIFY_AD')")
     @RequestMapping(method = RequestMethod.PUT, consumes = "application/json", produces="application/json", value="/{adId}/{pId}")
     public ResponseEntity<AdvertisementDTO> editAd(@RequestBody AdvertisementDTO a, @PathVariable Long adId, @PathVariable Long pId,  HttpServletRequest request) {
         RegularExpressions regularExpressions = new RegularExpressions();
@@ -250,22 +248,6 @@ public class AdvertisementController {
         }
         return new ResponseEntity<>(ret, HttpStatus.OK);
     }
-
-    @PreAuthorize("hasAuthority('READ_AD')")
-    @PostMapping(value = "/filter", produces="application/json")
-    public ResponseEntity<List<BasketDTO>> getAllInBasket(@RequestBody Long[] identifiers, HttpServletRequest request) {
-        List<BasketDTO>retValue = advertisementService.getAllInBasket(identifiers);
-        if(retValue.size() == 0){
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        else{
-            String token = tokenUtils.getToken(request);
-            String username = tokenUtils.getUsernameFromToken(token);
-            logger.info("user " + username + " searched ads");
-            return new ResponseEntity<>(retValue, HttpStatus.OK);
-        }
-    }
-
 
     @PostMapping(consumes = "application/json", produces="application/json", value="/search")
     public ResponseEntity<List<AdvertisementDTO>> addAd(@RequestBody SearchDTO search) {

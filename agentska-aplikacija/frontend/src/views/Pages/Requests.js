@@ -20,9 +20,8 @@ import {
 const url = (process.env.REACT_APP_DOMAIN) + ':' + (process.env.REACT_APP_PORT) + '/';
 
 const columns = [
-  { dataField: 'userName', text: 'Customer' },
-  { dataField: 'startDate', text: 'Start' },
-  { dataField: 'endDate', text: 'End' },
+  { dataField: 'customerName', text: 'Customer' },
+  { dataField: 'agentName', text: 'Agent' },  
   { dataField: 'state', text: 'Status' },
 ]
 
@@ -109,10 +108,9 @@ mileageValidation(c) {
         url: url + 'request',
         headers: { "Authorization": AuthStr } ,            
       }).then((response) => {
-        if (response.data.status === 200) {
-          console.log(response.data.entity)
-          let transform = JSON.parse(response.data.entity)
-          this.transformResponse(transform)    
+        if (response.status === 200) {
+          this.transformResponse(response.data)
+          //this.setState({requests: response.data})
         } else {
           NotificationManager.info(response.data.entity, '', 3000);  
         }       
@@ -185,10 +183,13 @@ mileageValidation(c) {
 
   transformResponse = transform => {
     for (let i = 0; i < transform.length; i++) {
-      let start = this.getDateString(transform[i].startDate);
-      let end = this.getDateString(transform[i].endDate);
-      transform[i].startDate = start;
-      transform[i].endDate = end;
+      for (let j=0; j < transform[i].requests.length; j++) {
+        let start = this.getDateString(transform[i].requests[j].startDate);
+        let end = this.getDateString(transform[i].requests[j].endDate);
+        transform[i].requests[j].startDate = start;
+        transform[i].requests[j].endDate = end;
+      }
+      
     }
 
     this.setState({ requests: transform });
@@ -238,13 +239,20 @@ mileageValidation(c) {
       <div>
         <Table responsive>
           <tbody>
-            {(row.cars.map((car, index) =>
+            {(row.requests.map((request, index) =>
               <tr key={index} className="crow">
-                <td className="crow">{car.make}</td>
-                <td className="crow">{car.model}</td>
-                <td className="crow">{car.fuel}</td>
-                <td className="crow">{car.price}</td>
-                {row.state === "PAID" && this.compareDates(row.endDate) && <Button color="primary" size="md" onClick={event => this.createReport(car.id)}> {}
+                <td>
+                    <div>
+                        <img width="100" height="50" src={request.cars[0].images[0].imageUrl}/>
+                    </div>
+                </td>
+                <td className="crow">{request.startDate}</td>
+                <td className="crow">{request.endDate}</td>
+                <td className="crow">{request.cars[0].make}</td>
+                <td className="crow">{request.cars[0].model}</td>
+                <td className="crow">{request.cars[0].fuel}</td>
+                
+                {request.state === "PAID" && this.compareDates(request.endDate) && <Button color="primary" size="md" onClick={event => this.createReport(request.cars[0].id)}> {}
                 Add report </Button>}
               </tr>
 

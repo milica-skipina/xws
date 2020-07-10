@@ -1,7 +1,10 @@
 package com.example.demo.model;
 
 import javax.persistence.*;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 @Entity
 public class Message {
@@ -26,6 +29,19 @@ public class Message {
     private String receiverUsername;
 
     public Message() {
+    }
+
+    public rs.ac.uns.ftn.xws_tim2.Message getGenerated() throws DatatypeConfigurationException {
+        rs.ac.uns.ftn.xws_tim2.Message retValue = new rs.ac.uns.ftn.xws_tim2.Message();
+        retValue.setId(getId());
+        retValue.setReceiverUsername(getReceiverUsername());
+        retValue.setSenderUsername(getSenderUsername());
+        retValue.setSubject(getSubject());
+        retValue.setText(getText());
+        GregorianCalendar c = new GregorianCalendar();
+        c.setTime(getTimeSent());
+        retValue.setTimeSent(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
+        return retValue;
     }
 
     public Long getId() {

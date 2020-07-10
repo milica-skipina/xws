@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+
 import org.owasp.encoder.Encode;
 import rs.ac.uns.ftn.xws_tim2.Order;
 
@@ -19,7 +22,7 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "REQUEST_AND_CAR", joinColumns = {
             @JoinColumn(name = "request_id") }, inverseJoinColumns = { @JoinColumn(name = "car_id") })
     private Set<Car> cars = new HashSet<Car>();
@@ -56,8 +59,9 @@ public class Request {
     @Column(name = "endDate", nullable = false)
     private Date endDate;
 
-    @Enumerated(EnumType.STRING)
-    private OrderStatus orderStatus;
+    @JsonBackReference(value = "bundle_mov")
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private RequestWrapper requestWrapper;
 
     public Request() {
     }
@@ -71,6 +75,18 @@ public class Request {
         this.customerUsername = customerUsername;
         this.agentUsername = agentUsername;
         this.dateCreated = dateCreated;
+    }
+
+    public Request(Order order) {
+        this.state = order.getState();
+        this.mileage = order.getMileage();
+        this.startDate = order.getStartDate().toGregorianCalendar().getTime();
+        this.endDate = order.getEndDate().toGregorianCalendar().getTime();
+        this.dateCreated = new Date();
+        this.agentUsername = "prodavac";
+        this.customerUsername = order.getCustomerUsername();
+        this.agentNamee = "RentACar";
+        this.customerName = "unknown";      // poslati u orderu i ime customera!
     }
 
     public Long getId() {
@@ -122,14 +138,6 @@ public class Request {
         this.endDate = endDate;
     }
 
-    public OrderStatus getOrderStatus() {
-        return orderStatus;
-    }
-
-    public void setOrderStatus(OrderStatus orderStatus) {
-        this.orderStatus = orderStatus;
-    }
-
     public Request escapeParameters(Request r) {
         r.setState(Encode.forHtml(r.getState()));
         return r;
@@ -173,6 +181,31 @@ public class Request {
 
     public void setAgentNamee(String agentNamee) {
         this.agentNamee = agentNamee;
+    }
+
+    public Order getGenerated(){
+        Order ret = new Order();
+        ret.setAgentUsername(this.agentUsername);
+        ret.setCustomerUsername(this.customerUsername);
+        ret.setMicroId(this.id);
+        GregorianCalendar c = new GregorianCalendar();
+        c.setTime(getEndDate());
+        try {
+            ret.setEndDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
+            c.setTime(getStartDate());
+            ret.setStartDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
+            c.setTime(this.dateCreated);
+            ret.setDateCreated(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
+        } catch (DatatypeConfigurationException e) {
+            e.printStackTrace();
+        }
+        ret.setId(this.id);
+        ret.setMileage(this.mileage);
+        ret.setState(this.state);
+        for (Car car : this.cars) {
+            ret.getCars().add(car.getAdId());
+        }
+        return ret;
     }
 }
 

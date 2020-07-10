@@ -2,12 +2,12 @@ package com.example.tim2.soap.clients;
 
 import com.example.tim2.model.Entrepreneur;
 import com.example.tim2.repository.AdvertisementRepository;
+import com.example.tim2.repository.CarRepository;
 import com.example.tim2.repository.PricelistRepository;
 import com.example.tim2.soap.gen.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -26,6 +26,9 @@ public class AdvertisementClient extends WebServiceGatewaySupport {
 
     @Autowired
     private AdvertisementRepository advertisementRepository;
+
+    @Autowired
+    private CarRepository carRepository;
 
     public NewPricelistResponse addPricelist(com.example.tim2.model.Pricelist p) {
         Pricelist generated = p.getGenerated();
@@ -146,6 +149,9 @@ public class AdvertisementClient extends WebServiceGatewaySupport {
         List<Long> microIds = response.getMicroIds();
         for(int i = 0; i < advertisements.size(); i++){
             advertisements.get(i).setMicroId(microIds.get(i));
+            com.example.tim2.model.Car car = advertisements.get(i).getCarAd();
+            car.setMicroId(microIds.get(i));    // jedan oglas za jedno auto je su tehnici isti idjevi
+            carRepository.save(car);
         }
         advertisementRepository.saveAll(advertisements);
         return response;

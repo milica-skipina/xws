@@ -1,6 +1,51 @@
 <xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:tns="http://www.ftn.uns.ac.rs/xws_tim2" targetNamespace="http://www.ftn.uns.ac.rs/xws_tim2"  elementFormDefault="qualified">
 
+    <xs:element name="sendMessageResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="ok" type="xs:boolean" nillable="false"/>
+                <xs:element name="microId" type="xs:long" nillable="false"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="sendMessageRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="message" type="tns:message"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getAllMessagesRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="username" type="xs:string"/>
+                <xs:element name="microIds" type="xs:long" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="getAllMessagesResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="messages" type="tns:message" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="message">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long" minOccurs="0"/>
+            <xs:element name="text" type="xs:string" minOccurs="0" nillable="false"/>
+            <xs:element name="subject" type="xs:string" minOccurs="0" nillable="false"/>
+            <xs:element name="timeSent" type="xs:dateTime" minOccurs="0" nillable="false"/>
+            <xs:element name="senderUsername" type="xs:string" minOccurs="0" nillable="false"/>
+            <xs:element name="receiverUsername" type="xs:string" minOccurs="0" nillable="false"/>
+        </xs:sequence>
+    </xs:complexType>
+
   <xs:element name="addOrderRequest">
     <xs:complexType>
       <xs:sequence>
@@ -19,37 +64,66 @@
     </xs:complexType>
   </xs:element>
 
-  <xs:element name="modifyOrderRequest">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="username" type="xs:string"/>
-        <xs:element name="id" type="xs:long"/>
-        <xs:element name="flag" type="xs:boolean"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
+    <xs:element name="modifyOrderRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="username" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 
-  <xs:element name="modifyOrderResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="ok" type="xs:boolean"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
+    <xs:element name="modifyOrderResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="ok" type="xs:boolean"/>
+                <xs:element name="requestWrappers" type="tns:wrapper" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 
-  <xs:complexType name="order">
-    <xs:sequence>
-      <xs:element name="id" type="xs:long" minOccurs="0"/>
-      <xs:element name="cars" type="xs:long" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
-      <xs:element name="state" type="xs:string" nillable="false"/>
-      <xs:element name="mileage" type="xs:double" nillable="false"/>
-      <xs:element name="dateCreated" type="xs:dateTime" nillable="false"/>
-      <xs:element name="customerUsername" type="xs:string" nillable="false"/>
-      <xs:element name="agentUsername" type="xs:string" nillable="false"/>
-      <xs:element name="startDate" type="xs:dateTime" nillable="false"/>
-      <xs:element name="endDate" type="xs:dateTime" nillable="false"/>
-    </xs:sequence>
-  </xs:complexType>
+    <xs:element name="payOrderRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="microId" type="xs:long"/>
+                <xs:element name="customerUsername" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="payOrderResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="ok" type="xs:boolean"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="order">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long" minOccurs="0"/>
+            <xs:element name="cars" type="xs:long" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="state" type="xs:string" nillable="false"/>
+            <xs:element name="mileage" type="xs:double" nillable="false"/>
+            <xs:element name="dateCreated" type="xs:dateTime" nillable="false"/>
+            <xs:element name="customerUsername" type="xs:string" nillable="false"/>
+            <xs:element name="agentUsername" type="xs:string" nillable="false"/>
+            <xs:element name="startDate" type="xs:dateTime" nillable="false"/>
+            <xs:element name="endDate" type="xs:dateTime" nillable="false"/>
+            <xs:element name="microId" type="xs:long"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="wrapper">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long" minOccurs="0"/>
+            <xs:element name="requests" type="tns:order" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="state" type="xs:string" nillable="false"/>
+            <xs:element name="customerUsername" type="xs:string" nillable="false"/>
+            <xs:element name="agentUsername" type="xs:string" nillable="false"/>
+            <xs:element name="microId" type="xs:long"/>
+        </xs:sequence>
+    </xs:complexType>
+
 
     <xs:element name="addImagesRequest">
         <xs:complexType>

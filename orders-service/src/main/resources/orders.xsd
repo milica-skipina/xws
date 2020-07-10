@@ -1,286 +1,82 @@
 <xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:tns="http://www.ftn.uns.ac.rs/xws_tim2" targetNamespace="http://www.ftn.uns.ac.rs/xws_tim2"  elementFormDefault="qualified">
 
-  <xs:element name="addOrderRequest">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="username" type="xs:string" nillable="false"/>
-        <xs:element name="order" type="tns:order" nillable="false"/>
-      </xs:sequence>
+    <xs:element name="addOrderRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="username" type="xs:string" nillable="false"/>
+                <xs:element name="order" type="tns:order" nillable="false"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="addOrderResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="microId" type="xs:long"/>
+                <xs:element name="ok" type="xs:boolean"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="modifyOrderRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="username" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="modifyOrderResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="ok" type="xs:boolean"/>
+                <xs:element name="requestWrappers" type="tns:wrapper" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="payOrderRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="microId" type="xs:long"/>
+                <xs:element name="customerUsername" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="payOrderResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="ok" type="xs:boolean"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="order">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long" minOccurs="0"/>
+            <xs:element name="cars" type="xs:long" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="state" type="xs:string" nillable="false"/>
+            <xs:element name="mileage" type="xs:double" nillable="false"/>
+            <xs:element name="dateCreated" type="xs:dateTime" nillable="false"/>
+            <xs:element name="customerUsername" type="xs:string" nillable="false"/>
+            <xs:element name="agentUsername" type="xs:string" nillable="false"/>
+            <xs:element name="startDate" type="xs:dateTime" nillable="false"/>
+            <xs:element name="endDate" type="xs:dateTime" nillable="false"/>
+            <xs:element name="microId" type="xs:long"/>
+        </xs:sequence>
     </xs:complexType>
-  </xs:element>
 
-  <xs:element name="addOrderResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="microId" type="xs:long"/>
-        <xs:element name="ok" type="xs:boolean"/>
-      </xs:sequence>
+    <xs:complexType name="wrapper">
+        <xs:sequence>
+            <xs:element name="id" type="xs:long" minOccurs="0"/>
+            <xs:element name="requests" type="tns:order" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="state" type="xs:string" nillable="false"/>
+            <xs:element name="customerUsername" type="xs:string" nillable="false"/>
+            <xs:element name="agentUsername" type="xs:string" nillable="false"/>
+            <xs:element name="microId" type="xs:long"/>
+        </xs:sequence>
     </xs:complexType>
-  </xs:element>
 
-  <xs:element name="modifyOrderRequest">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="username" type="xs:string"/>
-        <xs:element name="id" type="xs:long"/>
-        <xs:element name="flag" type="xs:boolean"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="modifyOrderResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="ok" type="xs:boolean"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:complexType name="order">
-    <xs:sequence>
-      <xs:element name="id" type="xs:long" minOccurs="0"/>
-      <xs:element name="cars" type="xs:long" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
-      <xs:element name="state" type="xs:string" nillable="false"/>
-      <xs:element name="mileage" type="xs:double" nillable="false"/>
-      <xs:element name="dateCreated" type="xs:dateTime" nillable="false"/>
-      <xs:element name="customerUsername" type="xs:string" nillable="false"/>
-      <xs:element name="agentUsername" type="xs:string" nillable="false"/>
-      <xs:element name="startDate" type="xs:dateTime" nillable="false"/>
-      <xs:element name="endDate" type="xs:dateTime" nillable="false"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:element name="addImagesRequest">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="username" type="xs:string"/>
-        <xs:element name="images" type="xs:string" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
-        <xs:element name="carId" type="xs:long" nillable="false"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="addImagesResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="ok" type="xs:boolean"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="deleteAdvertisementRequest">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="username" type="xs:string"/>
-        <xs:element name="id" type="xs:long"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="deleteAdvertisementResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="ok" type="xs:boolean"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="deletePricelistRequest">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="username" type="xs:string"/>
-        <xs:element name="id" type="xs:long"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="deletePricelistResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="ok" type="xs:boolean"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="editPricelistRequest">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="username" type="xs:string"/>
-        <xs:element name="pricelist" type="tns:pricelist"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="editPricelistResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="ok" type="xs:boolean"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="editAdvertisementRequest">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="username" type="xs:string"/>
-        <xs:element name="id" type="xs:long"/>
-        <xs:element name="startDate" type="xs:dateTime"/>
-        <xs:element name="endDate" type="xs:dateTime"/>
-        <xs:element name="mileage" type="xs:double"/>
-        <xs:element name="kidsSeats" type="xs:int"/>
-        <xs:element name="mileageLimit" type="xs:double"/>
-        <xs:element name="pricelist" type="xs:long"/>
-        <xs:element name="city" type="xs:string"/>
-        <xs:element name="collisionDW" type="xs:boolean"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="editAdvertisementResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="ok" type="xs:boolean"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="allPricelistsRequest">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="username" type="xs:string"/>
-        <xs:element name="pricelists" type="tns:pricelist" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="allPricelistsResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="ok" type="xs:boolean"/>
-        <xs:element name="microIds" type="xs:long" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="allAdvertisementsRequest">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="username" type="xs:string"/>
-        <xs:element name="advertisements" type="tns:advertisement" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="allAdvertisementsResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="ok" type="xs:boolean"/>
-        <xs:element name="microIds" type="xs:long" nillable="true" minOccurs="0" maxOccurs="unbounded"/>      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="newAdvertisementRequest">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="username" type="xs:string"/>
-        <xs:element name="advertisement" type="tns:advertisement"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="newAdvertisementResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="microId" type="xs:long"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="newPricelistResponse">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="microId" type="xs:long"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:element name="newPricelistRequest">
-    <xs:complexType>
-      <xs:sequence>
-        <xs:element name="username" type="xs:string"/>
-        <xs:element name="pricelist" type="tns:pricelist"/>
-      </xs:sequence>
-    </xs:complexType>
-  </xs:element>
-
-  <xs:complexType name="advertisement">
-    <xs:sequence>
-      <xs:element name="carAd" type="tns:car" minOccurs="0"/>
-      <xs:element name="city" type="xs:string" minOccurs="0"/>
-      <xs:element name="deleted" type="xs:boolean"/>
-      <xs:element name="endDate" type="xs:dateTime" minOccurs="0"/>
-      <xs:element name="entrepreneurName" type="xs:string" minOccurs="0"/>
-      <xs:element name="entrepreneurUsername" type="xs:string" minOccurs="0"/>
-      <xs:element name="id" type="xs:long" minOccurs="0"/>
-      <xs:element name="pricelist" type="xs:long" minOccurs="0"/>
-      <xs:element name="request" type="xs:boolean"/>
-      <xs:element name="startDate" type="xs:dateTime" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="car">
-    <xs:sequence>
-      <xs:element name="carClass" type="xs:string" minOccurs="0" nillable="false"/>
-      <xs:element name="entrepreneurUsername" type="xs:string" minOccurs="0" nillable="false"/>
-      <xs:element name="following" type="xs:boolean"/>
-      <xs:element name="fuel" type="xs:string" minOccurs="0" nillable="false"/>
-      <xs:element name="gearbox" type="xs:string" minOccurs="0" nillable="false"/>
-      <xs:element name="id" type="xs:long" minOccurs="0"/>
-      <xs:element name="insurance" type="xs:boolean" minOccurs="0" nillable="false"/>
-      <xs:element name="kidsSeats" type="xs:int" minOccurs="0" nillable="false"/>
-      <xs:element name="make" type="xs:string" minOccurs="0" nillable="false"/>
-      <xs:element name="mileage" type="xs:double" minOccurs="0" nillable="false"/>
-      <xs:element name="mileageLimit" type="xs:double" minOccurs="0" nillable="false"/>
-      <xs:element name="model" type="xs:string" minOccurs="0" nillable="false"/>
-      <xs:element name="state" type="xs:string" minOccurs="0"/>
-      <xs:element name="raiting" type="xs:double" minOccurs="0"/>
-      <xs:element name="images" type="tns:image" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
-      <xs:element name="trackingToken" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="image">
-    <xs:sequence>
-      <xs:element name="id" type="xs:long" minOccurs="0"/>
-      <xs:element name="imageUrl" type="xs:string" minOccurs="0"/>
-      <xs:element name="carId" type="xs:long" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="review">
-    <xs:sequence>
-      <xs:element name="car" type="xs:long" minOccurs="0" nillable="false"/>
-      <xs:element name="date" type="xs:dateTime" minOccurs="0" nillable="false"/>
-      <xs:element name="evaluation" type="xs:int"/>
-      <xs:element name="id" type="xs:long" minOccurs="0"/>
-      <xs:element name="state" type="xs:string" minOccurs="0" nillable="false"/>
-      <xs:element name="text" type="xs:string" minOccurs="0"/>
-      <xs:element name="username" type="xs:string" minOccurs="0" nillable="false"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="pricelist">
-    <xs:sequence>
-      <xs:element name="collisionDW" type="xs:double" minOccurs="0" nillable="false"/>
-      <xs:element name="deleted" type="xs:boolean"/>
-      <xs:element name="discount20" type="xs:double" minOccurs="0" nillable="false"/>
-      <xs:element name="discount30" type="xs:double" minOccurs="0" nillable="false"/>
-      <xs:element name="exceedMileage" type="xs:double" minOccurs="0" nillable="false"/>
-      <xs:element name="id" type="xs:long" minOccurs="0"/>
-      <xs:element name="priceDay" type="xs:double" minOccurs="0" nillable="false"/>
-      <xs:element name="username" type="xs:string"/>
-    </xs:sequence>
-  </xs:complexType>
 </xs:schema>
-

@@ -70,7 +70,7 @@ class Ads extends Component {
       shouldRegister: false,
       customers: [] ,
       hideRegModal: true ,
-      manualCustomerUsername: "" ,
+      manualCustomerUsername: "kupac" ,
       manualCustomerEmail: "" ,
       manualCustomerName: "" ,
       manualCustomerSurname: "" ,
@@ -101,21 +101,19 @@ class Ads extends Component {
     this.CustomerEmailValidation = this.CustomerEmailValidation.bind(this);
     this.CustomerNameValidation = this.CustomerNameValidation.bind(this);
     this.validateFields = this.validateFields.bind(this);
+    this.datesBetween = this.datesBetween.bind(this);
+    this.redirectToTracking = this.redirectToTracking.bind(this);
+  }
+
+  redirectToTracking = (event, token) => {
+    //this.props.history.action.pop();
+    //this.props.history.goBack();
+    this.props.history.push('tracking/' + token);
   }
 
   componentDidMount() {
     let token = localStorage.getItem("ulogovan")
-    let AuthStr = 'Bearer '.concat(token);
-   /* axios({
-      method: 'get',
-      url: url + 'advertisement/agentUsername',
-      headers: { "Authorization": AuthStr } ,       
-    }).then((response) => {
-      if (response.status !== 404)
-        this.setState({ agentUsername: response.data });
-    }, (error) => {
-      console.log(error);
-    });*/
+    let AuthStr = 'Bearer '.concat(token);   
     axios({
       method: 'get',
       url: url + 'advertisement/advertisement',
@@ -651,38 +649,36 @@ if (godina < year) {
   addToBasket = id => {
     let token = localStorage.getItem("ulogovan")
     let AuthStr = 'Bearer '.concat(token);
+    let start = new Date(this.state.startDate);
+    let startTime = this.state.startTime.split(':');
+    start.setHours(startTime[0], startTime[1], 0, 0);
+    start = start.getTime();
+    let end = new Date(this.state.endDate);
+    let endTime = this.state.endTime.split(':');
+    end.setHours(endTime[0], endTime[1], 0, 0);
+    end = end.getTime();
+    
     let dodaj = true;
       axios({
-        method: 'post',
-        url: url + 'orders/request/' + id,    // provera da li je taj oglas vec rezervisan
+        method: 'get',
+        url: url + 'orders/request/' + id + '/' + start + '/' + end,    // provera da li je taj oglas vec rezervisan za te datume
         headers: { "Authorization": AuthStr } ,       
       }).then((response) => {
-        if (response.data) {    // ima ga u zahtevu
+        if (!response.data) {    // ima ga u zahtevu
             dodaj = false;
             NotificationManager.info("You have already created order for this car!", '', 3000);             
-        } else {
-          let array = JSON.parse(sessionStorage.getItem('basket')) || [] ;
-          for (let i = 0 ; i < array.length ; i++) {
-            if (array[i] === id) {
-              NotificationManager.error("Item already in basket!", '', 3000);
-              dodaj=false;
-              break;
-            }
-          }
-    
-          if (dodaj) {  //prosao ceo niz i nema ga u kanti
-            array.push(id);
-            console.log(array);
-            sessionStorage.setItem('basket', JSON.stringify(array));   
+        } else {              
             NotificationManager.success("Item successfully added!", '', 3000);
-           
           }
           
-        }
+        
       }, (error) => {
         console.log(error);
-      });
-    
+      });    
+  }
+
+  datesBetween = ( startOffset, endOffset, checkDate) => {
+      return checkDate >= startOffset && checkDate < endOffset ;
   }
 
   renderCheckboxes(int) {
@@ -931,7 +927,9 @@ if (godina < year) {
                     {localStorage.getItem('name') === oglas.name && <Button color="success" size="md" onClick={(e) => this.openModal(oglas)}> {}
                      Reserve
                     </Button>}
-
+                    {localStorage.getItem('role') === "ROLE_SELLER" && oglas.trackingDevice  && <Button color="primary" size="md" onClick={(e) => this.redirectToTracking(e, oglas.id)}> {}
+                     Tracking
+                    </Button>}
                     {localStorage.getItem('name') !== oglas.name  && <Button color="warning" size="md" hidden={this.state.hideBasket} onClick={(e) => this.addToBasket(oglas.id)}> {/**/}
 
                       Add to basket

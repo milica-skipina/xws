@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+/*
 const axiosInterceptor =  axios.interceptors.request.use((config) => {
 
     const https = require("https");
@@ -14,5 +14,5 @@ const axiosInterceptor =  axios.interceptors.request.use((config) => {
     }, (error) => {
       return Promise.reject(error);
     });
-
+*/
 export default axiosInterceptor;

@@ -27,13 +27,13 @@ var routes = [
         component: Ads,
         
       },
-      {
+      /*{
         path: "/icons",
         name: "Icons",
         icon: "nc-icon nc-diamond",
         component: Icons,
        
-      },
+      },*/
     
   
 ];

@@ -78,6 +78,8 @@ INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 21);
 INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 22);
 INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 26);
 INSERT INTO roles_privileges (role_id, privilege_id) VALUES (2, 27);
+INSERT INTO roles_privileges (role_id, privilege_id) VALUES (1, 15);
+
 
 
 INSERT INTO korisnik (username, password, email, enabled,deleted, number_failed_login,blocked) VALUES ('prodavac', '$2a$10$PkDHt3T9ussutTLpXWGXCOWRjIC5MVtT6dUkz25m7mvrl1u.1Ta4y', 'prodavac@gmail.com', true,false, 0,false);

@@ -23,12 +23,12 @@ class Basket extends RoleAwareComponent {
 
     this.state = {          
       ads: [],      
-      hideEdit: true,
-      checkedAds: [],        // ids of selected cars for rent
+      hideEdit: true,      
       bundle: false,
       openModal: false ,
-      agentForBundle: [], 
-      readyForRequest: true //obrnuto
+      agentForBundle: [],
+      readyForRequest: true,
+      adsToRent: []
     };
 
     
@@ -54,17 +54,14 @@ class Basket extends RoleAwareComponent {
     this.fillBasket();
   }
 
-  fillBasket = () => {
-    let data = sessionStorage.getItem('basket');
+  fillBasket = () => {    
     let token = localStorage.getItem("ulogovan")
-    let AuthStr = 'Bearer '.concat(token);
-    let array = JSON.parse(sessionStorage.getItem('basket')) || [] ;
-    console.log(array)
+    let AuthStr = 'Bearer '.concat(token);    
     axios({
         method: 'post',
-        url: url + 'advertisement/advertisement/filter',
+        url: url + 'orders/advertisement/filter',
         headers: { "Authorization": AuthStr } ,   
-        data: array    
+        
       }).then((response) => {
         if (response.status === 200) {
           this.setState({ ads: response.data });
@@ -80,36 +77,34 @@ class Basket extends RoleAwareComponent {
   }
   
   requestSelection = (key, name) => {
-      let found = false;
-      for (let i=0; i < this.state.checkedAds.length; i++) {          
-          if (key === this.state.checkedAds[i].split("+")[0]) {
-                found = true;
-                break;
+    let found = false;
+    for (let i=0; i < this.state.adsToRent.length; i++) {          
+        if (key == this.state.adsToRent[i].wishlistId) {
+              found = true;
+              break;
+        }
+    }
+
+    if (found) {      // obrisi iz niza
+      let helperArray = [];
+      for (let i=0; i < this.state.adsToRent.length; i++) {
+          if (key != this.state.adsToRent[i].wishlistId) {
+                helperArray.push(this.state.adsToRent[i]);
           }
       }
+      this.state.adsToRent = helperArray;
+    }else {
+      let index = parseInt(key)
+      let str = this.state.ads.find(element => element.wishlistId === index);
+      this.state.adsToRent.push(str);          
+    }
 
-      if (found) {      // obrisi iz niza
-        let helperArray = [];
-        for (let i=0; i < this.state.checkedAds.length; i++) {
-            if (key !== this.state.checkedAds[i].split("+")[0]) {
-                  helperArray.push(this.state.checkedAds[i]);
-            }
-        }
-        this.state.checkedAds = helperArray;
-      }else {
-        let str = key.concat("+").concat(name);
-        this.state.checkedAds.push(str);
-       // this.setState({checkedAds: [...this.state.checkedAds, str]})
-      }
-
-      if (this.state.checkedAds.length == 0) {
-        this.setState({readyForRequest: true})    // nek bude dugme disabled
-      }else {
-        this.setState({readyForRequest: false})
-      }
-      
-        
-  }
+    if (this.state.adsToRent.length === 0) {
+      this.setState({readyForRequest: true})    // nek bude dugme disabled
+    }else {
+      this.setState({readyForRequest: false})
+    }    
+}
 
   toggle = () => {
     this.setState({
@@ -118,10 +113,9 @@ class Basket extends RoleAwareComponent {
   }
 
   askForRent = () => {      // rentiraaaj ove noci poveruj da je ljubav dosla samaaaa
-    let flag = this.state.bundle ;
-    let data = this.state.checkedAds;
-    data.push(localStorage.getItem('start'))  // posalji i datume pretrage
-    data.push(localStorage.getItem('end'))
+    
+    let data = this.state.adsToRent;
+    
     let token = localStorage.getItem("ulogovan")
     let AuthStr = 'Bearer '.concat(token);
     axios({
@@ -131,11 +125,9 @@ class Basket extends RoleAwareComponent {
         data: data        // niz oglasa u formi id+entrepreneurName+true/false    
       }).then((response) => {
         if (response.status === 201) {
-            for (let i=0 ; i <  this.state.checkedAds.length ; i++) {
-              this.removeFromBasket(this.state.checkedAds[i].split("+")[0]);
-            }
-            this.setState({checkedAds: [], agentForBundle: []}) ;
-            NotificationManager.success("Order is sent!", '', 3000);
+          this.setState({adsToRent: [], agentForBundle: [], readyForRequest: true}) ;
+          NotificationManager.success("Order is sent!", '', 3000);
+          this.fillBasket();
         }         
          
       }, (error) => {
@@ -166,42 +158,37 @@ class Basket extends RoleAwareComponent {
   }
 
   handleSelectedCars = () => {
-      let namesOnly = [];
-      let hlp = false;
-      for (let j=0; j < this.state.checkedAds.length ; j++) {
-          if (namesOnly.includes(this.state.checkedAds[j].split("+")[1]) && 
-              !this.state.agentForBundle.includes(this.state.checkedAds[j].split("+")[1])) {
-              this.setState({agentForBundle: [...this.state.agentForBundle, this.state.checkedAds[j].split("+")[1]]})
-              hlp = true;
-              //break;
-            } else {
-                namesOnly.push(this.state.checkedAds[j].split("+")[1]);
-          }
-       
-      }
+    let namesOnly = [];
+    let hlp = false;
+    for (let j=0; j < this.state.adsToRent.length ; j++) {
+        if (namesOnly.includes(this.state.adsToRent[j].entrepreneur) && 
+            !this.state.agentForBundle.includes(this.state.adsToRent[j].entrepreneur)) {
+            this.setState({agentForBundle: [...this.state.agentForBundle, this.state.adsToRent[j].entrepreneur]})
+            hlp = true;
+            //break;
+          } else {
+              namesOnly.push(this.state.adsToRent[j].entrepreneur);
+        }
+     
+    }
 
-      if(hlp) {
-        this.setState({openModal: true}) 
-      }else {
-        this.askForRent();  
-      }
+    if(hlp) {
+      this.setState({openModal: true}) 
+    }else {
+      this.askForRent();  
+    }
   
   }
 
   addToBundle = (agent, event) => {
-    let temp = this.state.checkedAds;
+    let temp = this.state.adsToRent;
     let isChecked = event.target.checked
     for (let i=0; i < temp.length; i++) {
-      if (temp[i].split("+")[1] === agent) {
-        if (isChecked) {
-          temp[i] = temp[i].concat("+").concat("true");
-        }else {   // uncekiran je agent
-          temp[i] = temp[i].substring(0, temp[i].length - 5);
-        }
-        
+      if (temp[i].entrepreneur === agent) {        
+          temp[i].bundle = isChecked;   
       }
     }
-    this.setState({checkedAds: temp});
+    this.setState({adsToRent: temp});
   }
 
   getDateString(miliseconds) {
@@ -241,7 +228,7 @@ class Basket extends RoleAwareComponent {
                   </thead>
                   <tbody>
                   {(this.state.ads.map((ad, index) =>
-                  <tr key={ad.advertisementId} keyad={ad.advertisementId} className="crow">
+                  <tr key={ad.advertisementId} keyad={ad.wishlistId} className="crow">
                     <td className="crow"><input type="checkbox"                 
                         onChange={event => this.requestSelection(event.target.parentNode.parentNode.getAttribute("keyad"),
                         ad.entrepreneur)}

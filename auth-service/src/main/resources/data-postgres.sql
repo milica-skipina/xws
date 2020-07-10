@@ -24,6 +24,8 @@ INSERT INTO privilege(name) VALUES ('MODIFY_USER');
 INSERT INTO privilege(name) VALUES ('DELETE_USER');
 INSERT INTO privilege(name) VALUES ('BLOCK_END_USER');
 INSERT INTO privilege(name) VALUES ('SEND_SOAP');
+INSERT INTO privilege(name) VALUES ('CREATE_MESSAGE');
+INSERT INTO privilege(name) VALUES ('EDIT_PRICE');
 
 INSERT INTO authority(name) VALUES ('ROLE_CUSTOMER');
 INSERT INTO authority(name) VALUES ('ROLE_ADMIN');
@@ -39,6 +41,8 @@ INSERT INTO roles_privileges (role_id, privilege_id) VALUES (1, 14);
 INSERT INTO roles_privileges (role_id, privilege_id) VALUES (1, 15);
 INSERT INTO roles_privileges (role_id, privilege_id) VALUES (1, 19);
 INSERT INTO roles_privileges (role_id, privilege_id) VALUES (1, 21);
+INSERT INTO roles_privileges (role_id, privilege_id) VALUES (1, 27);
+INSERT INTO roles_privileges (role_id, privilege_id) VALUES (1, 9);
 
 INSERT INTO roles_privileges (role_id, privilege_id) VALUES (2, 1);
 INSERT INTO roles_privileges (role_id, privilege_id) VALUES (2, 2);
@@ -70,6 +74,9 @@ INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 19);
 INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 26);
 INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 14);
 INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 15);
+INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 20);
+INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 27);
+INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 28);
 
 INSERT INTO table_user (username, password, email, enabled, activated, number_failed_login,deleted,blocked) VALUES ('prodavac', '$2a$10$PkDHt3T9ussutTLpXWGXCOWRjIC5MVtT6dUkz25m7mvrl1u.1Ta4y', 'prodavac@gmail.com', true, true, 0,false,false);
 INSERT INTO agent(city, address, registry_number, company_name, name, surname, user_id) VALUES ('Beograd', 'Stepe Stepanovica','123458363', 'RentACar', null, null, 1);
