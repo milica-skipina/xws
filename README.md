@@ -18,6 +18,7 @@
 ### advertisement-service: https://github.com/Dr4g4n4/advertisement-service
 ### auth-service: https://github.com/ivana-k/auth-microservice
 ### email-service: https://github.com/Dr4g4n4/email-service
+ - https://tim2-email-service.herokuapp.com
 ### eureka: https://github.com/m1l1c4/xws-eureka
 ### message-service: https://github.com/djoda/xml-poruke-service
 ### orders-service: https://github.com/ivana-k/orders-microservice
