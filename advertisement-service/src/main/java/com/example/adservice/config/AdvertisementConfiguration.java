@@ -54,7 +54,7 @@ public class AdvertisementConfiguration extends WebSecurityConfigurerAdapter {
 
                 .authorizeRequests()
                 .antMatchers( "/ws/*").hasAnyAuthority("SEND_SOAP")
-                .antMatchers( "/advertisement/canAccess/*", "/advertisement", "/advertisement/search/**", "/codebook", "/car/track/*", "/pricelist/**")
+                .antMatchers( "/advertisement/canAccess/*", "/advertisement", "/advertisement/search/**", "/codebook", "/car/track/*", "/pricelist/**", "/car/changeMileage/*")
                 .permitAll()
                 .anyRequest().authenticated();
 

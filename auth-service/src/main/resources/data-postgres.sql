@@ -78,7 +78,7 @@ INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 20);
 INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 27);
 INSERT INTO roles_privileges (role_id, privilege_id) VALUES (3, 28);
 
-INSERT INTO table_user (username, password, email, enabled, activated, number_failed_login,deleted,blocked) VALUES ('prodavac', '$2a$10$PkDHt3T9ussutTLpXWGXCOWRjIC5MVtT6dUkz25m7mvrl1u.1Ta4y', 'prodavac@gmail.com', true, true, 0,false,false);
+INSERT INTO table_user (username, password, email, enabled, activated, number_failed_login,deleted,blocked) VALUES ('prodavac2', '$2a$10$PkDHt3T9ussutTLpXWGXCOWRjIC5MVtT6dUkz25m7mvrl1u.1Ta4y', 'prodavac2@gmail.com', true, true, 0,false,false);
 INSERT INTO agent(city, address, registry_number, company_name, name, surname, user_id) VALUES ('Beograd', 'Stepe Stepanovica','123458363', 'RentACar', null, null, 1);
 INSERT INTO user_authority (user_id, authority_id) VALUES (1, 3);
 

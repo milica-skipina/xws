@@ -15,13 +15,6 @@ var routes = [
     component: Profile,
   },
   {
-    path: "/codebook",
-    name: "Codebook",
-    icon: "nc-icon nc-bank",
-    component: Codebook,
-    layout: "/admin"
-  },
-  {
     path: "/pricelist",
     name: "Pricelist",
     icon: "nc-icon nc-tile-56",

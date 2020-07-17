@@ -82,7 +82,6 @@ class ShowAd extends Component {
     this.postReview = this.postReview.bind(this);
     this.getReviews = this.getReviews.bind(this);
     this.getCanComment = this.getCanComment.bind(this);
-    this.redirectToTracking = this.redirectToTracking.bind(this);
   }
 
   
@@ -580,7 +579,7 @@ class ShowAd extends Component {
     let AuthStr = 'Bearer '.concat(token);
     axios({
       method: 'get',
-      url: url + '/advertisement/car/' + id +'/writeReview',
+      url: url + 'advertisement/car/' + id +'/writeReview',
       headers: { "Authorization": AuthStr },
     }).then((response) => {
       if (response.status === 200) {
@@ -648,10 +647,10 @@ class ShowAd extends Component {
                       <Col sm="6" xl="6" md="6">
                         <MDBCardTitle tag="h6"> Owner: <p style={{ color: "red" }}>{this.state.oglas.username}   </p></MDBCardTitle>
                       </Col>
-                      {localStorage.getItem('role') === "ROLE_SELLER" && <Col sm="3" xl="3" md="3" hidden={this.state.canEdit} className="mb-3 mb-xl-0">
+                      {localStorage.getItem('name') === this.state.oglas.name && <Col sm="3" xl="3" md="3" hidden={this.state.canEdit} className="mb-3 mb-xl-0">
                         <Button block color="primary" onClick={(e) => this.edit(e)}>Edit</Button>
                       </Col>}
-                      {localStorage.getItem('role') === "ROLE_SELLER" && <Col sm="3" xl="3" md="3" hidden={this.state.canEdit} className="mb-3 mb-xl-0">
+                      {localStorage.getItem('name') === this.state.oglas.name && <Col sm="3" xl="3" md="3" hidden={this.state.canEdit} className="mb-3 mb-xl-0">
                         <Button block color="primary" onClick={(e) => this.delete(e)}>Delete</Button>
                       </Col>}
                       

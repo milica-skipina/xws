@@ -40,13 +40,6 @@ var routes = [
         component: Codebook,
         layout: "/admin"
     },
-    {
-        path: "/pricelist",
-        name: "Pricelist",
-        icon: "nc-icon nc-tile-56",
-        component: Pricelist,
-        layout: "/admin"
-    },
 
 
     {

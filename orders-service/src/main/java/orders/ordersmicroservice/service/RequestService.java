@@ -534,7 +534,7 @@ public class RequestService {
                     break;
                 } else if (r.getState().equals("PENDING")) {
                     List<Request> toChange = pendingAgentsRequests.stream()
-                                                            .filter(el -> el.getId() == order.getMicroId())
+                                                            .filter(el -> el.getRequestWrapper().getId() == order.getMicroId())
                                                             .collect(Collectors.toList() );
                     if (toChange.isEmpty()) {       // isti takav zahtev ne postoji na mikro, sve ostale ciji se datumi poklapaju treba ponistiti
                         Long microID = createNewRequestFromSoap(order, (Car)r.getCars().toArray()[0]);
@@ -554,6 +554,8 @@ public class RequestService {
                          requestRepository.save(((Request)toChange.toArray()[0])); // i taj zahtev je otisao na agent pa se tamo odobrava
                         RequestWrapper wrapper = ((Request)toChange.toArray()[0]).getRequestWrapper();
                         wrapper.setState("RESERVED");
+                        response.setMicroId(wrapper.getId());
+                        System.out.println("SA AGENTA IZMENA WRAPPER: MICRO ID JE " + wrapper.getId());
                         requestWrapperRepository.save(wrapper);
                     }
                 }
@@ -579,8 +581,8 @@ public class RequestService {
         carsForNew.add(car);
         addNew.setCars(carsForNew);
         addNew = requestRepository.save(addNew);
-        requestWrapperRepository.save(wrapper);
-
-        return addNew.getId();
+        wrapper = requestWrapperRepository.save(wrapper);
+        System.out.println("DODAO SE NOVI WRAPPER: MICRO ID JE " + wrapper.getId());
+        return wrapper.getId();
     }
 }

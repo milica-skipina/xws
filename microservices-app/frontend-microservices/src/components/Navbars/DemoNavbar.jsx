@@ -154,7 +154,7 @@ class Header extends React.Component {
             
             <Nav navbar>
             {!localStorage.getItem('role') && 
-            <NavbarBrand onClick={this.props.openModal}><i className="nc-icon nc-single-02"></i>Login</NavbarBrand>}
+            <NavbarBrand onClick={this.props.openModal}><i class="nc-icon nc-single-02"></i>Login</NavbarBrand>}
            
               {/*<Dropdown
                 nav

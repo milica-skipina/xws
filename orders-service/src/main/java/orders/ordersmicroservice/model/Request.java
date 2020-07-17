@@ -187,7 +187,7 @@ public class Request {
         Order ret = new Order();
         ret.setAgentUsername(this.agentUsername);
         ret.setCustomerUsername(this.customerUsername);
-        ret.setMicroId(this.id);
+        ret.setMicroId(this.requestWrapper.getId());
         GregorianCalendar c = new GregorianCalendar();
         c.setTime(getEndDate());
         try {

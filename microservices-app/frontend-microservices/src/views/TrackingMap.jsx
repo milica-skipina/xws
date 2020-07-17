@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
-import {Map, InfoWindow, Marker, GoogleApiWrapper} from 'google-maps-react';
+//import {Map, InfoWindow, Marker, GoogleApiWrapper} from 'google-maps-react';
+import {YMaps, Map, GeoObject} from 'react-yandex-maps';
 
 import axios from 'axios';
 
@@ -32,12 +33,40 @@ export class TrackingMap extends Component{
         }
     }*/
 
+    mapa = () => {
+        return (<YMaps width="100%" height="600px">
+            <div width="100%" height="600px">
+                Car tracking
+                <Map width="100%" height="600px" state={{
+                    center: [this.state.lat, this.state.lng],
+                    zoom: 9
+                }} >
+                    <GeoObject
+                        geometry={{
+                            type: 'Point',
+                            coordinates: [this.state.lat, this.state.lng],
+                        }}
+                        properties={{
+                            iconContent: '',
+                            hintContent: 'Car',
+                        }}
+                    />
+                </Map>
+            </div>
+        </YMaps>);
+    };
+
+   testCoords = () => {
+       this.setState({lat:44.980194,lng:20.223405});
+   }
+
     componentDidMount(){
         const { id } = this.props.match.params;
         this.setState({id:id});
          this.interval = setInterval(() => {
             this.getCoords();
         },1000);
+
     }
 
     getCoords = () =>{
@@ -104,7 +133,30 @@ export class TrackingMap extends Component{
         });
     }
    
- 
+        /*<Map google = {this.props.google} zoom = {10} syle = {mapStyles} initialCenter ={{lat: this.state.lat , lng: this.state.lng}} >
+                <Marker position = {{ lat: this.state.lat, lng:this.state.lng}}> </Marker>
+                <InfoWindow
+                marker = {this.state.activeMarker}
+                visible = {this.state.showingInfoWindow}>
+                    <div className="container">
+                        <div className="section-title text-center">
+                            <div>
+                                <p > Drzava: {this.state.state} </p>
+                                <p > Grad: {this.state.city} </p>
+                                <p > Adresa: {this.state.address} </p>
+                                <p > </p>
+                            </div>
+                        </div>
+                    </div>
+                </InfoWindow>
+                <div className="container">
+                  <div className="section-title text-center">
+                      <div>
+
+                      </div>
+                  </div>
+              </div>
+                </Map>*/
     render() {
         const mapStyles = {
             position: 'static',
@@ -121,25 +173,9 @@ export class TrackingMap extends Component{
         //onClick = {this.onMarkerClick}
         else{
             return (
-                <div className="content">
+                <div  className="content">
                     <div className="animated fadeIn">
-                <Map google = {this.props.google} zoom = {10} syle = {mapStyles} initialCenter ={{lat: this.state.lat , lng: this.state.lng}} >
-                <Marker position = {{ lat: this.state.lat, lng:this.state.lng}}> </Marker>
-                <InfoWindow
-                marker = {this.state.activeMarker}
-                visible = {this.state.showingInfoWindow}>
-                    <div className="container">
-                        <div className="section-title text-center">
-                            <div>
-                                <p > Drzava: {this.state.state} </p>
-                                <p > Grad: {this.state.city} </p>
-                                <p > Adresa: {this.state.address} </p>
-                                <p > </p>
-                            </div>
-                        </div>
-                    </div>
-                </InfoWindow>
-                </Map>
+                        {this.mapa()}
                 </div>
                 </div>
                 );
@@ -147,9 +183,9 @@ export class TrackingMap extends Component{
         }
     }
 }
+export default TrackingMap;
  
- 
-export default GoogleApiWrapper({
+/*export default GoogleApiWrapper({
     apiKey: 'AIzaSyA0aqRI4uzz_2cLTkurwCYLUNKzw81FOvU',
     language: 'ENG'
-})(TrackingMap);
+})(TrackingMap);*/

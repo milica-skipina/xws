@@ -51,7 +51,7 @@ public class Request {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private RequestWrapper requestWrapper;
 
-    @Column(name = "micro_id", unique = true, nullable = true)
+    @Column(name = "micro_id",  nullable = true)
     private Long microId;       // id iz orders microservisa
 
     public Request() {

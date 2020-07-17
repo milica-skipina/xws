@@ -65,7 +65,7 @@ public class CarService {
                 CoordsDTO dto = new CoordsDTO();
                 dto.setX(45.2464362);
                 dto.setY(19.8517172);
-                return new CoordsDTO();
+                return dto;
             }
             return null;
 

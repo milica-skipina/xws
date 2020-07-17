@@ -55,7 +55,7 @@ public class MessageReceiver {
                     if (log.contains(" ")) {
                         String[] arr = log.split(" ");
                         try {
-                            emailService.sendHtmlMail(arr[1], "Verification mail", "<html><body>Confirm account activation on link.</br><a href=\"https://localhost:3000/validation/" + arr[0] + "\">Activation link</a><body/></html>");
+                            emailService.sendHtmlMail(arr[1], "Verification mail", "<html><body>Confirm account activation on link.</br><a href=\"http://localhost:8082/validation/" + arr[0] + "\">Activation link</a><body/></html>");
                         } catch (Exception e) {
 
                         }

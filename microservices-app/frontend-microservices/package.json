@@ -26,6 +26,7 @@
     "react-router-role-authorization": "^1.1.4",
     "react-scripts": "^3.4.1",
     "react-star-ratings": "^2.3.0",
+    "react-yandex-maps": "^4.4.0",
     "reactstrap": "8.0.0"
   },
   "scripts": {

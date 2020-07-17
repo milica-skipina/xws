@@ -37,7 +37,7 @@ public class EmailService {
         MimeMessage mess = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mess, "utf-8");
         helper.setText(htmlText,true);
-        helper.setTo(to);
+        helper.setTo("pswisa.tim31.2019@gmail.com");
         helper.setSubject(subject);
         helper.setFrom("pswisa.tim31.2019@gmail.com");
         javaMailSender.send(mess);

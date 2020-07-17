@@ -213,6 +213,10 @@ public class RequestService {
                     requestWrapperRepository.save(microWrap);
                 } else if (!isChanged.getState().equals(w.getState())) {        //placen je na mikro
                     isChanged.setState(w.getState());
+                    for (Request reqPaid : isChanged.getRequests()) {
+                        reqPaid.setState(w.getState());
+                    }
+                    requestRepository.saveAll(isChanged.getRequests());
                     requestWrapperRepository.save(isChanged);
                 }
             }
@@ -281,6 +285,8 @@ public class RequestService {
                 r.setDateCreated(new Date());       //kasnije se koristi za proveru placanja
                 r.setState("RESERVED");
                 r.setMicroId(response.getMicroId());
+                requestWrapper.setMicroId(response.getMicroId());
+                requestWrapperRepository.save(requestWrapper);
             } else if (!response.isOk()) {
             return false;
         } else {
