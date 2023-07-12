@@ -11,7 +11,7 @@
     "google-maps-react": "^2.0.6",
     "history": "4.9.0",
     "mdbreact": "^4.27.0",
-    "node-sass": "^4.14.1",
+    "node-sass": "^9.0.0",
     "perfect-scrollbar": "1.4.0",
     "rc-slider": "^9.3.0",
     "react": "16.8.6",
@@ -24,7 +24,7 @@
     "react-router": "5.0.0",
     "react-router-dom": "5.0.0",
     "react-router-role-authorization": "^1.1.4",
-    "react-scripts": "^3.4.1",
+    "react-scripts": "^5.0.1",
     "react-star-ratings": "^2.3.0",
     "react-yandex-maps": "^4.4.0",
     "reactstrap": "8.0.0"
